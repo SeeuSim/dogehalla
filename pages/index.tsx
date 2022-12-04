@@ -3,10 +3,12 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Collections from './collections_dash';
 import Searchbar from './searchbar';
+import NavBar from './navbar';
 
 export default function Home() {
   return (
-    <div className={styles.container}>
+      <div className="px-0 py-8">
+      {/* <div className={styles.container}> */}
       <Head>
         <title>DogeTTM</title>
         <meta name="description" content="Your #1 NFT insights page" />
@@ -14,7 +16,7 @@ export default function Home() {
       </Head>
       
       <main className="min-h-screen p-16 justify-center items-center">
-        <Searchbar/>
+        <NavBar/>
         <Collections/>
       </main>
     </div>

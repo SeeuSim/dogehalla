@@ -46,8 +46,8 @@ export default function Collections() {
     <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between px-5 py-3">
       <div>
         <p className="text-sm text-gray-700">
-          Showing{" "}<span className="font-medium">1</span>{" "}to{" "}<span className="font-medium">5</span>{" "}of{" "} 
-          <span className="font-medium">50</span>{" "}results
+          Showing{" "}<span className="font-medium">1</span>{" "}to{" "}<span className="font-medium">10</span>{" "}of{" "} 
+          <span className="font-medium">100</span>{" "}results
         </p>
       </div>
       <div>
@@ -86,7 +86,7 @@ export default function Collections() {
       </div> 
     </div>;
 
-  const data = [1, 2, 3, 4, 5];
+  const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
     <div className="bg-gray-100 dark:bg-slate-800">
@@ -103,7 +103,7 @@ export default function Collections() {
                 {data.map(idx => render(idx))}
               </tbody>
               <tfoot className="table-footer-group">
-                <tr className="table-row bg-slate-100">
+                <tr className="table-row bg-white dark:bg-slate-900">
                   <td className="table-cell">{footer}</td>
                 </tr>
               </tfoot>
