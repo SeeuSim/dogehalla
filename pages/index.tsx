@@ -7,8 +7,7 @@ import NavBar from './navbar';
 
 export default function Home() {
   return (
-      <div className="px-0 py-8">
-      {/* <div className={styles.container}> */}
+    <div className="px-0 py-8">
       <Head>
         <title>DogeTTM</title>
         <meta name="description" content="Your #1 NFT insights page" />
