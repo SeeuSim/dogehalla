@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Collections from './collections_dash';
+import Searchbar from './searchbar';
 
 export default function Home() {
   return (
@@ -13,7 +14,8 @@ export default function Home() {
       </Head>
       
       <main className="min-h-screen p-16 justify-center items-center">
-        {Collections()}
+        <Searchbar/>
+        <Collections/>
       </main>
     </div>
   )
