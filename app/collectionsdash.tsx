@@ -1,4 +1,4 @@
-export default function Collections() {
+export default function CollectionsDash() {
   function render(index: number): JSX.Element {
     return (<tr key={index} className="odd:bg-white even:bg-slate-100"><td>
       <a href="#" className="block hover:bg-gray-50">

@@ -17,20 +17,27 @@ export default function Searchbar() {
   return (
     <form>
       <div className="flex">
-        <select id="countries" 
-                className={`
-                  bg-gray-50 max-w-min 
-                  border border-gray-300 
-                  text-gray-900 text-sm 
-                  rounded-l-lg 
-                  focus:ring-blue-500 focus:border-blue-500 
-                  block w-full p-2.5 
-                  
-                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white 
-                  dark:focus:ring-blue-500 dark:focus:border-blue-500`}
-                defaultValue={"All Categories"}>
-          {selectLabels.map(lbl => renderLabel(lbl))}
-        </select>
+        <div className={`
+              text-left rounded-l-lg max-w-min
+              bg-gray-50 border border-gray-300 
+              text-gray-900 text-sm 
+              focus:ring-blue-500 focus:border-blue-500 
+              w-auto p-2.5 items-center inline-flex
+              dark:border-gray-600 dark:placeholder-gray-400 dark:bg-gray-700
+              dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+          `}>
+          <select id="searchTypes" 
+                  className="appearance-none bg-inherit focus:bg-inherit focus:border-0"
+                  defaultValue={"All Categories"}>
+            {selectLabels.map(lbl => renderLabel(lbl))}
+          </select>
+          
+          {/** Down Arrow - Temporary until safari starts rendering select properly */}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
+        
         
         <div className="relative w-full">
             <input type="search" 
