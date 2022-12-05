@@ -1,13 +1,12 @@
 import Collections from './collectionsdash'
-import NavBar from './navbar'
 
 export default function Home() {
+  // Desktop - Side By Side
+  // Tablet and below - Stacked, with analytics collapsed and fetched when needed
   return (
     <div>
-      <main className="min-h-screen p-16 justify-center items-center">
-        <NavBar/>
-        <Collections/>
-      </main>
-    </div>
+      <Collections/>
+      {/** Analytics Pane */}
+    </div>  
   )
 }
