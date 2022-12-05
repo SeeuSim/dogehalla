@@ -1,7 +1,7 @@
 export default function CollectionsDash() {
   function render(index: number): JSX.Element {
     return (<tr key={index} className="odd:bg-white even:bg-slate-100"><td>
-      <a href="#" className="block hover:bg-gray-50">
+      <a href={`/collection/${index}`} className="block hover:bg-gray-50">
         <div className="px-4 py-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="truncate text-sm font-medium text-indigo-600 dark:text-white">Collection{" "}{index}</div>
