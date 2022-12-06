@@ -147,7 +147,7 @@ export default function Collection({ params }: { params: { address: string };}) 
 
 
   return (
-    <div className="py-4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 grid-rows-2 lg:grid-rows-1 max-h-full">
+    <div className="py-4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 grid-rows-2 lg:grid-rows-1 h-full">
       {pane}
       {graphPane}
     </div>

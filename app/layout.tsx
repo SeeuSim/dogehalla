@@ -14,7 +14,7 @@ export default function RootLayout({
       */}
       <head />
       <body>
-        <main className="min-h-screen p-16 justify-center items-center">
+        <main className="min-h-screen p-16 justify-center items-center bg-gray-100 dark:bg-slate-900">
           <NavBar/>
           {children}
         </main>

@@ -17,27 +17,22 @@ export default function Searchbar() {
   return (
     <form>
       <div className="flex">
-        <div className={`
-              text-left rounded-l-lg max-w-min
-              bg-gray-50 border border-gray-300 
-              text-gray-900 text-sm 
-              focus:ring-blue-500 focus:border-blue-500 
-              w-auto p-2.5 items-center inline-flex
-              dark:border-gray-600 dark:placeholder-gray-400 dark:bg-gray-700
-              dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-          `}>
-          <select id="searchTypes" 
-                  className="appearance-none bg-inherit focus:bg-inherit focus:border-0"
-                  defaultValue={"All Categories"}>
-            {selectLabels.map(lbl => renderLabel(lbl))}
+          <select className={`
+            appearance-none px-2.5 rounded-none rounded-l-lg
+            block max-w-fit
+
+            bg-gray-50 border border-gray-300 
+            hover:bg-gray-200
+            focus:ring-blue-500 focus:border-blue-500 
+            
+            dark:hover:bg-gray-600
+            dark:bg-gray-700 dark:border-gray-600 
+            dark:placeholder-gray-400 dark:text-white 
+            dark:focus:ring-blue-500 dark:focus:border-blue-500
+          `}
+            defaultValue={selectLabels[0]}>
+              {selectLabels.map(renderLabel)}
           </select>
-          
-          {/** Down Arrow - Temporary until safari starts rendering select properly */}
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-          </svg>
-        </div>
-        
         
         <div className="relative w-full">
             <input type="search" 
@@ -52,6 +47,7 @@ export default function Searchbar() {
                       dark:text-white dark:focus:border-blue-500
                     `}
                     placeholder="Search Your NFT" required/>
+
             <button type="submit" 
                     className={`
                       absolute top-0 right-0 p-2.5 
