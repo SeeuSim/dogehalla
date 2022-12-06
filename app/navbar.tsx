@@ -1,3 +1,23 @@
+/**
+ * Current Layout:
+ * ----------------------------
+ * | Logo | Links | Searchbar |
+ * ----------------------------
+ * ... rest of content ... 
+ * 
+ * Ideal Layout: (Flowbite Navbar Block with search section)
+ * ----------------------------------------
+ * | Logo | Links | Account circle        |
+ * |      |       | (with expanding opts) |
+ * ----------------------------------------
+ * | Searchbar                            |
+ * | (with dynamic dropdown -             |
+ * |  label for ≥md, icon for sm)         |
+ * ----------------------------------------
+ * 
+ */
+
+
 import Searchbar from "./searchbar";
 
 export default function NavBar(): JSX.Element {
