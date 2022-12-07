@@ -50,7 +50,7 @@ export default function Page() {
                                 className={`
                                   flex items-center justify-center
                                   w-full 
-                                  text-white 
+                                  text-gray-900 dark:text-white 
                                   bg-inherit hover:bg-gray-50 
                                   border border-gray-300 
                                   dark:border-gray-600
