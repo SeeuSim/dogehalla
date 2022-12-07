@@ -41,11 +41,38 @@ export default function Page() {
               <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
 
                   {/** Sign In Header */}
-                  <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                      Sign in to your account
-                  </h1>
+                  <h2 className="text-lg font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                      Welcome back
+                  </h2>
 
-                  {/** Actual Form */}
+                  {/** OAuth Form */}
+                  <button type="submit" 
+                                className={`
+                                  flex items-center justify-center
+                                  w-full 
+                                  text-white 
+                                  bg-inherit hover:bg-gray-50 
+                                  border border-gray-300 
+                                  dark:border-gray-600
+                                  focus:ring-4 focus:outline-none 
+                                  focus:ring-blue-300 
+                                  font-medium rounded-lg 
+                                  text-sm px-5 py-2.5 text-center 
+                                  dark:hover:bg-gray-700 dark:focus:ring-blue-800
+                                `}
+                                onClick={() => signIn("google")}>
+                                  <img className="h-6 w-6" src="https://freesvg.org/img/1534129544.png"/>&nbsp;&nbsp;Login with Google
+                                </button>
+
+
+                  {/** Separator */}
+                  <div className="flex items-center justify-between">
+                    <hr className="my-4 mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 md:my-10 dark:bg-gray-700"/>
+                    <div className="dark:text-gray-400 font-medium">or</div>
+                    <hr className="my-4 mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 md:my-10 dark:bg-gray-700"/>
+                  </div>
+
+                  {/** Manual Form */}
                   <form className="space-y-4 md:space-y-6" action="#">
                       <div>
                           {/** Email */}
@@ -104,14 +131,13 @@ export default function Page() {
                                 text-sm px-5 py-2.5 text-center 
                                 dark:bg-blue-600 dark:hover:bg-blue-700 
                                 dark:focus:ring-blue-800
-                              `}
-                              onClick={() => signIn()}>
-                                Sign in with&nbsp;<img className="h-6 w-6" src="https://img.icons8.com/dusk/512/google-logo--v1.png"/>
+                              `}>
+                                Sign in to your account
                               </button>
                       <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                           Don{`'`}t have an account yet?{" "}
                           <a href="#" className="font-medium text-blue-600 hover:underline dark:text-blue-500">
-                            Sign up
+                            Sign up here
                           </a>
                       </p>
                   </form>
