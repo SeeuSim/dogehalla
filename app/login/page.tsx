@@ -94,6 +94,7 @@ export default function Page() {
                       </div>
                       <button type="submit" 
                               className={`
+                                flex items-center justify-center
                                 w-full 
                                 text-white 
                                 bg-blue-600 hover:bg-blue-700 
@@ -104,7 +105,9 @@ export default function Page() {
                                 dark:bg-blue-600 dark:hover:bg-blue-700 
                                 dark:focus:ring-blue-800
                               `}
-                              onClick={() => signIn()}>Sign in</button>
+                              onClick={() => signIn()}>
+                                Sign in with&nbsp;<img className="h-6 w-6" src="https://img.icons8.com/dusk/512/google-logo--v1.png"/>
+                              </button>
                       <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                           Don{`'`}t have an account yet?{" "}
                           <a href="#" className="font-medium text-blue-600 hover:underline dark:text-blue-500">
