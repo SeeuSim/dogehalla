@@ -1,6 +1,43 @@
+# DogeTTM
+
+---
+Welcome to DogeTTM - Your next biggest asset in NFT value analysis :)
+
+## Dev Setup
+
+1. Run `npm install` after cloning the repository.
+2. Configure the OAuth setup as described in the following section: [Google Auth](#google-auth)
+3. Once done, open the application by running `npm run dev` in the terminal in the project root directory.
+
+### Google Auth
+
+First, prep the `.env` file by renaming `./.env.example` to `.env`.
+
+1. Visit [Google Cloud OAuth Site](https://console.cloud.google.com/apis/credentials?authuser=1&project=dogettm-370912&supportedpurview=project) to obtain
+the required credentials for the dev server.
+2. Configure the credentials for "OAuth Client ID":
+
+- **Application Type**: `Web Application`
+- **Javascript origin**: `http://localhost:3000`
+- **Redirect URI**: `http://localhost:3000/api/auth/callback/google`
+
+3. Copy and paste the client id and client secret into your `.env` file in the root directory.
+4. Run the following command in your powershell/zsh/bash terminal:
+
+```shell
+openssl rand -base64 32
+```
+
+Proceed to copy the printed string into your .env file under `JWT_SECRET`. Save, and you're done!
+
+---
+
+
+## Base Stuff from Vercel
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+### Getting Started
 
 First, run the development server:
 
@@ -18,7 +55,7 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
-## Learn More
+### Learn More
 
 To learn more about Next.js, take a look at the following resources:
 
@@ -27,7 +64,7 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+### Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
