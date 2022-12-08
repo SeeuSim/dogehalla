@@ -112,7 +112,7 @@ export default function CollectionsDash() {
 
   return (
     <div className="bg-gray-100 dark:bg-slate-900">
-      <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="mx-auto max-w-none">
           <div className="overflow-hidden bg-white dark:bg-black shadow sm:rounded-lg">
             <table className="table-fixed w-full text-sm text-left text-gray-500 dark:text-gray-400">

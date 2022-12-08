@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * Current Layout:
  * ----------------------------
@@ -17,158 +19,150 @@
  * 
  */
 
+import { useState } from 'react'
+import { Dialog } from '@headlessui/react'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
-import Searchbar from "./searchbar";
+// WIP
+// import Searchbar from "./searchbar";
+
+const menuOptions = [
+  { name: 'Home', href: '/' },
+  { name: 'Analytics', href: '#' },
+  { name: 'Account', href: '/login/' },
+]
+
+const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
+
+const Logo = () => {
+  return (
+    <div className="flex lg:min-w-0 lg:flex-1" aria-label="Global">
+      <a href="/" className="flex items-center">
+        <img src={dogeLogo} className="h-6 mr-3 sm:h-9" alt="DogeTTM"/>
+        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">DogeTTM</span>
+      </a>
+    </div>
+  );
+}
 
 export default function NavBar(): JSX.Element {
-  // TO BE CHANGED
-  const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
-
-  // TO BE PLANNED
-  const menuOptions = ["Home", "Analytics", "Account"];
-
-  function renderMenuOpt(option: string): JSX.Element {
-    /**
-     * Renders the menu labels into their respective routing links.
-     * 
-     * TODO: Add route links for each of the labels (href)
-     */
-    if (option === "Account") { //Login-specific routing
-      return (
-        <li key={option}>
-          <a href="/login/" 
-            className={`
-              block py-2 pl-3 pr-4 text-white 
-              bg-blue-700 rounded md:bg-transparent 
-              md:text-blue-700 md:p-0 dark:text-white`} 
-            aria-current="page">
-            {option}
-          </a>
-        </li>
-      );
-    }
-
-
-    return (
-      <li key={option}>
-        <a href="#" 
-          className={`
-            block py-2 pl-3 pr-4 text-white 
-            bg-blue-700 rounded md:bg-transparent 
-            md:text-blue-700 md:p-0 dark:text-white`} 
-          aria-current="page">
-          {option}
-        </a>
-      </li>
-    );
-  }
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <nav className={`
-      bg-white border-gray-200 
-      px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900
-      fixed w-full z-20 
-      top-0 left-0 border-b dark:border-gray-600
-      `}>
-      <div className="container flex flex-wrap items-center justify-between mx-auto">
-        <a href="/" className="flex items-center">
-          <img src={dogeLogo} className="h-6 mr-3 sm:h-9" alt="DogeTTM"/>
-          <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">DogeTTM</span>
-        </a>
+    <div className="px-6 pt-6 lg:px-8">
+      {/** Large Screens and Above */}
+      <nav className={`
+            ${mobileMenuOpen? "hidden" : ""}
+            bg-white border-gray-200 
+            px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900
+            fixed w-full z-20 
+            top-0 left-0 border-b dark:border-gray-700
+            `} 
+           aria-label="Global">
+        <div className="container flex flex-wrap items-center justify-between lmx-auto">
+          {Logo()}
 
-        <div className="flex md:order-2">
-          <button type="button" 
-                  data-collapse-toggle="navbar-search" 
-                  aria-controls="navbar-search" 
-                  aria-expanded="false" 
-                  className={`
-                    md:hidden text-gray-500 dark:text-gray-400 
-                    hover:bg-gray-100 dark:hover:bg-gray-700 
-                    focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 
-                    rounded-lg text-sm p-2.5 mr-1`}>
-            <svg className="w-5 h-5" 
-                aria-hidden="true" 
-                fill="currentColor" 
-                viewBox="0 0 20 20" 
-                xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" 
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" 
-                    clipRule="evenodd">      
-              </path>
-            </svg>
-            <span className="sr-only">Search</span>
-          </button>
-
-          {/* DESKTOP VIEW */}
-          <div className="relative hidden md:block">
-            <Searchbar/>
+          {/** Hamburger Button */}
+          <div className="flex lg:hidden">
+            <button
+              type="button"
+              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <span className="sr-only">Open main menu</span>
+              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+            </button>
           </div>
-          
-          {/** MOBILE VIEW */}
-          {/** TODO: Sidebar Toggle Action - Logic to be completed for mobile view*/}
-          <button data-collapse-toggle="navbar-search" 
-                  type="button" 
-                  className={`
-                    inline-flex items-center p-2 text-sm 
-                    text-gray-500 rounded-lg md:hidden hover:bg-gray-100 
-                    focus:outline-none focus:ring-2 focus:ring-gray-200 
-                    dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600`} 
-                  aria-controls="navbar-search" 
-                  aria-expanded="false">
-            <span className="sr-only">Open menu</span>
-            <svg className="w-6 h-6" 
-                  aria-hidden="true" 
-                  fill="currentColor" 
-                  viewBox="0 0 20 20" 
-                  xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" 
-                    d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" 
-                    clipRule="evenodd">
-              </path>
-            </svg>
-          </button>
+
+          {/** Links */}
+          <div className="hidden lg:flex lg:min-w-0 lg:flex-1 lg:justify-center lg:space-x-8">
+            {menuOptions.map((item) => (
+              <a key={item.name} href={item.href} 
+                 className={`
+                  block py-2 px-2 font-medium
+                  text-blue-700 hover:text-blue-500
+                  dark:text-white dark:hover:text-gray-400
+                 `}>
+                {item.name}
+              </a>
+            ))}
+          </div>
+
+          {/** Login Button */}
+          <div className="hidden lg:flex lg:min-w-0 lg:flex-1 lg:justify-end">
+            <a href="/login/"
+               className={`
+                  inline-block rounded-lg px-3 py-1.5 
+                  text-sm font-semibold leading-6 
+                  text-gray-900 shadow-sm
+                  dark:text-white 
+                  ring-1 ring-gray-900/10 hover:ring-gray-900/20
+                  dark:ring-gray-50/10 dark:hover:ring-gray-50/20
+                `}>
+              Log in
+            </a>
+          </div>
         </div>
-        <div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-search">
-          <div className="relative mt-3 md:hidden">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <svg className="w-5 h-5 text-gray-500" 
-                    aria-hidden="true" 
-                    fill="currentColor" 
-                    viewBox="0 0 20 20" 
-                    xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" 
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" 
-                      clipRule="evenodd">
-                </path>
-              </svg>
+      </nav>
+
+      {/** Medium Screens and Below - Hamburger Menu */}
+      <Dialog as="div" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
+        <Dialog.Panel onFocus={() => {}} className="fixed inset-0 z-10 overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 lg:hidden">
+          <div className="flex h-9 items-center justify-between">
+
+            {/** Company Logo */}
+            <div className="flex">
+              <a href="#" className="-m-1.5 p-1.5">
+                <span className="sr-only">Your Company</span>
+                <img
+                  className="h-8"
+                  src={dogeLogo}
+                  alt=""
+                />
+              </a>
             </div>
 
-            {/** 
-              * INSERT SEARCH HERE
-              * - To be optimised for mobile view
-              */}
-            <input type="text" 
-                  id="search-navbar" 
-                  className={`
-                    block w-full p-2 pl-10 text-sm 
-                    text-gray-900 border border-gray-300 rounded-lg 
-                    bg-gray-50 focus:ring-blue-500 focus:border-blue-500 
-                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                  `} placeholder="Search..."/>
+            {/** Close Menu Button */}
+            <div className="flex">
+              <button
+                type="button"
+                className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="sr-only">Close menu</span>
+                <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+              </button>
+            </div>
           </div>
 
-          <ul className={`
-                flex flex-col p-4 mt-4 
-                border border-gray-100 rounded-lg 
-                bg-gray-50 md:flex-row md:space-x-8 
-                md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white 
-                dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700
-            `}>
-            {menuOptions.map(renderMenuOpt)}
-          </ul>
-        </div>
-      </div>
-    </nav>
+          {/** Links */}
+          <div className="mt-6 flow-root">
+            <div className="-my-6 divide-y divide-gray-500/10">
+              <div className="space-y-2 py-6">
+                {menuOptions.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-400/10 dark:text-white"
+                  >
+                    {item.name}
+                  </a>
+                ))}
+              </div>
+
+              {/** Login Button */}
+              <div className="py-6">
+                <a
+                  href="/login/"
+                  className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-6 text-gray-900 hover:bg-gray-400/10 dark:text-white"
+                >
+                  Log in
+                </a>
+              </div>
+            </div>
+          </div>
+        </Dialog.Panel>
+      </Dialog>
+    </div>
   );
 }
