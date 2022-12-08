@@ -1,6 +1,6 @@
 import "./output.css";
 import Providers from "./providers";
-import NavBar from "./navbar";
+import NavBar from "./(home-components)/navbar";
 
 export default function RootLayout({
   children,

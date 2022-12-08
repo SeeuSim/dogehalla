@@ -1,4 +1,4 @@
-import CollectionsDash from './collectionsdash'
+import CollectionsDash from './(home-components)/collectionsdash'
 
 export default function Home() {
   // Desktop - Side By Side
