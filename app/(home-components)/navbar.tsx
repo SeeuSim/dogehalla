@@ -20,6 +20,7 @@
  */
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
@@ -46,6 +47,8 @@ const Logo = () => {
 }
 
 export default function NavBar(): JSX.Element {
+  const {data: session} = useSession();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -88,7 +91,9 @@ export default function NavBar(): JSX.Element {
             ))}
           </div>
 
-          {/** Login Button */}
+          {/** Login Button 
+            * Should be swapped to an Account Pic dropdown if there is a session 
+            */} 
           <div className="hidden lg:flex lg:min-w-0 lg:flex-1 lg:justify-end">
             <a href="/login/"
                className={`

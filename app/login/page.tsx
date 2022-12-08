@@ -24,10 +24,10 @@ export default function Page() {
       : "random user"
 
     return (
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        Signed in as {emailAddr} <br />
+      <div className="flex flex-col items-center px-6 mx-auto md:h-screen lg:py-0">
+        Signed in as <a className="text-blue-500" href={`mailto:${emailAddr}`}>{emailAddr}</a> <br />
         {/* <UserInformation data={session.user} /> */}
-        <button onClick={() => signOut()}>Sign out</button>
+        <button className="border border-gray-500 rounded px-3 py-1" onClick={() => signOut()}>Sign out</button>
       </div>
     );
   }
@@ -35,7 +35,7 @@ export default function Page() {
   //Sign in Form
   return (
     <div className="bg-gray-50 dark:bg-gray-900">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+      <div className="flex flex-col items-center px-6 mx-auto md:h-screen lg:py-0">
           {/** Main Form */}
           <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
               <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
