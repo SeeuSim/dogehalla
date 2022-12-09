@@ -62,7 +62,7 @@ export default function NavBar(): JSX.Element {
             top-0 left-0 border-b dark:border-gray-700
             `} 
            aria-label="Global">
-        <div className="container flex flex-wrap items-center justify-between lmx-auto">
+        <div className="flex h-9 items-center justify-between">
           {Logo()}
 
           {/** Hamburger Button */}
