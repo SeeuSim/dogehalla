@@ -19,7 +19,7 @@ export default function Searchbar() {
       <div className="flex">
           <select className={`
             appearance-none px-2.5 rounded-none rounded-l-lg
-            block max-w-fit
+            block max-w-fit bg-opacity-30
 
             bg-gray-50 border border-gray-300 
             hover:bg-gray-200
