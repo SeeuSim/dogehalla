@@ -64,8 +64,8 @@ export default function CollectionsDash() {
 
   const paginationStyles = {
     highlighted: `relative z-10 inline-flex items-center border border-indigo-500 bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-600 focus:z-20`,
-    second:      `relative inline-flex items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20`,
-    third:       `relative hidden items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 md:inline-flex`,
+    regular:      `relative inline-flex items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20`,
+    compact:       `relative hidden items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 md:inline-flex`,
     edge_r:      `relative inline-flex items-center rounded-r-md bg-inherit px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20`,
     edge_l:      `relative inline-flex items-center rounded-l-md bg-inherit px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20`
   }
@@ -86,12 +86,12 @@ export default function CollectionsDash() {
           </a>
           {/* <!-- Current: "z-10 bg-indigo-50 border-indigo-500 text-indigo-600", Default: "bg-white border-gray-300 text-gray-500 hover:bg-gray-50" --> */}
           <a href="#" aria-current="page" className={paginationStyles.highlighted}>1</a>
-          <a href="#" className={paginationStyles.second}>2</a>
-          <a href="#" className={paginationStyles.third}>3</a>
+          <a href="#" className={paginationStyles.regular}>2</a>
+          <a href="#" className={paginationStyles.compact}>3</a>
           <span className="relative inline-flex items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-700">...</span>
-          <a href="#" className={paginationStyles.third}>8</a>
-          <a href="#" className={paginationStyles.second}>9</a>
-          <a href="#" className={paginationStyles.second}>10</a>
+          <a href="#" className={paginationStyles.compact}>8</a>
+          <a href="#" className={paginationStyles.regular}>9</a>
+          <a href="#" className={paginationStyles.regular}>10</a>
           <a href="#" className={paginationStyles.edge_r}>
             <span className="sr-only">Next</span>
             <ChevronRightIcon className="h-4 w-4"/>
