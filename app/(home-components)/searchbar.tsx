@@ -70,38 +70,10 @@ export default function Searchbar() {
       </Transition>
     </Listbox>;
 
-  //OLD CODE
-  const selectLabels = ["All Categories", "Token", "Collection"]
-
-  function renderLabel(label: string): JSX.Element {
-    return (
-      <option key={label} value={label}>{label}</option>
-    );
-  }
-
-  const [clicked, toggleClick] = useState(false);
-
   return (
     <form>
       <div className="flex">
-          {searchFilterComponent}
-          {/* <select className={`
-            appearance-none px-2.5 rounded-none rounded-l-lg
-            block max-w-fit
-
-            bg-gray-50 border border-gray-300 
-            hover:bg-gray-200
-            focus:ring-blue-500 focus:border-blue-500 
-            
-            dark:hover:bg-gray-600
-            dark:bg-gray-700 dark:border-gray-600 
-            dark:placeholder-gray-400 dark:text-white 
-            dark:focus:ring-blue-500 dark:focus:border-blue-500
-          `}
-            defaultValue={selectLabels[0]}>
-              {selectLabels.map(renderLabel)}
-          </select> */}
-        
+        {searchFilterComponent}
         <div className="relative w-full">
             <input type="search" 
                     id="search-dropdown" 
@@ -115,7 +87,6 @@ export default function Searchbar() {
                       dark:text-white dark:focus:border-blue-500
                     `}
                     placeholder="Search Your NFT" required/>
-
             <button type="submit" 
                     className={`
                       absolute top-0 right-0 p-2.5 
@@ -140,6 +111,5 @@ export default function Searchbar() {
         </div>
       </div>
     </form>
-
   );
 }
