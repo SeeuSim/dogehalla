@@ -1,7 +1,8 @@
 "use client"
 
 import { Listbox, Transition } from "@headlessui/react";
-import { AdjustmentsVerticalIcon, CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/24/solid";
 import { useState, Fragment } from "react";
 
 export default function Searchbar() {
@@ -14,7 +15,7 @@ export default function Searchbar() {
     <Listbox value={searchFilterState} onChange={setSearchFilterState}>
       <Listbox.Button className={`
         px-2.5 rounded-none rounded-l-lg
-        w-40 inline-flex justify-between items-center
+        w-44 inline-flex justify-between items-center
         bg-gray-50 border border-gray-300 
         hover:bg-gray-200
         focus:ring-blue-500 focus:border-blue-500 
@@ -32,13 +33,17 @@ export default function Searchbar() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
         >
-        <Listbox.Options className="absolute max-h-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+        <Listbox.Options className={`
+            absolute w-32 max-h-60 overflow-auto rounded-md 
+            bg-white py-1 text-base shadow-lg dark:bg-gray-700 
+            ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm
+            `}>
           {searchFilters.map((filterOption) => (
             <Listbox.Option
               key={filterOption}
               className={({ active }) =>
                 `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                  active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
+                  active ? ' bg-slate-300 text-slate-900' : 'text-gray-900 dark:text-white'
                 }`
               }
               value={filterOption}
@@ -53,7 +58,7 @@ export default function Searchbar() {
                     {filterOption}
                   </span>
                   {selected ? (
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
                       <CheckIcon className="h-5 w-5" aria-hidden="true" />
                     </span>
                   ) : null}
