@@ -19,10 +19,11 @@
  * 
  */
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { useSession } from 'next-auth/react'
-import { Dialog } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Dialog, Popover, Transition } from '@headlessui/react'
+import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import SearchDropDown from './search-dropdown'
 
 // WIP
 // import Searchbar from "./searchbar";
@@ -51,12 +52,14 @@ export default function NavBar(): JSX.Element {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const [searchOpen, setSearchOpen] = useState(false);
+
   return (
     <div className="px-6 pt-6 lg:px-8">
       {/** Large Screens and Above */}
       <nav className={`
             ${mobileMenuOpen? "hidden" : ""}
-            bg-white border-gray-200 
+            bg-white border-gray-200
             px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900
             fixed w-full z-20 
             top-0 left-0 border-b dark:border-gray-700
@@ -66,14 +69,15 @@ export default function NavBar(): JSX.Element {
           {Logo()}
 
           {/** Hamburger Button */}
-          <div className="flex lg:hidden">
+          <div className="flex gap-x-2 lg:hidden">
+            <SearchDropDown/>
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
               onClick={() => setMobileMenuOpen(true)}
             >
               <span className="sr-only">Open main menu</span>
-              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+              <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-white" aria-hidden="true" />
             </button>
           </div>
 
@@ -94,7 +98,8 @@ export default function NavBar(): JSX.Element {
           {/** Login Button 
             * Should be swapped to an Account Pic dropdown if there is a session 
             */} 
-          <div className="hidden lg:flex lg:min-w-0 lg:flex-1 lg:justify-end">
+          <div className="hidden lg:flex lg:min-w-0 lg:flex-1 lg:justify-end gap-x-2">
+            <SearchDropDown/>
             <a href="/login/"
                className={`
                   inline-block rounded-lg px-3 py-1.5 
