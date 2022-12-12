@@ -31,7 +31,7 @@ the required credentials for the dev server.
 
 ### Coinbase Auth
 
-1. In your Coinbase Account, visit the [Coinbase API Site](http://www.coinbase.com/settings/api) to obtain the required credentials for the dev server.
+1. In your Coinbase Account, visit the [Coinbase API Site](http://www.coinbase.com/settings/api) to obtain the required credentials for the dev server. It can be configured under "Create new OAuth Application".
 2. Configure the redirect URI as `http://localhost:3000/api/auth/callback/coinbase`
 3. Copy and paste the client ID and client Secret into your `.env` file in the root directory.
 
