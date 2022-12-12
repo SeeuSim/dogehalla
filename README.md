@@ -1,6 +1,5 @@
 # DogeTTM
 
----
 Welcome to DogeTTM - Your next biggest asset in NFT value analysis :)
 In order to test the app, follow the [Setup Instructions](#dev-environment-setup) as listed below.
 
