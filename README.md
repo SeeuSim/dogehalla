@@ -1,13 +1,18 @@
 # DogeTTM
 
----
 Welcome to DogeTTM - Your next biggest asset in NFT value analysis :)
+In order to test the app, follow the [Setup Instructions](#dev-environment-setup) as listed below.
 
-## Dev Setup
+## Dev Environment Setup
 
 1. Run `npm install` after cloning the repository.
-2. Configure the OAuth setup as described in the following section: [Google Auth](#google-auth)
-3. Once done, open the application by running `npm run dev` in the terminal in the project root directory.
+2. Configure the OAuth setup as described in the following sections:
+
+- [Google Auth](#google-auth)
+- [Coinbase Auth](#coinbase-auth)
+
+3. Configure the JWT (JSON Web Token) setup in the section [JWT Setup](#jwt-setup).
+4. Once done, open the application by running `npm run dev` in the terminal in the project root directory.
 
 ### Google Auth
 
@@ -22,7 +27,16 @@ the required credentials for the dev server.
 - **Redirect URI**: `http://localhost:3000/api/auth/callback/google`
 
 3. Copy and paste the client id and client secret into your `.env` file in the root directory.
-4. Run the following command in your powershell/zsh/bash terminal:
+
+### Coinbase Auth
+
+1. In your Coinbase Account, visit the [Coinbase API Site](http://www.coinbase.com/settings/api) to obtain the required credentials for the dev server. It can be configured under "Create new OAuth Application".
+2. Configure the redirect URI as `http://localhost:3000/api/auth/callback/coinbase`
+3. Copy and paste the client ID and client Secret into your `.env` file in the root directory.
+
+### JWT Setup
+
+1. Run the following command in your powershell/zsh/bash terminal:
 
 ```shell
 openssl rand -base64 32
@@ -31,7 +45,6 @@ openssl rand -base64 32
 Proceed to copy the printed string into your .env file under `JWT_SECRET`. Save, and you're done!
 
 ---
-
 
 ## Base Stuff from Vercel
 

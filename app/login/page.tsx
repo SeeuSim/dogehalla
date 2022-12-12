@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
+import OAuthButton from "./(login-components)/OAuthButton";
 
 const dogeLogo = "https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg"
 const labelStyle = "block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -46,24 +47,8 @@ export default function Page() {
                   </h2>
 
                   {/** OAuth Form */}
-                  <button type="submit" 
-                                className={`
-                                  flex items-center justify-center
-                                  w-full 
-                                  text-gray-900 dark:text-white 
-                                  bg-inherit hover:bg-gray-50 
-                                  border border-gray-300 
-                                  dark:border-gray-600
-                                  focus:ring-4 focus:outline-none 
-                                  focus:ring-blue-300 
-                                  font-medium rounded-lg 
-                                  text-sm px-5 py-2.5 text-center 
-                                  dark:hover:bg-gray-700 dark:focus:ring-blue-800
-                                `}
-                                onClick={() => signIn("google")}>
-                                  <img className="h-6 w-6" src="https://freesvg.org/img/1534129544.png"/>&nbsp;&nbsp;Login with Google
-                                </button>
-
+                  <OAuthButton logoImg="https://freesvg.org/img/1534129544.png" provider="google" providerName="Google"/>
+                  <OAuthButton logoImg="https://avatars.githubusercontent.com/u/18060234?s=280&v=4" provider="coinbase" providerName="Coinbase"/>
 
                   {/** Separator */}
                   <div className="flex items-center justify-between">

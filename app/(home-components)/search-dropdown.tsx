@@ -21,7 +21,7 @@ export default function SearchDropDown() {
         leaveTo="opacity-0 translate-y-1"
         >
         <Popover.Panel className="fixed right-0 mt-2 drop-shadow">
-          <div className="z-10 mt-1 w-screen md:[width:33rem] transform px-2">
+          <div className="z-10 mt-1 ml-2 w-screen md:[width:33rem] transform px-2">
             <Searchbar/>
           </div>
           {/* <div className="h-2"></div> */}

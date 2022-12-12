@@ -64,8 +64,8 @@ export default function CollectionsDash() {
 
   const paginationStyles = {
     highlighted: `relative z-10 inline-flex items-center border border-indigo-500 bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-600 focus:z-20`,
-    regular:      `relative inline-flex items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20`,
-    compact:       `relative hidden items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 md:inline-flex`,
+    regular:     `relative inline-flex items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20`,
+    compact:     `relative hidden items-center bg-inherit px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 md:inline-flex`,
     edge_r:      `relative inline-flex items-center rounded-r-md bg-inherit px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20`,
     edge_l:      `relative inline-flex items-center rounded-l-md bg-inherit px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20`
   }
