@@ -1,22 +1,14 @@
 "use client"
 
 /**
- * Current Layout:
- * ----------------------------
- * | Logo | Links | Searchbar |
- * ----------------------------
- * ... rest of content ... 
- * 
- * Ideal Layout: (Flowbite Navbar Block with search section)
+ * Layout:
  * ----------------------------------------
  * | Logo | Links | Account circle        |
  * |      |       | (with expanding opts) |
  * ----------------------------------------
  * | Searchbar                            |
- * | (with dynamic dropdown -             |
- * |  label for ≥md, icon for sm)         |
+ * | (with dynamic dropdown)              |
  * ----------------------------------------
- * 
  */
 
 import { useState } from 'react'
@@ -25,16 +17,14 @@ import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import SearchDropDown from './search-dropdown'
 
-// WIP
-// import Searchbar from "./searchbar";
+//TO BE CHANGED
+const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 
 const menuOptions = [
   { name: 'Home', href: '/' },
   { name: 'Analytics', href: '#' },
   { name: 'Account', href: '/login/' },
 ]
-
-const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 
 const Logo = () => {
   return (
@@ -66,19 +56,6 @@ export default function NavBar(): JSX.Element {
         <div className="flex h-9 items-center justify-between">
           {Logo()}
 
-          {/** Hamburger Button */}
-          <div className="flex gap-x-2 lg:hidden">
-            <SearchDropDown/>
-            <button
-              type="button"
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <span className="sr-only">Open main menu</span>
-              <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-white" aria-hidden="true" />
-            </button>
-          </div>
-
           {/** Links */}
           <div className="hidden lg:flex lg:min-w-0 lg:flex-1 lg:justify-center lg:space-x-8">
             {menuOptions.map((item) => (
@@ -93,14 +70,23 @@ export default function NavBar(): JSX.Element {
             ))}
           </div>
 
-          {/** Login Button 
-            * Should be swapped to an Account Pic dropdown if there is a session 
+          {/** Search | Hamburger (Medium and below) | Login Button (Large only)
+            * Login Button
+            * - Should be swapped to an Account Pic dropdown if there is a session 
             */} 
-          <div className="hidden lg:flex lg:min-w-0 lg:flex-1 lg:justify-end gap-x-2">
+          <div className="flex min-w-0 flex-1 justify-end gap-x-2">
             <SearchDropDown/>
+            <button
+              type="button"
+              className="-m-2.5 lg:hidden inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+              onClick={() => setMobileMenuOpen(true)}>
+              <span className="sr-only">Open main menu</span>
+              <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-white" aria-hidden="true" />
+            </button>
             <a href="/login/"
                className={`
-                  inline-block rounded-lg px-3 py-1.5 
+                  hidden
+                  lg:inline-block rounded-lg px-3 py-1.5 
                   text-sm font-semibold leading-6 
                   text-gray-900 shadow-sm
                   dark:text-white 
