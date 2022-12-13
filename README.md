@@ -10,6 +10,7 @@ In order to test the app, follow the [Setup Instructions](#dev-environment-setup
 
 - [Google Auth](#google-auth)
 - [Coinbase Auth](#coinbase-auth)
+- [Database Setup]()
 
 3. Configure the JWT (JSON Web Token) setup in the section [JWT Setup](#jwt-setup).
 4. Once done, open the application by running `npm run dev` in the terminal in the project root directory.
@@ -34,6 +35,11 @@ the required credentials for the dev server.
 2. Configure the redirect URI as `http://localhost:3000/api/auth/callback/coinbase`
 3. Copy and paste the client ID and client Secret into your `.env` file in the root directory.
 
+### Database Setup
+
+1. Using `psql` or your system PostgreSQL client, setup a database instance and configure the `DATABASE_URL` in the `.env` as per the format given.
+2. Run `npx prisma migrate dev` to migrate your database.
+
 ### JWT Setup
 
 1. Run the following command in your powershell/zsh/bash terminal:
@@ -43,6 +49,69 @@ openssl rand -base64 32
 ```
 
 Proceed to copy the printed string into your .env file under `JWT_SECRET`. Save, and you're done!
+
+## **Navigating Around**
+
+---
+
+In case you are lost, here's a guide to the respective folders in the project and how to navigate around them.
+
+```shell
+.
+├─ app ##############-------- Main frontend components of the app - See nextJS documentation
+│  └─ ...
+├─ prisma ############------- Prisma Configuration
+│  └─ schema.prisma
+├─ env ##############-------- Validation Guards for `.env` variables
+│  ├─ client.mjs
+│  ├─ schema.mjs
+│  └─ server.mjs
+├─ pages ############-------- API Routing
+│  ├─ api
+│  │  ├─ auth 
+│  │  │  └─ [...nextauth].ts
+│  │  ├─ trpc
+│  │  │  └─ [trpc].ts
+│  │  └─ examples.ts
+├─ types ############-------- Type Guards for Module Imports
+│  └─ next-auth.d.ts
+├─ utils ############-------- TRPC Config for the whole App
+│  └─ trpc.ts
+├─ server ###########-------- Backend Functions
+│  ├─ common ########-------- Auth Session Validation for server
+│  │  └─ get-server-auth-session.ts
+│  ├─ db ############-------- Prisma Instance (DB)
+│  │  └─ client.ts
+│  └─ trpc
+│     ├─ router #####-------- API Routes
+│     │  ├─ _app.ts
+│     │  ├─ auth.ts
+│     │  └─ example.ts
+│     ├─ context.ts #-------- Context handler for browser to manage sessions
+│     └─ trpc.ts ####-------- Middleware
+...
+
+```
+
+### **Key Pointers**
+
+- `pages/api` vs `server/trpc/router`:
+  
+  The former is reserved for authentication calls, while the latter can be used to determine custom type-safe API routes that retrieve data directly from the server with TypeScript validation (`TRPC`) and input validation (`zod`).
+- Migrations and seeding data
+  
+  As PostgreSQL is a relational database that stores data in tables, migrations are needed to enforce the schema on the database and "migrate" its structure. Also, you may wish to define functions that seed the data from scratch, for a fresh environment setup
+- Schema (`./prisma/*`)
+
+  This is where the table configurations for the Postgres Database is made. To add new tables, simply add new `model`s, while to add new columns to existing tables, add `field`s to those models. Remember to migrate the database once done.
+
+## **Final Words**
+
+We're still new to the Prisma/TRPC workflow, but we do believe it will help abstract away complexity in the long run and speed up development from here on. Do have patience with us as we iron out the bugs.
+
+*Cheers*,
+
+The DogeTTM Team
 
 ---
 
