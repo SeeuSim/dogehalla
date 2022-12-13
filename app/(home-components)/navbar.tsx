@@ -19,10 +19,10 @@
  * 
  */
 
-import { useState, Fragment } from 'react'
+import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { Dialog, Popover, Transition } from '@headlessui/react'
-import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Dialog } from '@headlessui/react'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import SearchDropDown from './search-dropdown'
 
 // WIP
@@ -51,8 +51,6 @@ export default function NavBar(): JSX.Element {
   const {data: session} = useSession();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <div className="px-6 pt-6 lg:px-8">
