@@ -13,9 +13,10 @@ In order to test the app, follow the [Setup Instructions](#dev-environment-setup
 
 1. Run `npm install` after cloning the repository.
 2. Configure the OAuth setup as described in the following sections:
+
   - [Google Auth](#google-auth)
   - [Coinbase Auth](#coinbase-auth)
-  - [Database Setup]()
+  - [Database Setup](#database-setup) or [Docker Setup](#docker-setup)
 
 3. Configure the JWT (JSON Web Token) setup in the section [JWT Setup](#jwt-setup).
 4. Once done, open the application by running `npm run dev` in the terminal in the project root directory.
@@ -48,6 +49,13 @@ You only need this section if you are not using Docker and have your own Docker 
 2. Start your own Redis server and paste the URL in `src/server/db/connectRedis.ts` under `redisUrl`.
 3. Run `pnpm db:migrate && pnpm db:push` to migrate your database. If using `npm`, replace `pnpm` with `npm run`.
 
+### **Docker Setup**
+
+You only need this section if you have Docker on your system, as well as Docker Compose.
+
+1. Run `docker-compose up -d`. Your databases will then be setup automatically.
+2. Run `pnpm db:migrate && pnpm db:push` to migrate your database. If using `npm`, replace `pnpm` with `npm run`.
+
 ### **JWT Setup**
 
 1. Run the following command in your powershell/zsh/bash terminal:
@@ -57,6 +65,50 @@ openssl rand -base64 32
 ```
 
 Proceed to copy the printed string into your .env file under `JWT_SECRET`. Save, and you're done!
+
+## **Development Paradigms to follow**
+
+1. Follow the NextJS 12 and T3 App File structure. This is because all TRPC functions rely on this.
+
+- All client UI pages reside under `./src/pages/`.
+  
+  - All pages should minimally have their own dynamic title. To do so, add a `<Head>` element containing the `<title>` element for that page in the
+    returned JSX. NextJS will automatically merge the Head element's contents into the page's Head element.
+  - Where possible, use `<Image>` and `<Link>` as opposed to `<img>` and `<a>` respectively. This improves loading and prefetching.
+  - For dynamic routes, simply enclose the file name in square brackets (`[]`) like so: `[address].tsx` for pages that route to `/[page]` where
+    `[page]` depends on the route (a unique blog post, asset, etc.)
+- All client API routes using Next's native hardware lie in `./src/pages/api/`. Additional server 
+  functions and routes should be configured in `./src/server/trpc`.
+
+2. Ensure that your environment variables, after added in `.env`, are:
+
+- Not committed to the git repository
+- Have their variable names reflected in both `.env.example` and `./env/schema.mjs`
+- The README updated accordingly on how to populate those variables.
+
+More will be added as this app continues development. Till then, feel free to reach out to us.
+
+## **Tech Stack**
+
+- Frontend:
+
+  - NextJS: A wrapper around React that improves SEO, server rendering, and native API routing
+  - TailwindCSS: A style system that makes it easy to style components
+  - HeadlessUI: A component library that provides common UI components with inbuilt logic and type definitions
+  
+- Server:
+
+  - NextAuth.JS: An authentication library that eases the OAuth authentication process with JWT validation
+  - Prisma: A Schema system that makes it easy to write SQL queries in TypeScript
+  - TRPC: A lightweight library to make type-safe APIs with TypeScript
+
+    - Zod: A Type Validation system to ensure validation of both API data and environment variables
+
+- Database:
+
+  - PostgreSQL: The industry standard for Relational Databases. Provides powerful and fast indexing functions
+  - Redis: A NoSQL store that provides fast access. Used mainly for storing user sessions, which is deleted on inactivity
+  - Docker: A containerization tool that provides ease of setup of these databases.
 
 ---
 
