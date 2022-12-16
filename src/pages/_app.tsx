@@ -5,8 +5,8 @@ import { SessionProvider } from "next-auth/react";
 import { trpc } from "../utils/trpc";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-import Header from "../(components)/header";
-import NavBar from "../(components)/navbar";
+import Header from "../components/header";
+import NavBar from "../components/navbar";
 
 import "../styles/globals.css";
 

@@ -24,6 +24,8 @@ model Example {
 model Account {
   id                String  @id @default(cuid())
   userId            String
+  created_at        Int?
+  updated_at        DateTime @updatedAt
   type              String
   provider          String
   providerAccountId String
@@ -49,12 +51,22 @@ model Session {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
+  name          String?   @db.VarChar(255)
   email         String?   @unique
+  password      String?
+  verified      Boolean?  @default(false)
   emailVerified DateTime?
-  image         String?
+  image         String?   @default("../public/user_profilepic.png")
+  role          RoleEnumType? @default(user)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
+}
+
+enum RoleEnumType {
+  user
+  admin
 }
 
 model VerificationToken {

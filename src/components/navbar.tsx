@@ -127,6 +127,7 @@ export default function NavBar(): JSX.Element {
                   <Link
                     key={item.name}
                     href={item.href}
+                    onClick={() => {setMobileMenuOpen(false)}}
                     className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-400/10 dark:text-white"
                   >
                     {item.name}
@@ -138,6 +139,7 @@ export default function NavBar(): JSX.Element {
               <div className="py-6">
                 <Link
                   href="/login/"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-6 text-gray-900 hover:bg-gray-400/10 dark:text-white"
                 >
                   Log in

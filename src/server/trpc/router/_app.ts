@@ -11,7 +11,7 @@ export const appRouter = router({
   example: exampleRouter,
   auth: authRouter,
   testRedis: publicProcedure.query(async ({ ctx }) => {
-    const message = await redisClient.get("trpc");
+    const message = await redisClient.get("tRPC");
     return { message };
   }),
 });

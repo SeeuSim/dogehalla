@@ -24,9 +24,11 @@ export default function Page() {
 
     return (
       <div className="flex flex-col items-center px-6 mx-auto md:h-screen lg:py-0">
-        Signed in as <a className="text-blue-500" href={`mailto:${emailAddr}`}>{emailAddr}</a> <br />
+        <p className="text-gray-800 dark:text-white text-center">
+          Signed in as <br/><a className="text-blue-500" href={`mailto:${emailAddr}`}>{emailAddr}</a> <br />
+        </p>
         {/* <UserInformation data={session.user} /> */}
-        <button className="border border-gray-500 rounded px-3 py-1" onClick={() => signOut()}>Sign out</button>
+        <button className="border border-gray-500 rounded px-3 py-1 text-gray-800 dark:text-white " onClick={() => signOut()}>Sign out</button>
       </div>
     );
   }

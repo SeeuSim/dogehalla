@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "RoleEnumType" AS ENUM ('user', 'admin');
+
 -- CreateTable
 CREATE TABLE "Example" (
     "id" TEXT NOT NULL,
@@ -11,6 +14,8 @@ CREATE TABLE "Example" (
 CREATE TABLE "Account" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
+    "created_at" INTEGER,
+    "updated_at" TIMESTAMP(3) NOT NULL,
     "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
     "providerAccountId" TEXT NOT NULL,
@@ -38,10 +43,15 @@ CREATE TABLE "Session" (
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "name" TEXT,
+    "name" VARCHAR(255),
     "email" TEXT,
+    "password" TEXT,
+    "verified" BOOLEAN DEFAULT false,
     "emailVerified" TIMESTAMP(3),
-    "image" TEXT,
+    "image" TEXT DEFAULT '../public/user_profilepic.png',
+    "role" "RoleEnumType" DEFAULT 'user',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
