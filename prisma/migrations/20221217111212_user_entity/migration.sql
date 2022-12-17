@@ -11,14 +11,14 @@ CREATE TABLE "Example" (
 );
 
 -- CreateTable
-CREATE TABLE "Account" (
+CREATE TABLE "OAuthProfile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "created_at" INTEGER,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
-    "providerAccountId" TEXT NOT NULL,
+    "providerOAuthId" TEXT NOT NULL,
     "refresh_token" TEXT,
     "access_token" TEXT,
     "expires_at" INTEGER,
@@ -27,7 +27,7 @@ CREATE TABLE "Account" (
     "id_token" TEXT,
     "session_state" TEXT,
 
-    CONSTRAINT "Account_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "OAuthProfile_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -64,7 +64,7 @@ CREATE TABLE "VerificationToken" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
+CREATE UNIQUE INDEX "OAuthProfile_provider_providerOAuthId_key" ON "OAuthProfile"("provider", "providerOAuthId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
@@ -79,7 +79,7 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
 
 -- AddForeignKey
-ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "OAuthProfile" ADD CONSTRAINT "OAuthProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

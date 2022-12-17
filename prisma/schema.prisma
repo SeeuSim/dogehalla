@@ -20,15 +20,14 @@ model Example {
   updatedAt DateTime @updatedAt
 }
 
-// Necessary for Next auth
-model Account {
+model OAuthProfile {
   id                String  @id @default(cuid())
   userId            String
   created_at        Int?
   updated_at        DateTime @updatedAt
   type              String
   provider          String
-  providerAccountId String
+  providerOAuthId String
   refresh_token     String?  @db.Text
   access_token      String?  @db.Text
   expires_at        Int?
@@ -38,7 +37,7 @@ model Account {
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([provider, providerOAuthId])
 }
 
 model Session {
@@ -60,7 +59,7 @@ model User {
   role          RoleEnumType? @default(user)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  accounts      Account[]
+  authprofiles  OAuthProfile[]
   sessions      Session[]
 }
 
