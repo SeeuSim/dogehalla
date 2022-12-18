@@ -109,7 +109,7 @@ passport.use(
 //Local Strategy
 passport.use(new LocalStrategy(
   async (username: string, password: string, callback: any) => {
-    const fail = callback(null, false, { message: 'Incorrect username or password' });
+    const fail = callback("Error", false, { message: 'Incorrect username or password' });
     try {
       const user = await trpc.model.user.getVerifyUser.useQuery({email: username});
       
@@ -128,7 +128,7 @@ passport.use(new LocalStrategy(
     } catch (err) {
       //Error logging should be turned off in production
       //return fail;
-      return callback(null, false, { message: err });
+      return callback(err, false, { message: err });
     }
   }
 ))
