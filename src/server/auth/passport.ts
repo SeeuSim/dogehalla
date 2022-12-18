@@ -1,7 +1,11 @@
 import passport from "passport";
 import { Strategy as CoinbaseStrategy } from "passport-coinbase";
 import { Strategy as GoogleStrategy } from "passport-google-oauth2";
+import { Strategy as LocalStrategy } from "passport-local";
+
+import argon2 from "argon2";
 import { trpc } from "../../utils/trpc";
+import { Prisma } from "@prisma/client";
 
 type GoogleOAuthSlug = {
   access_token: string,
@@ -101,5 +105,32 @@ passport.use(
     }
   })
 );
+
+//Local Strategy
+passport.use(new LocalStrategy(
+  async (username: string, password: string, callback: any) => {
+    const fail = callback(null, false, { message: 'Incorrect username or password' });
+    try {
+      const user = await trpc.model.user.getVerifyUser.useQuery({email: username});
+      
+      //Hashing should be transferred to login form - at later date
+      const hashedPassword = await argon2.hash(password);
+
+      if (!user || hashedPassword != user.data?.password) {
+        return fail;
+      }
+
+      return callback(null, {
+        email: user.data.email, 
+        name: user.data.name
+      });
+
+    } catch (err) {
+      //Error logging should be turned off in production
+      //return fail;
+      return callback(null, false, { message: err });
+    }
+  }
+))
 
 export default passport;

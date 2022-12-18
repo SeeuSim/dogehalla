@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default nextConnect().get(
   passport.authenticate("coinbase", {
-    failureRedirect: "/"
+    failureRedirect: "/login"
   }),
   (req: NextApiRequest & { user: any }, res: NextApiResponse) => {
     // you can save the user session here. to get access to authenticated user through req.user

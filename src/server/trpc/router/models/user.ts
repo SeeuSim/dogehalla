@@ -17,7 +17,7 @@ export const UserRouter = router({
         try {
           const user = prisma.user.findUniqueOrThrow({
             where: {
-              email: input?.email
+              email: input.email
             }, 
             select: {
               email: true,
@@ -29,5 +29,33 @@ export const UserRouter = router({
       } catch (err) {
         return null;
       }
-    })
+    }),
+  getVerifyUser: publicProcedure
+    .input(z.object({
+      email: z.string().nullish()
+    }).nullish())
+    .query(
+      ({input}) => {
+        if (!input?.email) {
+          return null;
+        }
+
+        try {
+          const user = prisma.user.findUniqueOrThrow({
+            where: {
+              email: input.email
+            },
+            select: {
+              email: true,
+              name: true,
+              password: true
+            }
+          });
+          return user;
+        } catch (err) {
+          return null;
+        }
+      }
+    )
+  
 })
