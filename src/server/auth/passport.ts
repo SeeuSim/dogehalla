@@ -7,6 +7,8 @@ import argon2 from "argon2";
 import { trpc } from "../../utils/trpc";
 import { Prisma } from "@prisma/client";
 
+import { env } from "../../env/server.mjs"; 
+
 type GoogleOAuthSlug = {
   access_token: string,
   expires_in: number,
@@ -46,8 +48,8 @@ passport.use(
   "google", 
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientID: env.GOOGLE_CLIENT_ID as string,
+      clientSecret: env.GOOGLE_CLIENT_SECRET as string,
       callbackURL: "http://localhost:3000/api/auth/callback/google",
       passReqToCallback: true,
     },
@@ -90,8 +92,8 @@ passport.use(
 passport.use(
   "coinbase",
   new CoinbaseStrategy({
-    clientID: process.env.COINBASE_CLIENT_ID as string,
-    clientSecret: process.env.COINBASE_CLIENT_SECRET as string,
+    clientID: env.COINBASE_CLIENT_ID as string,
+    clientSecret: env.COINBASE_CLIENT_SECRET as string,
     callbackURL: "http://localhost:3000/api/auth/callback/coinbase",
     scope: ["wallet:user:email", "wallet:user:read"]
   },

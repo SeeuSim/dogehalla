@@ -75,3 +75,21 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model Collection {
+  id            String    @id @default(cuid())
+  address       String
+  name          String?
+  type          String?
+  tokens        String
+  owners        String
+  salesVolume   String
+  
+  //Metadata
+  description   String?
+  bannerImg     String
+  image         String
+  extURL        String?
+
+  @@unique([address])
+}
