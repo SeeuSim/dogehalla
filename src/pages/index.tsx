@@ -7,7 +7,6 @@ import { trpc } from "../utils/trpc";
 import CollectionsDash from "./(home-components)/collectionsDash";
 
 const Home: NextPage = () => {
-  const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
 
   return (
     <>

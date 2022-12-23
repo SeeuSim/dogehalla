@@ -25,16 +25,20 @@ model OAuthProfile {
   userId            String
   created_at        Int?
   updated_at        DateTime @updatedAt
+
   type              String
   provider          String
-  providerOAuthId String
+  providerOAuthId   String
+
   refresh_token     String?  @db.Text
   access_token      String?  @db.Text
   expires_at        Int?
+
   token_type        String?
   scope             String?
   id_token          String?  @db.Text
   session_state     String?
+  
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerOAuthId])
