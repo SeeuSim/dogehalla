@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { router, publicProcedure } from "../../trpc";
-import { prisma } from "../../../db/client";
+import { router, publicProcedure } from "server/trpc/trpc";
+import { prisma } from "server/db/client";
 
 export const OAuthRouter = router({
   getOAuthProfileOwner: publicProcedure

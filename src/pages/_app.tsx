@@ -2,13 +2,13 @@ import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 
-import { trpc } from "../utils/trpc";
+import { trpc } from "utils/trpc";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-import Header from "../components/header";
-import NavBar from "../components/navbar";
+import Header from "components/header";
+import NavBar from "components/navbar";
 
-import "../styles/globals.css";
+import "styles/globals.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,

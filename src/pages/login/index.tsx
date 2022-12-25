@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useSession, signOut } from "next-auth/react";
-import OAuthButton from "../../components/buttons/OAuthButton";
+import OAuthButton from "components/buttons/OAuthButton";
 
 const labelStyle = "block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 const fieldStyle = `

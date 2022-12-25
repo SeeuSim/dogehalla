@@ -1,5 +1,5 @@
 import nextConnect from "next-connect";
-import passport from "../../../../server/auth/passport";
+import passport from "server/auth/passport";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default nextConnect().get(

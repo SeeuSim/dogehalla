@@ -4,8 +4,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth2";
 import { Strategy as LocalStrategy } from "passport-local";
 
 import argon2 from "argon2";
-import { trpc } from "../../utils/trpc";
-import { Prisma } from "@prisma/client";
+import { trpc } from "utils/trpc";
 
 type GoogleOAuthSlug = {
   access_token: string,

@@ -1,7 +1,7 @@
 import { publicProcedure, router } from "../trpc";
 import { authRouter } from "./auth";
 
-import connectDB from "../../db/client";
+import connectDB from "server/db/client";
 import { modelsRouter } from "./models";
 
 connectDB();

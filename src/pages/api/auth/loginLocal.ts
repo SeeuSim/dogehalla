@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import passport from "../../../server/auth/passport";
+import passport from "server/auth/passport";
 
 export default async (request: NextApiRequest, response: NextApiResponse) => {
   if (request.method === "POST") {
