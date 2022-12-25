@@ -17,7 +17,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <SessionProvider session={session}>
       <Header/>
-      <main className="min-h-screen p-16 justify-center items-center bg-gray-100 dark:bg-slate-900">
+      <main className="min-h-screen py-16 px-2 justify-center items-center bg-gray-100 dark:bg-slate-900">
         <NavBar/>
         <Component {...pageProps} />
       </main>

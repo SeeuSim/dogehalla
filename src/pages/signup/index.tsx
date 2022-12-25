@@ -2,6 +2,10 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import OAuthButton from "../../components/buttons/OAuthButton";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+
 /**
  * Alert Functionality
  */
@@ -25,7 +29,7 @@ const AlertInput = ({ children }: {children: string | undefined}) =>
 /**
  * Form Styling
  */
-const labelStyle = "block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+const labelStyle = "block mb-2 text-sm font-medium text-gray-900 dark:text-white";
 const fieldStyle = `
   bg-gray-50 
   border border-gray-300 
@@ -35,7 +39,8 @@ const fieldStyle = `
   block w-full p-2.5 
   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-`
+`;
+
 /**
  * Form Validation
  */
@@ -44,19 +49,8 @@ const userSchema = z
     firstName: z.string().max(36),
     lastName: z.string().min(1, { message: "The last name is required." }).max(36),
     email: z.string().min(1, {message: "Email address is required"}).max(36),
-    confirmEmail: z.string(),
     password: z.string().min(8, {message: "Password must be at least 8 characters in length"}).max(60),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.email === data.confirmEmail, {
-    message: "Email addresses do not match", 
-    path: ["confirmEmail"]
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"]
-  }, 
-  );
+  });
 
 type FormData = z.infer<typeof userSchema>;
 
@@ -68,6 +62,9 @@ const onSubmit = (data: any) => {
  * Page Component
  */
 export default function SignUp() {
+  //Hide Password element
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     register, handleSubmit, formState: {errors},
   } = useForm<FormData>({
@@ -81,8 +78,28 @@ export default function SignUp() {
       )}
 
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-        <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+        <div className="space-y-4 p-6 md:space-y-6 sm:p-8">
+          {/** Sign Up Header */}
+          <div>
+            <h2 className="text-lg font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-gray-200">
+              Get Started
+            </h2>
+            <p className="text-gray-900 dark:text-gray-200">Create a new account</p>
+          </div>
+
+          {/** OAuth Providers */}
+          <OAuthButton logoImg="https://freesvg.org/img/1534129544.png" provider="google" providerName="Google" copytext="Continue"/>
+          <OAuthButton logoImg="https://avatars.githubusercontent.com/u/18060234?s=280&v=4" provider="coinbase" providerName="Coinbase" copytext="Continue"/>
+          
+          {/** Separator */}
+          <div className="flex items-center justify-between">
+            <hr className="mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 dark:bg-gray-700"/>
+            <div className="dark:text-gray-400 font-medium">or</div>
+            <hr className="mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 dark:bg-gray-700"/>
+          </div>
+
           <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <div className="columns-2">
             <div>
               <label htmlFor="firstName" className={labelStyle}>First Name:</label>
               <input type="text" 
@@ -96,14 +113,15 @@ export default function SignUp() {
             </div>
 
             <div>
-              <label htmlFor="lastName">Last Name:</label>
+              <label htmlFor="lastName" className={labelStyle}>Last Name:</label>
               <input type="text" 
                     id="lastName" 
                     className={fieldStyle}
                     placeholder="Smith"
                     {...register("lastName")}/>
               <AlertInput>{errors?.lastName?.message}</AlertInput>
-              </div>
+            </div>
+            </div>
 
             <div>
               <label htmlFor="email" className={labelStyle}>Email Address:</label>
@@ -115,32 +133,21 @@ export default function SignUp() {
               <AlertInput>{errors?.email?.message}</AlertInput>
             </div>
 
-            <div>
-              <label htmlFor="confirmEmail" className={labelStyle}>Confirm Email Address:</label>
-              <input type="email" 
-                    id="confirmEmail"
-                    className={fieldStyle} 
-                    placeholder="johnSmith@acme.com"
-                    {...register("confirmEmail")}/>
-              <AlertInput>{errors?.confirmEmail?.message}</AlertInput>
-            </div>
-
-            <div>
+            <div className="relative">
               <label htmlFor="password" className={labelStyle}>Password:</label>
-              <input type="password" 
+              <input type={showPassword? "text": "password"} 
                     id="password"
-                    className={fieldStyle} 
+                    className={fieldStyle + `
+                      pr-8
+                    `} 
                     {...register("password")}/>
               <AlertInput>{errors?.password?.message}</AlertInput>
-            </div>
-            
-            <div>
-              <label htmlFor="confirmPassword" className={labelStyle}>Confirm Password:</label>
-              <input type="password" 
-                    id="confirmPassword"
-                    className={fieldStyle} 
-                    {...register("confirmPassword")}/>
-              <AlertInput>{errors?.confirmPassword?.message}</AlertInput>
+              <button className="absolute -translate-y-8 right-2"
+                      onClick={() => setShowPassword(!showPassword)}>
+                {showPassword
+                  ? <EyeSlashIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>
+                  : <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>}
+              </button>
             </div>
 
             <button type="submit"

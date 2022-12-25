@@ -33,7 +33,7 @@ export default function NavBar(): JSX.Element {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="px-6 pt-6 lg:px-8">
+    <div className="px-6 pt-2 lg:px-8">
       {/** Large Screens and Above */}
       <nav className={`
             ${mobileMenuOpen? "hidden" : ""}

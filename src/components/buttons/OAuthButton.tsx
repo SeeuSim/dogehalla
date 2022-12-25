@@ -3,7 +3,8 @@ import { signIn } from "next-auth/react";
 type OAuthButtonProps = {
   logoImg: string,
   provider: string,
-  providerName: string
+  providerName: string,
+  copytext: string
 }
 
 export default function OAuthButton(props: OAuthButtonProps) {
@@ -23,7 +24,7 @@ export default function OAuthButton(props: OAuthButtonProps) {
               dark:hover:bg-gray-700 dark:focus:ring-blue-800
             `}
             onClick={() => signIn(props.provider)}>
-      <img className="h-6 w-6" src={props.logoImg}/>&nbsp;&nbsp;Login with{` ${props.providerName}`}
+      <img className="h-6 w-6" src={props.logoImg}/>&nbsp;&nbsp;{`${props.copytext} `}with{` ${props.providerName}`}
     </button>
   );
 }
