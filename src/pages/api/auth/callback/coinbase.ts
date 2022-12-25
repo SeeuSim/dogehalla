@@ -8,6 +8,7 @@ export default nextConnect().get(
   }),
   (req: NextApiRequest & { user: any }, res: NextApiResponse) => {
     // you can save the user session here. to get access to authenticated user through req.user
+    console.log(req.user);
     res.redirect("/");
   }
 );
