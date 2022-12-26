@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
@@ -31,7 +31,6 @@ export default function NavBar(): JSX.Element {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-/**   const dropdownOptions = [Home, Analytics, Profile, Sign Out] */
   return (
     <div className="px-6 pt-2 lg:px-8">
       {/** Large Screens and Above */}
