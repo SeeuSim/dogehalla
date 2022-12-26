@@ -5,28 +5,10 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { Alert, AlertInput } from "components/forms/alert";
 import OAuthButton from "components/buttons/OAuthButton";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-
-/**
- * Alert Functionality
- */
-type AlertType = "error" | "warning" | "success"
-
-// Global Alert div.
-function Alert({ children, type }: { children: string; type: AlertType }) {
-  const backgroundColor = type === "error" ? "bg-rose-400" : type === "warning" ? "bg-orange-400" : "bg-sky-400"
-
-  return <div className={`px-3 ${backgroundColor}`}>{children}</div>
-}
-
-// Use role="alert" to announce the error message.
-const AlertInput = ({ children }: {children: string | undefined}) =>
-  Boolean(children) ? (
-    <span className="bg-rose-400" role="alert">
-      {children}
-    </span>
-  ) : null;
+import Head from "next/head";
 
 /**
  * Form Styling
@@ -75,7 +57,6 @@ export default function SignUp() {
   const router = useRouter();
 
   //Submission Logic
-  
   async function onSubmit (data: any) {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
@@ -92,13 +73,16 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex flex-col items-center px-6 mx-auto md:h-screen lg:py-0 bg-inherit">
+    <div className="flex flex-col items-center mx-auto md:h-screen lg:py-0 bg-inherit">
+      <Head>
+        <title>Sign Up | DogeTTM</title>
+      </Head>
       {Boolean(Object.keys(errors)?.length) && (
         <Alert type="error">There are errors in the form.</Alert>
       )}
 
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-        <div className="space-y-4 p-6 md:space-y-6 sm:p-8">
+        <div className="space-y-4 p-4 sm:p-6">
           {/** Sign Up Header */}
           <div>
             <h2 className="text-lg font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-gray-200">
@@ -120,27 +104,27 @@ export default function SignUp() {
 
           <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="columns-2">
-            <div>
-              <label htmlFor="firstName" className={labelStyle}>First Name:</label>
-              <input type="text" 
-                    id="firstName"
-                    className={fieldStyle}
-                    placeholder="John"
-                    {...register("firstName")}
-                    aria-invalid={errors.firstName ? "true" : "false"}
-                    />
-              <AlertInput>{errors?.firstName?.message}</AlertInput>
-            </div>
+              <div>
+                <label htmlFor="firstName" className={labelStyle}>First Name:</label>
+                <input type="text" 
+                      id="firstName"
+                      className={fieldStyle}
+                      placeholder="John"
+                      {...register("firstName")}
+                      aria-invalid={errors.firstName ? "true" : "false"}
+                      />
+                <AlertInput>{errors?.firstName?.message}</AlertInput>
+              </div>
 
-            <div>
-              <label htmlFor="lastName" className={labelStyle}>Last Name:</label>
-              <input type="text" 
-                    id="lastName" 
-                    className={fieldStyle}
-                    placeholder="Smith"
-                    {...register("lastName")}/>
-              <AlertInput>{errors?.lastName?.message}</AlertInput>
-            </div>
+              <div>
+                <label htmlFor="lastName" className={labelStyle}>Last Name:</label>
+                <input type="text" 
+                      id="lastName" 
+                      className={fieldStyle}
+                      placeholder="Smith"
+                      {...register("lastName")}/>
+                <AlertInput>{errors?.lastName?.message}</AlertInput>
+              </div>
             </div>
 
             <div>
@@ -148,7 +132,8 @@ export default function SignUp() {
               <input type="email" 
                     id="email"
                     className={fieldStyle}
-                    placeholder="johnSmith@acme.com" 
+                    placeholder="johnSmith@acme.com"
+                    autoComplete="email"
                     {...register("email")}/>
               <AlertInput>{errors?.email?.message}</AlertInput>
             </div>
@@ -182,7 +167,13 @@ export default function SignUp() {
                       text-sm px-5 py-2.5 text-center 
                       dark:bg-blue-600 dark:hover:bg-blue-700 
                       dark:focus:ring-blue-800
-                    `}>Register Your Account</button> 
+                    `}>Register Your Account</button>
+            <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+              Already have an account?{" "}
+              <a href="/login" className="font-medium text-blue-600 hover:underline dark:text-blue-500">
+                Log in here
+              </a>
+            </p>
           </form>
         </div>
       </div>

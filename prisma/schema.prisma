@@ -47,9 +47,9 @@ model OAuthProfile {
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
-  userId       String
+  userId       String?
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data         String?  @db.Text
 }
 
 model User {
@@ -64,7 +64,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   authprofiles  OAuthProfile[]
-  sessions      Session[]
+  // sessions      Session[]
 }
 
 enum RoleEnumType {

@@ -55,9 +55,9 @@ export default function Page() {
 
             {/** Separator */}
             <div className="flex items-center justify-between">
-              <hr className="my-4 mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 md:my-10 dark:bg-gray-700"/>
+              <hr className="mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 dark:bg-gray-700"/>
               <div className="dark:text-gray-400 font-medium">or</div>
-              <hr className="my-4 mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 md:my-10 dark:bg-gray-700"/>
+              <hr className="mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 dark:bg-gray-700"/>
             </div>
 
             {/** Manual Form */}
