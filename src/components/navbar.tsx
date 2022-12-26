@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signIn, signOut } from 'next-auth/react'
 import Link from 'next/link'
-
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-
+import AccountDropdown from './accountDropdown'
 import SearchDropDown from './searchDropdown'
 
 //TO BE CHANGED
@@ -32,6 +31,7 @@ export default function NavBar(): JSX.Element {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+/**   const dropdownOptions = [Home, Analytics, Profile, Sign Out] */
   return (
     <div className="px-6 pt-2 lg:px-8">
       {/** Large Screens and Above */}
@@ -60,10 +60,8 @@ export default function NavBar(): JSX.Element {
             ))}
           </div>
 
-          {/** Search | Hamburger (Medium and below) | Login Button (Large only)
-            * Login Button
-            * - Should be swapped to an Account Pic dropdown if there is a session 
-            */} 
+          {/** Search | Hamburger (Medium and below) | Login Button (Large only) */}
+           
           <div className="flex min-w-0 flex-1 justify-end gap-x-2">
             <SearchDropDown/>
             <button
@@ -73,18 +71,28 @@ export default function NavBar(): JSX.Element {
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-white" aria-hidden="true" />
             </button>
-            <Link href="/login/"
-               className={`
-                  hidden
-                  lg:inline-block rounded-lg px-3 py-1.5 
-                  text-sm font-semibold leading-6 
-                  text-gray-900 shadow-sm
-                  dark:text-white 
-                  ring-1 ring-gray-900/10 hover:ring-gray-900/20
-                  dark:ring-gray-50/10 dark:hover:ring-gray-50/20
-                `}>
-              Log in
-            </Link>
+            {/**If not logged in -> Display Log In button */}
+            {!session && (
+              <>
+              <Link href="/login/"
+                className={`
+                    hidden
+                    lg:inline-block rounded-lg px-3 py-1.5 
+                    text-sm font-semibold leading-6 
+                    text-gray-900 shadow-sm
+                    dark:text-white 
+                    ring-1 ring-gray-900/10 hover:ring-gray-900/20
+                    dark:ring-gray-50/10 dark:hover:ring-gray-50/20
+                  `}>
+                Log in
+              </Link>
+              </>
+            )}
+            {/** If logged in -> Display user icon with dropdown 
+             * To test, Replace session with !session */ }
+            {session && (
+              <AccountDropdown/>
+            )}
           </div>
         </div>
       </nav>
