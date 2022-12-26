@@ -1,5 +1,7 @@
 import Head from "next/head";
-import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
+
+// import { useSession, signOut } from "next-auth/react";
 import OAuthButton from "components/buttons/OAuthButton";
 
 const labelStyle = "block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -15,23 +17,23 @@ const fieldStyle = `
 `
 
 export default function Page() {
-  const { data: session } = useSession();
+  // const { data: session } = useSession();
 
-  if (session) {
-    const emailAddr = session.user?.email 
-      ? session.user.email
-      : "random user"
+  // if (session) {
+  //   const emailAddr = session.user?.email 
+  //     ? session.user.email
+  //     : "random user"
 
-    return (
-      <div className="flex flex-col items-center px-6 mx-auto md:h-screen lg:py-0">
-        <p className="text-gray-800 dark:text-white text-center">
-          Signed in as <br/><a className="text-blue-500" href={`mailto:${emailAddr}`}>{emailAddr}</a> <br />
-        </p>
-        {/* <UserInformation data={session.user} /> */}
-        <button className="border border-gray-500 rounded px-3 py-1 text-gray-800 dark:text-white " onClick={() => signOut()}>Sign out</button>
-      </div>
-    );
-  }
+  //   return (
+  //     <div className="flex flex-col items-center px-6 mx-auto md:h-screen lg:py-0">
+  //       <p className="text-gray-800 dark:text-white text-center">
+  //         Signed in as <br/><a className="text-blue-500" href={`mailto:${emailAddr}`}>{emailAddr}</a> <br />
+  //       </p>
+  //       {/* <UserInformation data={session.user} /> */}
+  //       <button className="border border-gray-500 rounded px-3 py-1 text-gray-800 dark:text-white " onClick={() => signOut()}>Sign out</button>
+  //     </div>
+  //   );
+  // }
 
   //Sign in Form
   return (
@@ -124,9 +126,9 @@ export default function Page() {
                         </button>
                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                     Don{`'`}t have an account yet?{" "}
-                    <a href="/signup" className="font-medium text-blue-600 hover:underline dark:text-blue-500">
+                    <Link href="/signup" className="font-medium text-blue-600 hover:underline dark:text-blue-500">
                       Sign up here
-                    </a>
+                    </Link>
                 </p>
             </form>
           </div>

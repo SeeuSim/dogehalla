@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 import { z } from "zod";
@@ -8,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, AlertInput } from "components/forms/alert";
 import OAuthButton from "components/buttons/OAuthButton";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import Head from "next/head";
 
 /**
  * Form Styling
@@ -170,9 +171,9 @@ export default function SignUp() {
                     `}>Register Your Account</button>
             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
               Already have an account?{" "}
-              <a href="/login" className="font-medium text-blue-600 hover:underline dark:text-blue-500">
+              <Link href="/login" className="font-medium text-blue-600 hover:underline dark:text-blue-500">
                 Log in here
-              </a>
+              </Link>
             </p>
           </form>
         </div>

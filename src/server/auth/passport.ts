@@ -5,6 +5,8 @@ import { VerifyCallback } from "passport-google-oauth2";
 import { Strategy as LocalStrategy } from "passport-local";
 
 import argon2 from "argon2";
+import session from "next-session";
+
 import { trpc } from "utils/trpc";
 import { prisma } from "server/db/client";
 
@@ -90,6 +92,7 @@ passport.use(
         }
         
         //create session with next-session and return session, user
+        session()
         done(null, false, {message: "logging"});
 
       } catch (err) {
