@@ -18,7 +18,7 @@ const MyApp: AppType = ({
   return (
     <QueryClientProvider client={queryclient}>
       <Header/>
-      <main className="min-h-screen max-h-full overflow-scroll py-16 px-2 justify-center items-center bg-gray-100 dark:bg-slate-900">
+      <main className="min-h-screen max-h-full py-16 px-2 justify-center items-center bg-gray-100 dark:bg-slate-900">
         <NavBar/>
         <Component {...pageProps} />
       </main>
