@@ -1,9 +1,10 @@
 import nextSession from "next-session";
 import { SessionData } from "next-session/lib/types";
 import { promisifyStore } from "next-session/lib/compat";
+
+import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "server/db/client";
 import { env } from "env/server.mjs";
-import { NextApiRequest, NextApiResponse } from "next";
 
 class PostgresStore {
   async set(sid: string, sess: SessionData) {
@@ -49,7 +50,7 @@ class PostgresStore {
   }
 }
 
-const getSession = nextSession({
+export const getSession = nextSession({
   store: promisifyStore(new PostgresStore()),
   cookie: {
     httpOnly: true,
