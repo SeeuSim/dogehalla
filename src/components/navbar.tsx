@@ -1,9 +1,14 @@
-import { useState } from 'react'
-import Link from 'next/link'
-import { Dialog } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import AccountDropdown from './accountDropdown'
-import SearchDropDown from './searchDropdown'
+import { useState } from 'react';
+import Link from 'next/link';
+
+import { useQuery } from '@tanstack/react-query';
+import { fetchCurrentUser } from 'server/common/sessionHook';
+
+import { Dialog } from '@headlessui/react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+
+import AccountDropdown from './accountDropdown';
+import SearchDropDown from './searchDropdown';
 
 //TO BE CHANGED
 const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
@@ -11,7 +16,7 @@ const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 const menuOptions = [
   { name: 'Home', href: '/' },
   { name: 'Analytics', href: '#' },
-  { name: 'Account', href: '/login/' },
+  { name: 'Account', href: '/auth/login/' },
 ]
 
 const Logo = () => {
@@ -26,7 +31,7 @@ const Logo = () => {
 }
 
 export default function NavBar(): JSX.Element {
-  const session = false;
+  const { data: { user } = {}, error } = useQuery(['currentUser'], fetchCurrentUser);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -70,27 +75,21 @@ export default function NavBar(): JSX.Element {
               <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-white" aria-hidden="true" />
             </button>
             {/**If not logged in -> Display Log In button */}
-            {!session && (
-              <>
-              <Link href="/auth/login/"
-                className={`
-                    hidden
-                    lg:inline-block rounded-lg px-3 py-1.5 
-                    text-sm font-semibold leading-6 
-                    text-gray-900 shadow-sm
-                    dark:text-white 
-                    ring-1 ring-gray-900/10 hover:ring-gray-900/20
-                    dark:ring-gray-50/10 dark:hover:ring-gray-50/20
-                  `}>
-                Log in
-              </Link>
-              </>
-            )}
-            {/** If logged in -> Display user icon with dropdown 
-             * To test, Replace session with !session */ }
-            {session && (
-              <AccountDropdown/>
-            )}
+            {user
+              ? <AccountDropdown/>
+              : <Link href="/auth/login/"
+                      className={`
+                          hidden
+                          lg:inline-block rounded-lg px-3 py-1.5 
+                          text-sm font-semibold leading-6 
+                          text-gray-900 shadow-sm
+                          dark:text-white 
+                          ring-1 ring-gray-900/10 hover:ring-gray-900/20
+                          dark:ring-gray-50/10 dark:hover:ring-gray-50/20
+                        `}>
+                      Log in
+                </Link>
+            }
           </div>
         </div>
       </nav>

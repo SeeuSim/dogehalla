@@ -9,6 +9,8 @@ import argon2 from "argon2";
 import { prisma } from "server/db/client";
 import { env } from "env/server.mjs";
 
+import type { User } from "@prisma/client";
+
 type GoogleOAuthSlug = {
   access_token: string,
   expires_in: number,
@@ -28,7 +30,7 @@ type GoogleOAuthProfile = {
   picture: string
 }
 
-type CoinbaseProfile ={
+type CoinbaseProfile = {
   _json: {
     id: string,
     name: string,
@@ -44,15 +46,17 @@ type CoinbaseProfile ={
 }
 
 passport.serializeUser((user, done) => {
-  console.log(user);
-  done(null, user);
+  const dbUser = user as unknown as User;
+  const out = { name: dbUser.name, email: dbUser.email, image: dbUser.image };
+  console.log(out);
+  done(null, out);
 });
 
-passport.deserializeUser(async (req: any, id: any, done: any) => {
+passport.deserializeUser(async (req: any, id: {name: string, email: string, image: string}, done: any) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: id
+        email: id.email
       }
     });
     done(null, user);

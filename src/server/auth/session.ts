@@ -1,13 +1,10 @@
-import nextSession from "next-session";
-import { SessionData } from "next-session/lib/types";
-import { promisifyStore } from "next-session/lib/compat";
-
 import { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "server/db/client";
+import nextSession from "next-session";
+
+import { prismaStore } from "server/db/client";
 import { env } from "env/server.mjs";
 
 import passport from "./passport";
-import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 
 
 // class PostgresStore {
@@ -57,11 +54,7 @@ import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 // }
 
 export const getSession = nextSession({
-  store: new PrismaSessionStore(prisma, {
-    checkPeriod: 2 * 60 * 1000,  //ms
-    dbRecordIdIsSessionId: undefined,
-    dbRecordIdFunction: undefined,
-  }),
+  store: prismaStore,
   cookie: {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',

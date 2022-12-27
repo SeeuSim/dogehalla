@@ -1,6 +1,10 @@
 import { Fragment } from "react";
+import { useRouter } from "next/router";
+import { useQueryClient } from "@tanstack/react-query";
+
 import { Popover, Transition } from "@headlessui/react";
 import { UserIcon } from "@heroicons/react/24/outline";
+
 
 const solutions = [
   {
@@ -18,6 +22,9 @@ const solutions = [
 ]
 
 export default function Example() {
+  const router = useRouter();
+  const queryclient = useQueryClient();
+
   return (
     <div className="flex">
       <Popover className="relative">
@@ -82,16 +89,22 @@ export default function Example() {
                     </a>
                   </div>
                   <div className=" dark:bg-gray-700 p-1">
-                    <a
-                      href="##"
+                    <button
+                      onClick={() => {
+                        fetch("/api/auth/logout", {
+                          method: "DELETE"
+                        });
+                        queryclient.refetchQueries({queryKey: ['currentUser']});
+                        router.push("/");
+                      }}
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
-                    >
+                      >
                       <span className="flex items-center">
                         <span className="text-sm font-medium  text-white">
                           Sign Out
                         </span>
                       </span>
-                    </a>
+                    </button>
                   </div>
                 </div>
               </Popover.Panel>

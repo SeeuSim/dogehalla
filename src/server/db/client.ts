@@ -1,10 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 
 import { env } from "env/server.mjs";
 
 declare global {
   // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
+  var prismaStore: PrismaSessionStore | undefined;
 }
 
 export const prisma =
@@ -14,9 +16,20 @@ export const prisma =
       env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
+export const prismaStore = 
+  global.prismaStore ||
+  new PrismaSessionStore(
+    prisma, {
+      checkPeriod: 2 * 60 * 1000,  //ms
+    }
+  );
+
 if (env.NODE_ENV !== "production") {
   global.prisma = prisma;
+  global.prismaStore = prismaStore;
 }
+
+
 
 async function connectDB() {
   try {
