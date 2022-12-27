@@ -5,7 +5,6 @@ import { VerifyCallback } from "passport-google-oauth2";
 import { Strategy as LocalStrategy } from "passport-local";
 
 import argon2 from "argon2";
-import { z } from "zod";
 
 import { prisma } from "server/db/client";
 import { env } from "env/server.mjs";
@@ -43,6 +42,24 @@ type CoinbaseProfile ={
     user_type: string // Preferably enum - 'individual'
   }
 }
+
+passport.serializeUser((user, done) => {
+  console.log(user);
+  done(null, user);
+});
+
+passport.deserializeUser(async (req: any, id: any, done: any) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id
+      }
+    });
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+})
 
 //Google
 passport.use(
@@ -236,16 +253,6 @@ passport.use(new LocalStrategy(
   }
 ))
 
-passport.serializeUser(function (user, callback) {
-  process.nextTick(function() {
-    callback(null, { user });
-  });
-});
 
-passport.deserializeUser(function(user, callback) {
-  process.nextTick(function() {
-    return callback(null, user as Express.User);
-  });
-});
 
 export default passport;

@@ -1,22 +1,22 @@
-import nextConnect from "next-connect";
 import passport from "server/auth/passport";
-import session from "server/auth/session";
-
+import { authOptions } from "server/auth/session";
+import { nextConnectOptions } from "server/auth/nextConnect";
+import nextConnect from "next-connect";
 import { NextApiRequest, NextApiResponse } from "next";
 
+const handler = nextConnect(nextConnectOptions);
 
-const auths = [session, passport.initialize(), passport.session()];
+handler.use(...authOptions);
 
-export default nextConnect()
-  .use(...auths)
-  .get(
+handler.get(
   passport.authenticate("coinbase", {
-    failureRedirect: "/login"
+    failureRedirect: "/auth/login"
   }),
-  (req: NextApiRequest & { user: any, session: any }, res: NextApiResponse) => {
+  (req: NextApiRequest & { user: any }, res: NextApiResponse) => {
     // you can save the user session here. to get access to authenticated user through req.user
-    req.session.user = req.user
     res.json({ user: req.user });
     res.redirect("/");
   }
 );
+
+export default handler;

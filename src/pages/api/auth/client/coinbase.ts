@@ -1,9 +1,16 @@
 import passport from "server/auth/passport";
+import { authOptions } from "server/auth/session";
+import { nextConnectOptions } from "server/auth/nextConnect";
 import nextConnect from "next-connect";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default nextConnect().use(passport.initialize())
-  .get(
-    passport.authenticate("coinbase", {
-      failureRedirect: "/"
-    })
-  );
+const handler = nextConnect(nextConnectOptions);
+
+handler.use(...authOptions);
+
+handler.get(passport.authenticate("coinbase"), (req: NextApiRequest & { user: any}, res: NextApiResponse) => {
+  console.log(req.user);
+  return res.status(200).json({user: req.user});
+});
+
+export default handler;

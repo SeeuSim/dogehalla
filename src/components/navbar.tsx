@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
@@ -27,7 +26,7 @@ const Logo = () => {
 }
 
 export default function NavBar(): JSX.Element {
-  const {data: session} = useSession();
+  const session = false;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -73,7 +72,7 @@ export default function NavBar(): JSX.Element {
             {/**If not logged in -> Display Log In button */}
             {!session && (
               <>
-              <Link href="/login/"
+              <Link href="/auth/login/"
                 className={`
                     hidden
                     lg:inline-block rounded-lg px-3 py-1.5 
@@ -145,7 +144,7 @@ export default function NavBar(): JSX.Element {
               {/** Login Button */}
               <div className="py-6">
                 <Link
-                  href="/login/"
+                  href="/auth/login/"
                   onClick={() => setMobileMenuOpen(false)}
                   className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-6 text-gray-900 hover:bg-gray-400/10 dark:text-white"
                 >

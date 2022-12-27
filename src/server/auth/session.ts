@@ -6,52 +6,62 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "server/db/client";
 import { env } from "env/server.mjs";
 
-class PostgresStore {
-  async set(sid: string, sess: SessionData) {
-    try {
-      const session = await prisma.session.create({
-        data: {
-          sessionToken: sid,
-          expires: sess.cookie.expires?.toDateString() || (Date.now() + 24 * 3600).toString(),
-          data: JSON.stringify(sess.cookie)
-        }
-      });
-    } catch (err) {
-      /* No-Op */
-    }
-  }
+import passport from "./passport";
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 
-  async get(sid: string) {
-    try {
-      const session = await prisma.session.findUnique({
-        where: {
-          sessionToken: sid
-        }
-      });
-      if (session && session.data) {
-        return JSON.parse(session.data) as SessionData;
-      }
-    } catch (err) {
 
-    }
-    return null;
-  }
+// class PostgresStore {
+//   async set(sid: string, sess: SessionData) {
+//     try {
+//       console.log(sid, sess)
+//       const session = await prisma.session.create({
+//         data: {
+//           sessionToken: sid,
+//           expires: sess.cookie.expires?.toDateString() || (Date.now() + 24 * 3600).toString(),
+//           data: JSON.stringify(sess.cookie)
+//         }
+//       });
+//     } catch (err) {
+//       /* No-Op */
+//       return;
+//     }
+//   }
 
-  async destroy(sid: string) {
-    try {
-      const session = await prisma.session.delete({
-        where: {
-          sessionToken: sid
-        }
-      });
-    } catch (err) {
-      /* No-Op */
-    }
-  }
-}
+//   async get(sid: string) {
+//     try {
+//       const session = await prisma.session.findUnique({
+//         where: {
+//           sessionToken: sid
+//         }
+//       });
+//       if (session && session.data) {
+//         return JSON.parse(session.data) as SessionData;
+//       }
+//     } catch (err) {
+
+//     }
+//     return null;
+//   }
+
+//   async destroy(sid: string) {
+//     try {
+//       const session = await prisma.session.delete({
+//         where: {
+//           sessionToken: sid
+//         }
+//       });
+//     } catch (err) {
+//       /* No-Op */
+//     }
+//   }
+// }
 
 export const getSession = nextSession({
-  store: promisifyStore(new PostgresStore()),
+  store: new PrismaSessionStore(prisma, {
+    checkPeriod: 2 * 60 * 1000,  //ms
+    dbRecordIdIsSessionId: undefined,
+    dbRecordIdFunction: undefined,
+  }),
   cookie: {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
@@ -66,3 +76,5 @@ export default async function session(request: NextApiRequest, response: NextApi
   await getSession(request, response);
   next();
 }
+
+export const authOptions = [session, passport.initialize(), passport.session()];
