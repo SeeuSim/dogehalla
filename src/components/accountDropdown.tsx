@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { useRouter } from "next/router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Popover, Transition } from "@headlessui/react";
 import { UserIcon } from "@heroicons/react/24/outline";
@@ -24,6 +24,18 @@ const solutions = [
 export default function Example() {
   const router = useRouter();
   const queryclient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (key) => {
+      return fetch("/api/auth/logout", {method: "DELETE"});
+    },
+    onSuccess: () => {
+      queryclient.invalidateQueries({ queryKey: ['currentUser']});
+      router.reload();
+    }
+  })
+
+  const signout = () => mutation.mutate();
 
   return (
     <div className="flex">
@@ -90,13 +102,7 @@ export default function Example() {
                   </div>
                   <div className=" dark:bg-gray-700 p-1">
                     <button
-                      onClick={() => {
-                        fetch("/api/auth/logout", {
-                          method: "DELETE"
-                        });
-                        queryclient.refetchQueries({queryKey: ['currentUser']});
-                        router.push("/");
-                      }}
+                      onClick={signout}
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                       >
                       <span className="flex items-center">
