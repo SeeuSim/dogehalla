@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "server/db/client";
+import { Mailer } from 'nodemailer-react'
 
 type SignUpData = {
   firstName: string,
@@ -38,6 +39,31 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (canRegister.status) {
       //Create User
 
+      //Send Email
+      let nodemailer = require('nodemailer')
+      const transporter = nodemailer.createTransport({
+        port: 465,
+        host: "smtp.gmail.com",
+        auth: {
+          user: 'cryptodogettm@gmail.com',
+          pass: 'CryptoDoge123!',
+        },
+        secure: true,
+      })
+      const mailData = {
+        from: 'cryptodogettm@gmail.com',
+        to: 'your email',
+        subject: `Complete your signup at Dogehalla! ${req.body.name}`,
+        text: req.body.message + " | Sent from: " + req.body.email,
+        html: `<div>${req.body.message}</div><p>Sent from:
+        ${req.body.email}</p>`
+      }
+      transporter.sendMail(mailData, function (err: any, info: any) {
+        if(err)
+          console.log(err)
+        else
+          console.log(info)
+      })
       //Send Response
       res.status(200).json({message: "Registration successful"});
     } else if (canRegister.user){
