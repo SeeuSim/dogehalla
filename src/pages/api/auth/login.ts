@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import passport from "server/auth/passport";
-import session from "server/auth/session";
 import nextConnect from "next-connect";
 
 import { nextConnectOptions } from "server/auth/nextConnect";
@@ -17,8 +16,7 @@ handler.post(
     {
       successReturnToOrRedirect: '/',
       failureRedirect: '/auth/login',
-      failureMessage: true,
-      failWithError: true
+      failureMessage: true
     }
   ), 
   (req: NextApiRequest & { user: any}, res: NextApiResponse) => {

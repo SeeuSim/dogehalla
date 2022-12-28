@@ -234,28 +234,28 @@ passport.use(
 
 //Local Strategy
 passport.use(new LocalStrategy(
-  async (username: string, password: string, callback: (error: any, user?: any, options?: { message: string }) => void) => {
+  { usernameField: 'email', passReqToCallback: true },
+  async (req, email: string, password: string, callback: (error: any, user?: any, options?: { message: string }) => void) => {
     try {
       //On server, interface directly with prisma -> TRPC not allowed
       const user = await prisma.user.findUnique({
         where: {
-          email: username
+          email: email
         }
       });
-      if (!user) {
+      if (!user || !user.password) {
         // Prompt Signup via form
         callback(null, false, { message: "Please signup via our form" });
       } else {
-        const hashedPwd = await argon2.hash(password);
-        if (hashedPwd != user.password) {
+        if (!await argon2.verify(user.password, password)) {
           callback(null, false, { message: "Password provided did not match"});
         } else {
+          console.log("pass")
           callback(null, user, { message: "User logged in successfully"});
         }
       }
     } catch (err) {
       //Error logging should be turned off in production
-      //return fail;
       callback(err, false, { message: err as string });
     }
   }
