@@ -1,9 +1,22 @@
 import { type inferAsyncReturnType } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
+
 import { prisma } from "../db/client";
 
+import { getSession } from "server/auth/session";
+
+export type Session = {
+  passport: {
+    user: {
+      name: string,
+      id: string,
+      image: string
+    }
+  }
+}
+
 type CreateContextOptions = {
-  session: null;
+  session: Session | null;
 };
 
 /** Use this helper for:
@@ -25,9 +38,8 @@ export const createContextInner = async (opts: CreateContextOptions) => {
 export const createContext = async (opts: CreateNextContextOptions) => {
   const { req, res } = opts;
 
-  // Get the session from the server using the unstable_getServerSession wrapper function
-  const session = null;
-
+  const session = await getSession(req, res);
+  
   return await createContextInner({
     session
   });

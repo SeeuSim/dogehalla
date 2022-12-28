@@ -67,7 +67,6 @@ export default function SignUp() {
       body: JSON.stringify(data)
     });
     const rs = await res.json();
-    console.log(rs);
     // //Successful -> Redirect to Email validation with magic link
     // if (res.status === 200) {
     //   router.push(res.url);

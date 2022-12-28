@@ -14,8 +14,6 @@ import type { User } from "@prisma/client";
 import { mailer } from "server/common/mailer";
 import { BASEURL } from "utils/base";
 
-var MagicLinkStrategy = require("passport-magic-link").Strategy;
-
 type GoogleOAuthSlug = {
   access_token: string,
   expires_in: number,
@@ -52,18 +50,17 @@ type CoinbaseProfile = {
 
 passport.serializeUser((user, done) => {
   const dbUser = user as unknown as User;
-  const out = { name: dbUser.name, email: dbUser.email, image: dbUser.image };
-  console.log(out);
+  const out = { name: dbUser.name, id: dbUser.id, image: dbUser.image };
   done(null, out);
 });
 
-passport.deserializeUser(async (req: any, id: {name: string, email: string, image: string}, done: any) => {
+passport.deserializeUser(async (req: any, user: {name: string, id: string, image: string}, done: any) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        email: id.email
-      }
-    });
+    // const user = await prisma.user.findUnique({
+    //   where: {
+    //     email: id.email
+    //   }
+    // });
     done(null, user);
   } catch (err) {
     done(err);
@@ -81,6 +78,8 @@ passport.use(
       scope: ["email", "profile"],
       passReqToCallback: true,
     },
+
+    //Google OAuth Creation and Link or Login Routine
     async (request: any, accessToken: any, refreshToken: any, slug: GoogleOAuthSlug, profile: GoogleOAuthProfile, done: VerifyCallback) => {
       try {
         const authedUser = await prisma.oAuthProfile.findUnique({
@@ -131,8 +130,6 @@ passport.use(
             });
             done(null, user, { message: "User created successfully"});
           } else { //User exists, prompt to login and link
-            //Check for existing profile
-
             //Check if user.link -> create oauth profile and link
 
             //Else
@@ -146,7 +143,6 @@ passport.use(
           });
           done(null, user, { message: "User logged in successfully" });
         }
-        // //create session with next-session and return session, user -> Session to be created in api/auth/callback/google.ts
 
       } catch (err) {
         console.error(err);
@@ -166,6 +162,8 @@ passport.use(
     scope: ["wallet:user:email", "wallet:user:read"],
     
   },
+
+  //Coinbase OAuth Create and Link OR Login Routine
   async (accessToken: any, refreshToken: any, profile: CoinbaseProfile, done: (error: any, user?: any, info?: any) => void) => {
     //Flow is roughly the same as Google, just that this provides created_at and does not provide expires_at
     try {
@@ -235,6 +233,8 @@ passport.use(
 //Local Strategy
 passport.use(new LocalStrategy(
   { usernameField: 'email', passReqToCallback: true },
+
+  //User Login Routine
   async (req, email: string, password: string, callback: (error: any, user?: any, options?: { message: string }) => void) => {
     try {
       //On server, interface directly with prisma -> TRPC not allowed
@@ -250,7 +250,6 @@ passport.use(new LocalStrategy(
         if (!await argon2.verify(user.password, password)) {
           callback(null, false, { message: "Password provided did not match"});
         } else {
-          console.log("pass")
           callback(null, user, { message: "User logged in successfully"});
         }
       }
