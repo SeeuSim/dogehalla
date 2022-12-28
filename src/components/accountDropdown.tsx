@@ -64,7 +64,7 @@ export default function Example() {
             >
               <Popover.Panel className="absolute left-1/2 z-10 mt-3 w-screen max-w-xs -translate-x-1/2 transform px-4 sm:px-0 lg:max-w-1">
                 <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-                <div className=" dark:bg-gray-700 p-1">
+                  <div className=" dark:bg-gray-700 p-1">
                     <a
                       href="/"
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
@@ -76,7 +76,7 @@ export default function Example() {
                       </span>
                     </a>
                   </div>
-                <div className=" dark:bg-gray-700 p-1">
+                  <div className=" dark:bg-gray-700 p-1">
                     <a
                       href="##"
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"

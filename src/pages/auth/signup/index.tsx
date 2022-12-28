@@ -11,6 +11,8 @@ import { AlertInput } from "components/forms/alert";
 import OAuthButton from "components/buttons/OAuthButton";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
+const BASEURL = `${process.env.NODE_ENV === "production" ? process.env.VERCEL_URL : "http://localhost:3000"}`;
+
 /**
  * Form Styling
  */
@@ -59,18 +61,20 @@ export default function SignUp() {
 
   //Submission Logic
   async function onSubmit (data: any) {
-    const res = await fetch("/api/auth/signup", {
+    console.log("requesting")
+    const res = await fetch(`${BASEURL}/api/auth/signup`, {
       method: "POST",
       body: JSON.stringify(data)
     });
-
-    //Successful -> Redirect to Email validation with magic link
-    if (res.status === 200) {
-      //router.push("/")
-    } else {
-      //Failure -> Redirect to Signup Page with error
-      console.log("Boo")
-    }
+    const rs = await res.json();
+    console.log(rs);
+    // //Successful -> Redirect to Email validation with magic link
+    // if (res.status === 200) {
+    //   router.push(res.url);
+    // } else {
+    //   //Failure -> Redirect to Signup Page with error
+    //   console.log("Boo")
+    // }
   };
 
   return (
@@ -103,7 +107,7 @@ export default function SignUp() {
             <hr className="mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 dark:bg-gray-700"/>
           </div>
 
-          <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-4 md:space-y-6" action="/api/auth/signup" method="post">
             <div className="columns-2 inline-flex space-x-4">
               <div>
                 <label htmlFor="firstName" className={labelStyle}>First Name:</label>
@@ -123,6 +127,7 @@ export default function SignUp() {
                       id="lastName" 
                       className={fieldStyle}
                       placeholder="Smith"
+                      required={true}
                       {...register("lastName")}/>
                 <AlertInput>{errors?.lastName?.message}</AlertInput>
               </div>
@@ -135,6 +140,7 @@ export default function SignUp() {
                     className={fieldStyle}
                     placeholder="johnSmith@acme.com"
                     autoComplete="email"
+                    required={true}
                     {...register("email")}/>
               <AlertInput>{errors?.email?.message}</AlertInput>
             </div>
@@ -146,6 +152,7 @@ export default function SignUp() {
                     className={fieldStyle + `
                       pr-8
                     `}
+                    required={true}
                     placeholder="••••••••" 
                     {...register("password")}/>
               <AlertInput>{errors?.password?.message}</AlertInput>

@@ -66,7 +66,7 @@ export default function Page() {
             </div>
 
             {/** Manual Form */}
-            <form className="space-y-4 md:space-y-6" action="#">
+            <form className="space-y-4 md:space-y-6" action="/api/auth/login" method="post">
                 <div>
                   {/** Email */}
                   <label htmlFor="email" 

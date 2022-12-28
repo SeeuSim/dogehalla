@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { hash } from "argon2";
+
 import { prisma } from "server/db/client";
-// import { Mailer } from 'nodemailer-react';
+import { BASEURL } from "utils/base";
 
 type SignUpData = {
   firstName: string,
@@ -33,41 +35,37 @@ async function validateRegForm(data: SignUpData) {
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
-    let data = await req.body;
-    data = JSON.parse(data);
+    let rawData = await req.body;
+    const data = JSON.parse(JSON.stringify(rawData));
     const canRegister = await validateRegForm(data);
     if (canRegister.status) {
+      const userProfile: SignUpData = data;
+      const hashedPwd = await hash(userProfile.password);
+
       //Create User
+      const user = await prisma.user.create({
+        data: {
+          email: userProfile.email,
+          name: `${userProfile.firstName} ${userProfile.lastName}`,
+          password: hashedPwd
+        }
+      });
 
-      //Send Email -> Redirect user to page "Click on link in email to complete registration - client side signup form"
-      /*
-      let nodemailer = require("nodemailer-react");
-      const transporter = nodemailer.createTransport({
-        port: 465,
-        host: "smtp.gmail.com",
-        auth: {
-          user: 'cryptodogettm@gmail.com',
-          pass: 'CryptoDoge123!',
+      //Redirect and generate magic link
+      const genLink = await fetch(`${BASEURL}/api/auth/signup/token`, {
+        method: "POST", 
+        headers: {
+          'Content-Type': 'application/json'
         },
-        secure: true,
-      })
-      const mailData = {
-        from: 'cryptodogettm@gmail.com',
-        to: 'your email',
-        subject: `Complete your signup at Dogehalla! ${req.body.name}`,
-        text: req.body.message + " | Sent from: " + req.body.email,
-        html: `<div>${req.body.message}</div><p>Sent from:
-        ${req.body.email}</p>`
-      }
-      transporter.sendMail(mailData, function (err: any, info: any) {
-        if(err)
-          console.log(err)
-        else
-          console.log(info)
-      }) */
+        body: JSON.stringify({
+          destination: user.email,
+          name: user.name
+        })
+      });
 
-      //Send Response
-      res.status(200).json({message: "Registration successful"});
+      const rs = await genLink.text();
+      //Redirect base off of rs
+      return res.status(200).json({rs});
     } else if (canRegister.user){
       //User Exists
       res.status(409).json({message: `User with email ${canRegister.user} already exists`});
@@ -75,7 +73,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(405).json({message: "Email was not supplied"})
     }
   } else {
-    console.log("from Backend: fail 3")
     res.status(405).json({message: "Bad Request"});
   }
 }

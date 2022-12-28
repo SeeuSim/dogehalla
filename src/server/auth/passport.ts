@@ -1,7 +1,8 @@
 import passport from "passport";
 import { Strategy as CoinbaseStrategy } from "passport-coinbase";
-import { Strategy as GoogleStrategy } from "passport-google-oauth2";
-import { VerifyCallback } from "passport-google-oauth2";
+import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
+import MagicLoginStrategy from "passport-magic-login";
+
 import { Strategy as LocalStrategy } from "passport-local";
 
 import argon2 from "argon2";
@@ -10,6 +11,10 @@ import { prisma } from "server/db/client";
 import { env } from "env/server.mjs";
 
 import type { User } from "@prisma/client";
+import { mailer } from "server/common/mailer";
+import { BASEURL } from "utils/base";
+
+var MagicLinkStrategy = require("passport-magic-link").Strategy;
 
 type GoogleOAuthSlug = {
   access_token: string,
@@ -237,7 +242,6 @@ passport.use(new LocalStrategy(
           email: username
         }
       });
-      
       if (!user) {
         // Prompt Signup via form
         callback(null, false, { message: "Please signup via our form" });
@@ -255,8 +259,45 @@ passport.use(new LocalStrategy(
       callback(err, false, { message: err as string });
     }
   }
-))
+));
 
+//Magic Link
+export const magicLogin = new MagicLoginStrategy({
+  secret: env.JWT_SECRET,
 
+  callbackUrl: "/api/auth/signup/verify",
+
+  sendMagicLink: async (destination, href) => {
+    await mailer.send("verify", {
+      name: destination,
+      link: `${BASEURL}${href}`
+    }, {
+      to: destination
+    })
+    },
+
+  verify: async (payload, callback) => {
+    try {
+      const user = await prisma.user.update({
+        where: {
+          email: payload.destination
+        },
+        data: {
+          emailVerified: new Date(Date.now())
+        }, 
+        select: {
+          name: true,
+          email: true,
+          image: true
+        }
+      });
+      callback(null, user);
+    } catch (err: any) {
+      callback(err);
+    }
+  },
+});
+
+passport.use(magicLogin);
 
 export default passport;
