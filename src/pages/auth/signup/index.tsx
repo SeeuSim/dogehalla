@@ -6,12 +6,11 @@ import { useRouter } from "next/router";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { BASEURL } from "utils/base";
 
 import { AlertInput } from "components/forms/alert";
 import OAuthButton from "components/buttons/OAuthButton";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-
-const BASEURL = `${process.env.NODE_ENV === "production" ? process.env.VERCEL_URL : "http://localhost:3000"}`;
 
 /**
  * Form Styling
@@ -30,16 +29,16 @@ const fieldStyle = `
 `;
 
 /**
- * Form Validation
- */
+   * Form Validation
+   */
 const userSchema = z
   .object({
     firstName: z.string().max(36),
     lastName: z.string().min(1, { message: "The last name is required." }).max(36),
-    email: z.string().min(1, {message: "Email address is required"}).max(36),
+    email: z.string().email().min(1, {message: "Email address is required"}).max(36),
     password: z.string().min(8, {message: "Password must be at least 8 characters in length"})
       .max(60, {message: "Password can only be at most 60 characters in length"}),
-  });
+  })
 
 type FormData = z.infer<typeof userSchema>;
 
@@ -54,26 +53,25 @@ export default function SignUp() {
   const {
     register, handleSubmit, formState: {errors},
   } = useForm<FormData>({
-    resolver: zodResolver(userSchema)
+    resolver: zodResolver(userSchema),
   });
 
   const router = useRouter();
 
   //Submission Logic
   async function onSubmit (data: any) {
-    console.log("requesting")
     const res = await fetch(`${BASEURL}/api/auth/signup`, {
       method: "POST",
       body: JSON.stringify(data)
     });
-    const rs = await res.json();
-    // //Successful -> Redirect to Email validation with magic link
-    // if (res.status === 200) {
-    //   router.push(res.url);
-    // } else {
-    //   //Failure -> Redirect to Signup Page with error
-    //   console.log("Boo")
-    // }
+    
+    if (res.ok) {
+      //Prevent Back navigation
+      return router.replace("/message/signupSuccess");
+    } 
+    //Toast the message
+    const rs = await res.text();
+    console.log(rs); //<<Replace this with toasts.
   };
 
   return (
@@ -81,9 +79,6 @@ export default function SignUp() {
       <Head>
         <title>Sign Up | DogeTTM</title>
       </Head>
-      {/* {Boolean(Object.keys(errors)?.length) && (
-        <Alert type="error">There are errors in the form.</Alert>
-      )} */}
 
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
         <div className="space-y-4 p-4 sm:p-6">
@@ -106,7 +101,7 @@ export default function SignUp() {
             <hr className="mx-auto w-36 h-0.5 bg-gray-100 rounded border-0 dark:bg-gray-700"/>
           </div>
 
-          <form className="space-y-4 md:space-y-6" action="/api/auth/signup" method="post">
+          <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="columns-2 inline-flex space-x-4">
               <div>
                 <label htmlFor="firstName" className={labelStyle}>First Name:</label>
@@ -126,7 +121,7 @@ export default function SignUp() {
                       id="lastName" 
                       className={fieldStyle}
                       placeholder="Smith"
-                      required={true}
+                      // required={true}
                       {...register("lastName")}/>
                 <AlertInput>{errors?.lastName?.message}</AlertInput>
               </div>
@@ -139,7 +134,7 @@ export default function SignUp() {
                     className={fieldStyle}
                     placeholder="johnSmith@acme.com"
                     autoComplete="email"
-                    required={true}
+                    // required={true}
                     {...register("email")}/>
               <AlertInput>{errors?.email?.message}</AlertInput>
             </div>
@@ -151,7 +146,7 @@ export default function SignUp() {
                     className={fieldStyle + `
                       pr-8
                     `}
-                    required={true}
+                    // required={true}
                     placeholder="••••••••" 
                     {...register("password")}/>
               <AlertInput>{errors?.password?.message}</AlertInput>
@@ -178,7 +173,6 @@ export default function SignUp() {
                         `}>Correct the errors in the form</button>
             
               : <button type="submit"
-                        disabled={false}
                         className={`
                           flex items-center justify-center
                           w-full 

@@ -275,7 +275,7 @@ export const magicLogin = new MagicLoginStrategy({
     }, {
       to: data.email
     })
-    },
+  },
 
   verify: async (payload, callback) => {
     try {

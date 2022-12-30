@@ -9,16 +9,13 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import AccountDropdown from './accountDropdown';
 import SearchDropDown from './searchDropdown';
 
-import type { GetServerSidePropsContext } from 'next';
-import type { SessionProps } from 'types/sessions';
-
 //TO BE CHANGED
 const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 
 const menuOptions = [
   { name: 'Home', href: '/' },
   { name: 'Analytics', href: '#' },
-  { name: 'Account', href: '/auth/login/' },
+  { name: 'Account', href: '/account' },
 ]
 
 const Logo = () => {

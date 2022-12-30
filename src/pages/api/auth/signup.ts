@@ -11,14 +11,14 @@ type SignUpData = {
   password: string,
 }
 
-async function validateRegForm(data: SignUpData) {
-  if (!data.email) {
+async function validateRegForm(emailAddr: string) {
+  if (!emailAddr) {
     return {status: false, user: null};
   }
 
   const existingUser = await prisma.user.findUnique({
     where: {
-      email: data.email
+      email: emailAddr
     }, 
     select: {
       email: true,
@@ -36,13 +36,13 @@ async function validateRegForm(data: SignUpData) {
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     let rawData = await req.body;
-    const data = JSON.parse(JSON.stringify(rawData));
-    const canRegister = await validateRegForm(data);
+    const data = JSON.parse(rawData);
+    const canRegister = await validateRegForm(data.email);
     if (canRegister.status) {
       const userProfile: SignUpData = data;
       const hashedPwd = await hash(userProfile.password);
 
-      //Create User
+      //Create User -> Avoid passing around password -> But ban from login, and autodelete if not verified after 2 days.
       const user = await prisma.user.create({
         data: {
           email: userProfile.email,
@@ -61,21 +61,25 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           destination: {
             email: user.email,
             name: user.name
-          },
-          name: user.name
+          }
         })
       });
 
       const rs = await genLink.text();
       //Redirect base off of rs
-      return res.status(200).json({rs});
+      if (genLink.ok) {
+        return res.status(200).json({rs});
+      } else {
+        return res.status(500).json({rs});
+      }
     } else if (canRegister.user){
       //User Exists
-      res.status(409).json({message: `User with email ${canRegister.user} already exists`});
+      return res.status(409).json({message: `User with ${canRegister.user} already exists. Please login with that email instead`});
     } else {
-      res.status(405).json({message: "Email was not supplied"})
+      //Will never happen, form validates requires email
+      return res.status(405).json({message: "Email was not supplied"})
     }
   } else {
-    res.status(405).json({message: "Bad Request"});
+    return res.status(405).json({message: "Internal Server Error"});
   }
 }

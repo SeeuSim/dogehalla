@@ -5,7 +5,7 @@ export function VerifyEmail ({ name, link } : { name: string, link: string}) {
       <html lang="en">
         <head>
           <meta charSet="UTF-8"/>
-          <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+          <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
           <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
           <title>Verify Email Address to Complete DogeTTM signup</title>
           <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet"/>
@@ -28,8 +28,8 @@ export function VerifyEmail ({ name, link } : { name: string, link: string}) {
                   <defs>
                       <linearGradient id="paint0_linear" x1="16.9996" y1="10.4791" x2="47.0156" y2="10.4791"
                           gradientUnits="userSpaceOnUse">
-                          <stop stop-color="#009217" />
-                          <stop offset="1" stop-color="#00FF29" />
+                          <stop stopColor="#009217" />
+                          <stop offset="1" stopColor="#00FF29" />
                       </linearGradient>
                   </defs>
                 </svg>
@@ -37,7 +37,7 @@ export function VerifyEmail ({ name, link } : { name: string, link: string}) {
               <p>To complete your account creation, let's get your email address verified:</p>
               <div className="mt-4">
                 <a href={link} className="px-2 py-2 text-blue-200 bg-blue-600 rounded">Click to Verify Email</a>
-                <p className="mt-4 text-sm">If you’re having trouble clicking the "Verify Email Address" button, copy
+                <p className="mt-4 text-sm">If you’re having trouble clicking the "Verify Email Address" link, copy
                     and
                     paste
                     the URL below
