@@ -20,7 +20,8 @@ handler.post(
     }
   ), 
   (req: NextApiRequest & { user: any}, res: NextApiResponse) => {
-    return res.json({ user: req.user });
+    res.setHeader("user", req.user);
+    return res.redirect("/");
   });
 
 export default handler;

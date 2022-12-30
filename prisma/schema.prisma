@@ -54,7 +54,7 @@ model Session {
 model User {
   id            String    @id @default(cuid())
   name          String?   @db.VarChar(255)
-  email         String?   @unique
+  email         String?   
   password      String?
   verified      Boolean?  @default(false)
   emailVerified DateTime?
@@ -64,6 +64,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   authprofiles  OAuthProfile[]
   // sessions      Session[]
+  
+  @@unique([email])
 }
 
 enum RoleEnumType {

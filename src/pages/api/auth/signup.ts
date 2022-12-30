@@ -58,7 +58,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          destination: user.email,
+          destination: {
+            email: user.email,
+            name: user.name
+          },
           name: user.name
         })
       });

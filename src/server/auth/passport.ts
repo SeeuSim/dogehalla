@@ -267,11 +267,13 @@ export const magicLogin = new MagicLoginStrategy({
   callbackUrl: "/api/auth/signup/verify",
 
   sendMagicLink: async (destination, href) => {
+    const data = JSON.parse(JSON.stringify(destination));
+
     await mailer.send("verify", {
-      name: destination,
+      name: data.name,
       link: `${BASEURL}${href}`
     }, {
-      to: destination
+      to: data.email
     })
     },
 
@@ -279,14 +281,14 @@ export const magicLogin = new MagicLoginStrategy({
     try {
       const user = await prisma.user.update({
         where: {
-          email: payload.destination
+          email: payload.destination.email
         },
         data: {
           emailVerified: new Date(Date.now())
         }, 
         select: {
           name: true,
-          email: true,
+          id: true,
           image: true
         }
       });
