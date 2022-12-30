@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { useRouter } from "next/router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { Popover, Transition } from "@headlessui/react";
 import { UserIcon } from "@heroicons/react/24/outline";
@@ -21,16 +21,14 @@ const solutions = [
   },
 ]
 
-export default function Example() {
+export default function AccountDropdown() {
   const router = useRouter();
-  const queryclient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: (key) => {
       return fetch("/api/auth/logout", {method: "DELETE"});
     },
     onSuccess: () => {
-      queryclient.invalidateQueries({ queryKey: ['currentUser']});
       router.reload();
     }
   })

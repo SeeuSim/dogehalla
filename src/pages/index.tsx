@@ -3,23 +3,19 @@ import Head from "next/head";
 
 import CollectionsDash from "./(home-components)/collectionsDash";
 
-import { type Session } from "server/trpc/context";
-import { trpc } from "utils/trpc";
+import type { SessionProps } from "types/sessions";
 
-//Experimental SSR/SSG
-// const Home: NextPage<{session: Session}> = ({ session } : { session : Session}) => {
-const Home: NextPage = () => {
-  const { data: session } = trpc.auth.getSession.useQuery(
-    undefined
-  );
-  
+const Home: NextPage<{session: SessionProps}> = ({ session } : { session : SessionProps}) => {
   return (
     <>
       <Head>
         <title>DogeTTM</title>
       </Head>
       <CollectionsDash/>
-      {JSON.stringify(session)}
+      { session &&
+      <code className= "text-white">
+        {JSON.stringify(session)}
+      </code>}
     </>
   );
 };

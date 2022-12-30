@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-import { useQuery } from '@tanstack/react-query';
-import { fetchCurrentUser } from 'server/common/sessionHook';
+import type { SessionProps } from "types/sessions";
 
 import { Dialog } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
@@ -30,9 +29,7 @@ const Logo = () => {
   );
 }
 
-export default function NavBar(): JSX.Element {
-  const { data: { user } = {}, error } = useQuery(['currentUser'], fetchCurrentUser);
-
+export default function NavBar({ session } : { session : SessionProps }): JSX.Element {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -74,8 +71,9 @@ export default function NavBar(): JSX.Element {
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-white" aria-hidden="true" />
             </button>
+
             {/**If not logged in -> Display Log In button */}
-            {user
+            {session
               ? <AccountDropdown/>
               : <Link href="/auth/login/"
                       className={`

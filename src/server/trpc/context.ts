@@ -15,6 +15,8 @@ export type Session = {
   }
 }
 
+export type SessionProps = Session["passport"]["user"] | boolean | undefined;
+
 type CreateContextOptions = {
   session: Session | null;
 };
