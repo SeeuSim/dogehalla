@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-import type { SessionProps } from "types/sessions";
+import { trpc } from 'utils/trpc';
 
 import { Dialog } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import AccountDropdown from './accountDropdown';
 import SearchDropDown from './searchDropdown';
+
+import type { GetServerSidePropsContext } from 'next';
+import type { SessionProps } from 'types/sessions';
 
 //TO BE CHANGED
 const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
@@ -29,8 +32,11 @@ const Logo = () => {
   );
 }
 
-export default function NavBar({ session } : { session : SessionProps }): JSX.Element {
+export default function NavBar(): JSX.Element {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const { data: session } = trpc.auth.getSession.useQuery(undefined);
+  
 
   return (
     <div className="px-6 pt-2 lg:px-8">
@@ -73,7 +79,7 @@ export default function NavBar({ session } : { session : SessionProps }): JSX.El
             </button>
 
             {/**If not logged in -> Display Log In button */}
-            {session
+            { session
               ? <AccountDropdown/>
               : <Link href="/auth/login/"
                       className={`

@@ -14,7 +14,6 @@ handler.post(
   passport.authenticate(
     "local",
     {
-      successReturnToOrRedirect: '/',
       failureRedirect: '/auth/login',
       failureMessage: true
     }
