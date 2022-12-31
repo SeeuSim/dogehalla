@@ -47,7 +47,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         data: {
           email: userProfile.email,
           name: `${userProfile.firstName} ${userProfile.lastName}`,
-          password: hashedPwd
+          password: hashedPwd,
+          verified: false
         }
       });
 

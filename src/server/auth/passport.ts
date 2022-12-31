@@ -1,4 +1,4 @@
-import passport from "passport";
+import passport, { use } from "passport";
 import { Strategy as CoinbaseStrategy } from "passport-coinbase";
 import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
 import MagicLoginStrategy from "passport-magic-login";
@@ -97,7 +97,9 @@ passport.use(
               email: profile.email
             },
             select: {
-              authprofiles: true
+              authprofiles: true,
+              canLink: true,
+              id: true
             }
           });
 
@@ -108,8 +110,7 @@ passport.use(
               data: {
                 name: `${profile.name.givenName} ${profile.name.familyName}`,
                 email: profile.email,
-                image: profile.picture,
-                //link: false //Signal that no OAuth is to be linked.
+                image: profile.picture
               }
             });
 
@@ -129,11 +130,35 @@ passport.use(
               }
             });
             done(null, user, { message: "User created successfully"});
-          } else { //User exists, prompt to login and link
-            //Check if user.link -> create oauth profile and link
-
-            //Else
-            done(null, false, { message: "User with this email already exists. Please login and link your oauth provider."})
+          } else { //User exists
+            if (user.canLink) {
+              const linkedUser = await prisma.user.update({
+                where: {
+                  id: user.id
+                },
+                data: {
+                  canLink: false
+                }
+              });
+              const authprofile = await prisma.oAuthProfile.create({
+                data: {
+                  userId: linkedUser.id,
+                  created_at: (Date.now() % (2 ** 32)) as number || 0,
+                  type: "",//
+                  provider: profile.provider,
+                  providerOAuthId: profile.id,
+                  refresh_token: refreshToken,
+                  access_token: accessToken,
+                  expires_at: (slug.expires_in % (2 ** 32)) as number || 0,
+                  token_type: slug.token_type,
+                  scope: slug.scope,
+                  id_token: slug.id_token,
+                }
+              });
+              done(null, linkedUser, { message: "OAuth login with Google successfully linked."});
+            } else {
+              done(null, false, { message: "User with this email already exists. Please login and link your oauth provider."})
+            }
           }
         } else {
           const user = await prisma.user.findUniqueOrThrow({
@@ -189,8 +214,7 @@ passport.use(
             data: {
               name: profile._json.name,
               email: profile._json.email,
-              image: profile._json.avatar_url,
-              //link: false //Signal that other OAuth profiles cannot be linked
+              image: profile._json.avatar_url
             }
           });
           const authprofile = await prisma.oAuthProfile.create({
@@ -204,16 +228,40 @@ passport.use(
               access_token: accessToken,
               expires_at: (new Date(profile._json.created_at).getTime() + 24 * 3600 * 7) % (2 ** 32),
               token_type: "",
-              scope: `\"wallet:user:email\", \"wallet:user:read\"`
+              scope: `wallet:user:email, wallet:user:read`
             }
           });
 
           done(null, user, { message: "User Created successfully"});
 
-        } else { //Check if can link, else error
-          //if user.link //-> Link, return user
-          //Else
-          done(null, false, { message: `User with this email address already exists. Please login to link your oauth profile.`});
+        } else { 
+          if (user.canLink) {
+            const linkedUser = await prisma.user.update({
+              where: {
+                id: user.id
+              },
+              data: {
+                canLink: false
+              }
+            });
+            const authprofile = await prisma.oAuthProfile.create({
+              data: {
+                userId: user.id,
+                created_at: new Date(profile._json.created_at).getTime() % (2 ** 32),
+                type: "",
+                provider: "coinbase",
+                providerOAuthId: profile._json.id,
+                refresh_token: refreshToken,
+                access_token: accessToken,
+                expires_at: (new Date(profile._json.created_at).getTime() + 24 * 3600 * 7) % (2 ** 32),
+                token_type: "",
+                scope: `wallet:user:email, wallet:user:read`
+              }
+            });
+            done(null, linkedUser, { message: "OAuth login with Coinbase successfully linked."});
+          } else {
+            done(null, false, { message: `User with this email address already exists. Please login to link your oauth profile.`});
+          }
         }
       } else {
         const user = await prisma.user.findUniqueOrThrow({
@@ -250,7 +298,11 @@ passport.use(new LocalStrategy(
         if (!await argon2.verify(user.password, password)) {
           callback(null, false, { message: "Password provided did not match"});
         } else {
-          callback(null, user, { message: "User logged in successfully"});
+          if (!user.verified) { //Only allow login requests for users whose emails have been verified.
+            callback(null, false, { message: "Please verify your email address before logging in" })
+          } else {
+            callback(null, user, { message: "User logged in successfully"});
+          }
         }
       }
     } catch (err) {
@@ -284,7 +336,8 @@ export const magicLogin = new MagicLoginStrategy({
           email: payload.destination.email
         },
         data: {
-          emailVerified: new Date(Date.now())
+          emailVerified: new Date(Date.now()),
+          verified: true
         }, 
         select: {
           name: true,

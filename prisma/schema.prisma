@@ -58,6 +58,7 @@ model User {
   password      String?
   verified      Boolean?  @default(false)
   emailVerified DateTime?
+  canLink       Boolean   @default(false)
   image         String?   @default("../public/user_profilepic.png")
   role          RoleEnumType? @default(user)
   createdAt     DateTime  @default(now())

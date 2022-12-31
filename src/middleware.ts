@@ -5,8 +5,6 @@ import { BASEURL } from 'utils/base';
 export async function middleware(request: NextRequest) {
   const session = request.cookies.get("sid");
 
-  console.log(session);
-
   if (session != undefined) return NextResponse.next();
 
   const response = NextResponse.redirect(`${BASEURL}/auth/login`);
