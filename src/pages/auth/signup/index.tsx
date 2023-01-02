@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -58,6 +58,10 @@ export default function SignUp() {
 
   const router = useRouter();
 
+  useEffect(() => {
+    router.prefetch("/message/signupSuccess");
+  }, []);
+
   //Submission Logic
   async function onSubmit (data: any) {
     const res = await fetch(`${BASEURL}/api/auth/signup`, {
@@ -67,7 +71,7 @@ export default function SignUp() {
     
     if (res.ok) {
       //Prevent Back navigation
-      return router.replace("/message/signupSuccess");
+      return router.push("/message/signupSuccess");
     } 
     //Toast the message
     const rs = await res.text();

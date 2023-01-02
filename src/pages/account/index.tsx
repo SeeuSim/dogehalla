@@ -13,8 +13,6 @@ const Account: NextPage<{ user: {name: string, id: string, image: string}}> = ({
   }
 
   const data = JSON.stringify(user);
-  console.log(data);
-  
   return (
     <>
       <Head>
@@ -30,7 +28,7 @@ export async function getServerSideProps({ req, res }: {req: NextApiRequest & {u
   const session = await getSession(req, res);
 
   if (session?.passport?.user) {
-    const userProp = await session.passport.user;
+    const userProp = session.passport.user;
     
     return {
       props: {
