@@ -3,7 +3,7 @@
  * 
  * TODO: Add Doge Logo Header
  */
-const VERIFYEMAILTEMPLATE = `
+const VERIFYEMAILTEMPLATE = (name: string, link: string) => `
 <!DOCTYPE html>
 <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
@@ -73,10 +73,10 @@ const VERIFYEMAILTEMPLATE = `
                   </tr>
                   <tr>
                     <td class="sm-px-6" style="background-color: #fff; padding: 8px 48px; text-align: left">
-                      <p style="margin: 0 0 32px; font-size: 18px; font-weight: 600; color: #374151">Hey {{{ name }}},</p>
+                      <p style="margin: 0 0 32px; font-size: 18px; font-weight: 600; color: #374151">Hey ${name},</p>
                       <p style="font-size: 16px; color: #374151">We're thrilled to welcome you to DogeTTM. <br> <br>To get started, confirm your email address:</p>
                       <div class="sm-h-8" style="line-height: 16px">&zwnj;</div>
-                      <a href="{{ link }}" class="hover-bg-blue-600" style="text-decoration: none; display: inline-block; border-radius: 4px; background-color: #3b82f6; padding: 20px 24px; font-size: 14px; font-weight: 600; text-transform: uppercase; line-height: 1; color: #fff">
+                      <a href="${link}" class="hover-bg-blue-600" style="text-decoration: none; display: inline-block; border-radius: 4px; background-color: #3b82f6; padding: 20px 24px; font-size: 14px; font-weight: 600; text-transform: uppercase; line-height: 1; color: #fff">
                         <!--[if mso]><i style="letter-spacing: 24px; mso-font-width: -100%; mso-text-raise: 26pt;">&nbsp;</i><![endif]-->
                         <span style="mso-text-raise: 13pt;">Confirm your email &rarr;</span>
                         <!--[if mso]><i style="letter-spacing: 24px; mso-font-width: -100%;">&nbsp;</i><![endif]-->
@@ -115,8 +115,7 @@ export function VerifyEmail ({ name, link } : { name: string, link: string}) {
   return {
     subject: "Verify Email Address for DogeTTM",
     body: (
-      <div dangerouslySetInnerHTML={ { __html: VERIFYEMAILTEMPLATE.replace("{{{ name }}}", name).replace("{{ link }}", link) } }/>
+      <div dangerouslySetInnerHTML={ { __html: VERIFYEMAILTEMPLATE(name, link) } }/>
     )
-    
   };
 }

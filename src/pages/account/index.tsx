@@ -1,25 +1,23 @@
 import { NextApiRequest, NextApiResponse, NextPage } from "next";
 import Head from "next/head";
-import Router from "next/router";
 import { getSession } from "server/auth/session";
+import AccountDash from "./(account-components)/accountDash";
 
 
 /**
  * Due to Middleware, this page will always be authenticated. Can proceed to fetch data
  */
 const Account: NextPage<{ user: {name: string, id: string, image: string}}> = ({ user} : { user: {name: string, id: string, image: string}}) => {
-  if (user === null) {
-    Router.replace("/auth/login");
-  }
-
   const data = JSON.stringify(user);
   return (
     <>
       <Head>
+        <title>Account | DogeTTM</title>
       </Head>
-      <div className="text-gray-700 dark:text-slate-200">
-        {data}
+      <div className="flex flex-col items-center px-2">
+        <AccountDash/>
       </div>
+      {/* <code className="flex-wrap text-gray-900 dark:text-slate-100">{data}</code> */}
     </>
     );
 }
@@ -37,8 +35,9 @@ export async function getServerSideProps({ req, res }: {req: NextApiRequest & {u
     }
   }
 
+  //Never called, `middleware.ts` blocks navigation here if the session cookie does not exist.
   return {
-    props: null
+    redirect: { destination: "/auth/login", permanent: true }
   };
 }
 
