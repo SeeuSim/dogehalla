@@ -1,8 +1,12 @@
 import { NextPage } from "next";
+import Head from "next/head";
 
 const SignupSuccess: NextPage = () => {
   return (
     <>
+      <Head>
+        <title>Signup Successful | DogeTTM</title>
+      </Head>
       <div>
         <p className="text-gray-800 dark:text-slate-200">
           Congratulations! Click on the link in your provided email address to complete your account activation. <br/> 

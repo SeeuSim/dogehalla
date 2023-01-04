@@ -6,11 +6,12 @@ import { useRouter } from "next/router";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 import { BASEURL } from "utils/base";
 
 import { AlertInput } from "components/forms/alert";
 import OAuthButton from "components/buttons/OAuthButton";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { CogIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 /**
  * Form Styling
@@ -38,7 +39,12 @@ const userSchema = z
     email: z.string().email().min(1, {message: "Email address is required"}).max(36),
     password: z.string().min(8, {message: "Password must be at least 8 characters in length"})
       .max(60, {message: "Password can only be at most 60 characters in length"}),
+    confirmPassword: z.string(),
   })
+  .refine((data) => data.password === data.confirmPassword, { 
+    path: ["confirmPassword"],
+    message: "The passwords do not match" 
+  });
 
 type FormData = z.infer<typeof userSchema>;
 
@@ -46,8 +52,14 @@ type FormData = z.infer<typeof userSchema>;
  * Page Component
  */
 export default function SignUp() {
+  //Show Loading UI
+  const [submitting, setSubmitting] = useState(false);
+
   //Hide Password element
   const [showPassword, setShowPassword] = useState(false);
+
+  //Hide ConfirmPassword element
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   //React Form Hooks
   const {
@@ -64,11 +76,12 @@ export default function SignUp() {
 
   //Submission Logic
   async function onSubmit (data: any) {
+    setSubmitting(true);
     const res = await fetch(`${BASEURL}/api/auth/signup`, {
       method: "POST",
       body: JSON.stringify(data)
     });
-    
+    setSubmitting(false);
     if (res.ok) {
       //Prevent Back navigation
       return router.replace("/message/signupSuccess");
@@ -161,7 +174,45 @@ export default function SignUp() {
                   : <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>}
               </button>
             </div>
-            { Boolean(Object.keys(errors)?.length)
+
+            <div className="relative">
+              <label htmlFor="confirmPassword" className={labelStyle}>Confirm Password:</label>
+              <input type={showConfirmPassword? "text": "password"} 
+                    id="password"
+                    className={fieldStyle + `
+                      pr-8
+                    `}
+                    // required={true}
+                    placeholder="••••••••" 
+                    {...register("confirmPassword")}/>
+              <AlertInput>{errors?.confirmPassword?.message}</AlertInput>
+              <button className={`absolute -translate-y-8 right-2`}
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                {showConfirmPassword
+                  ? <EyeSlashIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>
+                  : <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>}
+              </button>
+            </div>
+            
+            {/* Loading UI | Errors UI | Normal UI */}
+            { submitting
+              ? <button
+                  disabled={true}
+                  className={`
+                    inline-flex items-center justify-center
+                    w-full space-x-2
+                    font-medium rounded-lg 
+                    text-sm px-5 py-2.5 text-center
+                    bg-slate-300 dark:bg-slate-800
+                    hover:bg-slate-500 dark:hover:bg-slate-600
+                    text-slate-900 dark:text-slate-200 
+                  `}
+                >
+                  <CogIcon className="h-6 w-6 animate-spin"/>
+                  <p>Loading</p>
+                </button>
+
+              : Boolean(Object.keys(errors)?.length)
               ? <button type="submit"
                         disabled={true}
                         className={`
@@ -186,7 +237,6 @@ export default function SignUp() {
                           focus:ring-blue-300 
                           font-medium rounded-lg 
                           text-sm px-5 py-2.5 text-center 
-                          dark:bg-blue-600 dark:hover:bg-blue-700 
                           dark:focus:ring-blue-800
                         `}>Register Your Account</button>
             }
