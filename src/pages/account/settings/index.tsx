@@ -1,34 +1,37 @@
 import { NextApiRequest, NextApiResponse, NextPage } from "next";
 import Head from "next/head";
-import SettingsDash from "./(settings-components)/accountSettingsDash";
+import SettingsDash from "./(settings-components)/settingsDash";
+
+import type { AuthedSessionProps } from "types/sessions";
 
 //getServerSideProps only
 import { getSession } from "server/auth/session";
 import { prisma } from "server/db/client";
-import { OAuthProfile } from "@prisma/client";
+
+export type OAuthProfileProps = {
+  created_at: string
+  id: string,
+  provider: string,
+};
+
 
 
 /**
  * Due to Middleware, this page will always be authenticated. Can proceed to fetch data
  */
 const AccountSettings: NextPage<{ 
-  user: {
-    name: string, 
-    id: string, 
-    image: string
-  },
-  oauths: OAuthProfile[]
-}> = ({ user, oauths } : { user: {name: string, id: string, image: string}, oauths: OAuthProfile[] }) => {
-  const data = JSON.stringify(user);
+  user: AuthedSessionProps,
+  oauths: OAuthProfileProps[]
+}> = ({ user, oauths }) => {
+  
   return (
     <>
       <Head>
         <title>Account Settings | DogeTTM</title>
       </Head>
       <div className="flex flex-col items-center px-2">
-        <SettingsDash oauths={oauths}/>
+        <SettingsDash oauths={oauths} user={user}/>
       </div>
-      {/* <code className="flex-wrap text-gray-900 dark:text-slate-100">{data}</code> */}
     </>
     );
 }
@@ -45,14 +48,20 @@ export async function getServerSideProps({ req, res }: {req: NextApiRequest & {u
       select: {
         id: true,
         provider: true,
-
+        created_at: true,
       }
     })
 
     return {
       props: {
         user: userProp,
-        oauths: authProfiles
+        oauths: authProfiles.map((pf) => {
+          return {
+            id: pf.id,
+            provider: pf.provider,
+            created_at: pf.created_at.toISOString()
+          }
+        })
       }
     }
   }

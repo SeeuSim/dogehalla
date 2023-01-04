@@ -71,7 +71,7 @@ export default function SignUp() {
     
     if (res.ok) {
       //Prevent Back navigation
-      return router.push("/message/signupSuccess");
+      return router.replace("/message/signupSuccess");
     } 
     //Toast the message
     const rs = await res.text();

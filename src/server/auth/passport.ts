@@ -117,7 +117,6 @@ passport.use(
             const authprofile = await prisma.oAuthProfile.create({
               data: {
                 userId: user.id,
-                created_at: (Date.now() % (2 ** 32)) as number || 0,
                 type: "",//
                 provider: profile.provider,
                 providerOAuthId: profile.id,
@@ -132,6 +131,7 @@ passport.use(
             done(null, user, { message: "User created successfully"});
           } else { //User exists
             if (user.canLink) {
+              console.log("/////USER CAN LINK")
               //Check if existing profile with Google is linked to the user
               const googleProfileExists = user.authprofiles.filter(e => e.provider === "google").length > 0;
 
@@ -148,7 +148,6 @@ passport.use(
                 const authprofile = await prisma.oAuthProfile.create({
                   data: {
                     userId: linkedUser.id,
-                    created_at: (Date.now() % (2 ** 32)) as number || 0,
                     type: "",//
                     provider: profile.provider,
                     providerOAuthId: profile.id,
@@ -233,7 +232,7 @@ passport.use(
           const authprofile = await prisma.oAuthProfile.create({
             data: {
               userId: user.id,
-              created_at: new Date(profile._json.created_at).getTime() % (2 ** 32),
+              created_at: new Date(profile._json.created_at),
               type: "",
               provider: "coinbase",
               providerOAuthId: profile._json.id,
@@ -264,7 +263,7 @@ passport.use(
               const authprofile = await prisma.oAuthProfile.create({
                 data: {
                   userId: user.id,
-                  created_at: new Date(profile._json.created_at).getTime() % (2 ** 32),
+                  created_at: new Date(profile._json.created_at),
                   type: "",
                   provider: "coinbase",
                   providerOAuthId: profile._json.id,

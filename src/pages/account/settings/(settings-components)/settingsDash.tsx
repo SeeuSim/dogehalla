@@ -3,10 +3,11 @@ import { type Dispatch, type SetStateAction, useState } from "react";
 import { Listbox } from "@headlessui/react";
 import { ChevronDownIcon, ShieldCheckIcon, WalletIcon } from "@heroicons/react/24/outline";
 
-import type { OAuthProfile } from "@prisma/client";
+import type { OAuthProfileProps } from "..";
+import type { AuthedSessionProps } from "types/sessions";
 
-import Pane from "./pane";
 import OAuthSettingsModal from "./oAuthSettingsModal";
+import Pane from "./pane";
 
 const SettingsNav: React.FC<{
   label: string,
@@ -18,6 +19,7 @@ const SettingsNav: React.FC<{
   return (
     <li className="mr-2" key={props.index}>
       <button 
+          key={props.index}
           className={`
             inline-flex p-4 rounded-t-lg border-b-2
             ${props.active
@@ -37,26 +39,54 @@ const SettingsNav: React.FC<{
   );
 };
 
+const OAuthProfileManager: React.FC<OAuthProfileProps> = (props) => {
+
+  const { created_at, provider, id } = props;
+
+  const deleteProfileCallback = () => {
+    
+  }
+
+  return (
+    <div className="inline-flex space-x-2">
+      <h3 className="dark:text-slate-100">{provider.charAt(0).toUpperCase() + provider.substring(1)}</h3>
+      <p className="dark:text-slate-200">Created on {created_at}</p>
+    </div>
+  );
+}
+
 const OAuthManager: React.FC<{
-  oauths: OAuthProfile[]
+  oauths: Array<OAuthProfileProps>,
 }> = (props) => {
 
   return (
-    <div>
+    <div className="mt-2 border-[0.5px] dark:border-slate-500 shadow-sm p-4 rounded-md">
+      <div className="border-b-[0.5px] dark:border-b-slate-500 px-1 mb-2">
+        <h1 className="text-md font-medium dark:text-slate-200">Linked OAuth Accounts:</h1>
+      </div>
+      <div className="px-1">
       {props.oauths.length === 0
-        ? <p>No accounts linked yet.</p>
-        : JSON.stringify(props.oauths)}
+        ? <p className="dark:text-slate-200 font-light">No accounts linked yet.</p>
+        : props.oauths.map((e) => 
+            <OAuthProfileManager 
+              key={e.id}  
+              provider={e.provider} 
+              created_at={e.created_at} 
+              id={e.id}
+            />)
+      }
+      </div>
     </div>
   );
 }
 
 const SettingsDash: React.FC<{
-  oauths: OAuthProfile[]
+  oauths: OAuthProfileProps[],
+  user: AuthedSessionProps
 }> = (props) => {
   const [main, setMain] = useState(0);
 
-  const [resetPasswordModal, closePasswordModal] = useState(false);
-
+  const [resetPasswordModal, openPasswordModal] = useState(false);
   const [linkOAuthModal, openOAuthModal] = useState(false);
 
     /**
@@ -96,7 +126,6 @@ const SettingsDash: React.FC<{
             },
             {
               type: "OAuth Accounts Table",
-              copytext: "Linked SSO accounts:",
               element: <OAuthManager oauths={props.oauths}/>,
             }
           ],

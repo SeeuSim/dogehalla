@@ -23,7 +23,7 @@ model Example {
 model OAuthProfile {
   id                String  @id @default(cuid())
   userId            String
-  created_at        Int?
+  created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
   type              String

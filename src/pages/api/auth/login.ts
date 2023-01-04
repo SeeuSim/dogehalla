@@ -19,6 +19,13 @@ handler.post(
     }
   ), 
   (req: NextApiRequest & { user: any}, res: NextApiResponse) => {
+    // To get hold of local IP, run this command in terminal: `ipconfig getifaddr eth0`
+    // To get hold of origin IP, user device for session management, you can log these:
+    /*
+    console.log(req.headers.origin)
+    console.log(req.headers["user-agent"])
+    */
+
     res.setHeader("user", req.user);
     return res.redirect("/");
   });

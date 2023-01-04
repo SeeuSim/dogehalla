@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, publicProcedure } from "server/trpc/trpc";
+import { router, publicProcedure, protectedProcedure } from "server/trpc/trpc";
 import { prisma } from "server/db/client";
 
 export const OAuthRouter = router({
