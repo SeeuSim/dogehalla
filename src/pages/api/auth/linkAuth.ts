@@ -9,9 +9,6 @@ import { BASEURL } from "utils/base";
 
 const handler = nextConnect(nextConnectOptions).use(...authOptions);
 
-/**
- * 
- */
 handler.post(async (req: NextApiRequest & { user: { id: string } }, res: NextApiResponse) => {
   if (!req.user) {
     return res.status(405).json({message: "Unauthorized"});
@@ -31,12 +28,12 @@ handler.post(async (req: NextApiRequest & { user: { id: string } }, res: NextApi
       data: {
         canLink: true
       }
-    })
+    });
 
-    return res.status(200).json({message:"ok"});
+    return res.status(200).json({ message: "ok" });
   } catch (err) {
-    res.setHeader("error", new String(err).valueOf())
-    return res.redirect(`${BASEURL}/account/settings`)
+    res.setHeader("error", new String(err).valueOf());
+    return res.redirect(`${BASEURL}/account/settings`);
   }
 });
 

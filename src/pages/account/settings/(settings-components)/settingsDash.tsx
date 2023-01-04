@@ -40,12 +40,11 @@ const SettingsNav: React.FC<{
 };
 
 const OAuthProfileManager: React.FC<OAuthProfileProps> = (props) => {
-
   const { created_at, provider, id } = props;
 
   const deleteProfileCallback = () => {
     
-  }
+  };
 
   return (
     <div className="inline-flex space-x-2">
