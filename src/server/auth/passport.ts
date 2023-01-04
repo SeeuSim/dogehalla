@@ -132,6 +132,9 @@ passport.use(
             done(null, user, { message: "User created successfully"});
           } else { //User exists
             if (user.canLink) {
+              //Check if existing profile with Google is linked to the user
+              const googleProfileExists = user.authprofiles.filter(e => e.provider === "google").length > 0;
+
               const linkedUser = await prisma.user.update({
                 where: {
                   id: user.id
@@ -140,22 +143,27 @@ passport.use(
                   canLink: false
                 }
               });
-              const authprofile = await prisma.oAuthProfile.create({
-                data: {
-                  userId: linkedUser.id,
-                  created_at: (Date.now() % (2 ** 32)) as number || 0,
-                  type: "",//
-                  provider: profile.provider,
-                  providerOAuthId: profile.id,
-                  refresh_token: refreshToken,
-                  access_token: accessToken,
-                  expires_at: (slug.expires_in % (2 ** 32)) as number || 0,
-                  token_type: slug.token_type,
-                  scope: slug.scope,
-                  id_token: slug.id_token,
-                }
-              });
-              done(null, linkedUser, { message: "OAuth login with Google successfully linked."});
+
+              if (!googleProfileExists) {
+                const authprofile = await prisma.oAuthProfile.create({
+                  data: {
+                    userId: linkedUser.id,
+                    created_at: (Date.now() % (2 ** 32)) as number || 0,
+                    type: "",//
+                    provider: profile.provider,
+                    providerOAuthId: profile.id,
+                    refresh_token: refreshToken,
+                    access_token: accessToken,
+                    expires_at: (slug.expires_in % (2 ** 32)) as number || 0,
+                    token_type: slug.token_type,
+                    scope: slug.scope,
+                    id_token: slug.id_token,
+                  }
+                });
+                done(null, linkedUser, { message: "OAuth login with Google successfully linked."});
+              } else {
+                done(null, false, { message: "User have logged in with another Google Account. Please login with that account instead." })
+              }
             } else {
               done(null, false, { message: "User with this email already exists. Please login and link your oauth provider."})
             }
@@ -206,6 +214,11 @@ passport.use(
         const user = await prisma.user.findUnique({
           where: {
             email: profile._json.email
+          }, 
+          select: {
+            authprofiles: true,
+            canLink: true,
+            id: true
           }
         });
 
@@ -244,21 +257,28 @@ passport.use(
                 canLink: false
               }
             });
-            const authprofile = await prisma.oAuthProfile.create({
-              data: {
-                userId: user.id,
-                created_at: new Date(profile._json.created_at).getTime() % (2 ** 32),
-                type: "",
-                provider: "coinbase",
-                providerOAuthId: profile._json.id,
-                refresh_token: refreshToken,
-                access_token: accessToken,
-                expires_at: (new Date(profile._json.created_at).getTime() + 24 * 3600 * 7) % (2 ** 32),
-                token_type: "",
-                scope: `wallet:user:email, wallet:user:read`
-              }
-            });
-            done(null, linkedUser, { message: "OAuth login with Coinbase successfully linked."});
+
+            const coinbaseProfileExists = user.authprofiles.filter(e => e.provider === "coinbase").length > 0;
+
+            if (!coinbaseProfileExists) {
+              const authprofile = await prisma.oAuthProfile.create({
+                data: {
+                  userId: user.id,
+                  created_at: new Date(profile._json.created_at).getTime() % (2 ** 32),
+                  type: "",
+                  provider: "coinbase",
+                  providerOAuthId: profile._json.id,
+                  refresh_token: refreshToken,
+                  access_token: accessToken,
+                  expires_at: (new Date(profile._json.created_at).getTime() + 24 * 3600 * 7) % (2 ** 32),
+                  token_type: "",
+                  scope: `wallet:user:email, wallet:user:read`
+                }
+              });
+              done(null, linkedUser, { message: "OAuth login with Coinbase successfully linked."});
+            } else {
+              done(null, false, { message: "User has already logged in with another Coinbase Account. Please login with that account instead." })
+            }
           } else {
             done(null, false, { message: `User with this email address already exists. Please login to link your oauth profile.`});
           }

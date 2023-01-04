@@ -1,25 +1,24 @@
-import { NextApiRequest, NextApiResponse, NextPage } from "next";
 import Head from "next/head";
-import { getSession } from "server/auth/session";
-import AccountDash from "./(account-components)/accountDash";
+import Link from "next/link";
+import { NextApiRequest, NextApiResponse } from "next";
 
+import { getSession } from "server/auth/session";
 
 /**
- * Due to Middleware, this page will always be authenticated. Can proceed to fetch data
+ * More work is needed for this UI
  */
-const Account: NextPage<{ user: {name: string, id: string, image: string}}> = ({ user} : { user: {name: string, id: string, image: string}}) => {
-  const data = JSON.stringify(user);
+export default function Account({user}: {user: {name: string, image: string, id: string}}) {
   return (
-    <>
+    <div>
       <Head>
         <title>Account | DogeTTM</title>
       </Head>
-      <div className="flex flex-col items-center px-2">
-        <AccountDash/>
-      </div>
-      {/* <code className="flex-wrap text-gray-900 dark:text-slate-100">{data}</code> */}
-    </>
-    );
+      <ul>
+      <li>My Assets</li>
+      <li><Link href="/account/settings">Settings</Link></li>
+      </ul>
+    </div>
+  )
 }
 
 export async function getServerSideProps({ req, res }: {req: NextApiRequest & {user: any}, res: NextApiResponse}) {
@@ -40,5 +39,3 @@ export async function getServerSideProps({ req, res }: {req: NextApiRequest & {u
     redirect: { destination: "/auth/login", permanent: true }
   };
 }
-
-export default Account;

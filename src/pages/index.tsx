@@ -13,11 +13,13 @@ const Home: NextPage = () => {
       <Head>
         <title>DogeTTM</title>
       </Head>
-      <CollectionsDash/>
-      { session &&
-      <code className= "text-white">
-        {JSON.stringify(session)}
-      </code>}
+      <div className="w-full">
+        <CollectionsDash/>
+        { session &&
+        <code className= "text-white">
+          {JSON.stringify(session)}
+        </code>}
+      </div>
     </>
   );
 };
