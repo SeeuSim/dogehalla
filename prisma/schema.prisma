@@ -21,10 +21,10 @@ model Example {
 }
 
 model OAuthProfile {
-  id                String  @id @default(cuid())
+  id                String      @id @default(cuid())
   userId            String
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
 
   type              String
   provider          String
@@ -52,17 +52,17 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?   @db.VarChar(255)
+  id            String          @id @default(cuid())
+  name          String?         @db.VarChar(255)
   email         String?   
   password      String?
-  verified      Boolean?  @default(false)
+  verified      Boolean?        @default(false)
   emailVerified DateTime?
-  canLink       Boolean   @default(false)
-  image         String?   @default("../public/user_profilepic.png")
-  role          RoleEnumType? @default(user)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  canLink       Boolean         @default(false)
+  image         String?         @default("../public/user_profilepic.png")
+  role          RoleEnumType?   @default(user)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   authprofiles  OAuthProfile[]
   // sessions      Session[]
   

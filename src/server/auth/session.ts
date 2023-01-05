@@ -6,7 +6,6 @@ import { env } from "env/server.mjs";
 
 import passport from "./passport";
 
-
 // class PostgresStore {
 //   async set(sid: string, sess: SessionData) {
 //     try {
@@ -58,11 +57,11 @@ export const getSession = nextSession({
   cookie: {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    maxAge: 2 * 7 * 24 * 60 * 60, //2 Weeks
+    maxAge: 4 * 60 * 60, //4 hours
     path: "/",
     sameSite: 'strict',
   },
-  touchAfter: 1 * 7 * 24 * 60 * 60 // 1 Week
+  touchAfter: 60 * 60 // 1 hour
 });
 
 export default async function session(request: NextApiRequest, response: NextApiResponse, next: () => any){
