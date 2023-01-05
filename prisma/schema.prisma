@@ -82,6 +82,8 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+
+//NFT Metadata
 model Collection {
   id            String    @id @default(cuid())
   address       String
@@ -97,5 +99,60 @@ model Collection {
   image         String
   extURL        String?
 
+  //Ranking     
+  ranking       RankTableEntry[]
+
+  //Data
+  data          DataPoint[]
+
   @@unique([address])
+}
+
+enum CollectionsRank {
+  avgPrice      @map("avg_price")
+  maxPrice      @map("max_price")
+  salesCount    @map("sales_count")
+  salesVolume   @map("sales_volume")
+}
+
+enum RankPeriod {
+  oneDay      @map("1_DAY")
+  sevenDays   @map("7_DAYS")
+  thirtyDays  @map("30_DAYS")
+  oneYear     @map("365_DAYS")
+}
+
+model RankTable {
+  id            String            @id @default(cuid())
+  type          CollectionsRank   
+  timePeriod    RankPeriod
+  entries       RankTableEntry[]
+
+  @@unique([type, timePeriod])
+}
+
+model RankTableEntry {
+  id            String            @id @default(cuid())
+  value         String
+  tableId       String
+  table         RankTable         @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  collectionId  String
+  collection    Collection        @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+}
+
+model DataPoint {
+  id            String          @id @default(cuid())
+  timestamp     DateTime      
+  avgPrice      String?
+  maxPrice      String?
+  minPrice      String?
+  salesCount    String?
+  salesVolume   String?
+  tokensMinted  String?
+  tokensBurned  String?
+  totalMinted   String?
+  totalBurned   String?
+  tokenCount    String?
+  collectionId  String
+  collection    Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 }
