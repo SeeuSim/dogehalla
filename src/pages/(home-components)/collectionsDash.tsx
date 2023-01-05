@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
-
 export default function CollectionsDash() {
 
   const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

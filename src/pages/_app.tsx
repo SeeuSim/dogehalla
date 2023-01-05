@@ -1,28 +1,30 @@
 import { type AppType } from "next/app";
-import { type Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
 
-import { trpc } from "../utils/trpc";
+import { trpc } from "utils/trpc";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import Header from "../components/header";
-import NavBar from "../components/navbar";
+import Header from "components/header";
+import NavBar from "components/navbar";
 
-import "../styles/globals.css";
+import "styles/globals.css";
+import { SessionProps } from "types/sessions";
 
-const MyApp: AppType<{ session: Session | null }> = ({
+const queryclient = new QueryClient();
+
+const MyApp: AppType = ({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps: { ...pageProps },
 }) => {
   return (
-    <SessionProvider session={session}>
+    <QueryClientProvider client={queryclient}>
       <Header/>
-      <main className="min-h-screen p-16 justify-center items-center bg-gray-100 dark:bg-slate-900">
+      <main className="min-h-screen max-h-full py-16 px-2 justify-center items-center bg-gray-100 dark:bg-slate-900 overflow-x-clip">
         <NavBar/>
-        <Component {...pageProps} />
+        <Component {...pageProps}/>
       </main>
       <ReactQueryDevtools initialIsOpen={false}/>
-    </SessionProvider>
+    </QueryClientProvider>
   );
 };
 

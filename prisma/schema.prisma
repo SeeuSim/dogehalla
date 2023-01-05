@@ -23,18 +23,22 @@ model Example {
 model OAuthProfile {
   id                String  @id @default(cuid())
   userId            String
-  created_at        Int?
+  created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
+
   type              String
   provider          String
-  providerOAuthId String
+  providerOAuthId   String
+
   refresh_token     String?  @db.Text
   access_token      String?  @db.Text
   expires_at        Int?
+
   token_type        String?
   scope             String?
   id_token          String?  @db.Text
   session_state     String?
+  
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerOAuthId])
@@ -42,25 +46,27 @@ model OAuthProfile {
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sid          String   @unique
+  data         String
+  expiresAt    DateTime
 }
 
 model User {
   id            String    @id @default(cuid())
   name          String?   @db.VarChar(255)
-  email         String?   @unique
+  email         String?   
   password      String?
   verified      Boolean?  @default(false)
   emailVerified DateTime?
+  canLink       Boolean   @default(false)
   image         String?   @default("../public/user_profilepic.png")
   role          RoleEnumType? @default(user)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   authprofiles  OAuthProfile[]
-  sessions      Session[]
+  // sessions      Session[]
+  
+  @@unique([email])
 }
 
 enum RoleEnumType {
