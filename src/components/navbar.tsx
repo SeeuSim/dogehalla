@@ -1,11 +1,13 @@
-import { useState } from 'react'
-import { useSession } from 'next-auth/react'
-import Link from 'next/link'
+import { useState } from 'react';
+import Link from 'next/link';
 
-import { Dialog } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { trpc } from 'utils/trpc';
 
-import SearchDropDown from './searchDropdown'
+import { Dialog } from '@headlessui/react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+
+import AccountDropdown from './accountDropdown';
+import SearchDropDown from './searchDropdown';
 
 //TO BE CHANGED
 const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
@@ -13,7 +15,7 @@ const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 const menuOptions = [
   { name: 'Home', href: '/' },
   { name: 'Analytics', href: '#' },
-  { name: 'Account', href: '/login/' },
+  { name: 'Account', href: '/account' },
 ]
 
 const Logo = () => {
@@ -28,12 +30,13 @@ const Logo = () => {
 }
 
 export default function NavBar(): JSX.Element {
-  const {data: session} = useSession();
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const { data: session } = trpc.auth.getSession.useQuery(undefined);
+  
+
   return (
-    <div className="px-6 pt-6 lg:px-8">
+    <div className="px-6 pt-2 lg:px-8">
       {/** Large Screens and Above */}
       <nav className={`
             ${mobileMenuOpen? "hidden" : ""}
@@ -60,10 +63,8 @@ export default function NavBar(): JSX.Element {
             ))}
           </div>
 
-          {/** Search | Hamburger (Medium and below) | Login Button (Large only)
-            * Login Button
-            * - Should be swapped to an Account Pic dropdown if there is a session 
-            */} 
+          {/** Search | Hamburger (Medium and below) | Login Button (Large only) */}
+           
           <div className="flex min-w-0 flex-1 justify-end gap-x-2">
             <SearchDropDown/>
             <button
@@ -73,18 +74,23 @@ export default function NavBar(): JSX.Element {
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-white" aria-hidden="true" />
             </button>
-            <Link href="/login/"
-               className={`
-                  hidden
-                  lg:inline-block rounded-lg px-3 py-1.5 
-                  text-sm font-semibold leading-6 
-                  text-gray-900 shadow-sm
-                  dark:text-white 
-                  ring-1 ring-gray-900/10 hover:ring-gray-900/20
-                  dark:ring-gray-50/10 dark:hover:ring-gray-50/20
-                `}>
-              Log in
-            </Link>
+
+            {/**If not logged in -> Display Log In button */}
+            { session
+              ? <AccountDropdown/>
+              : <Link href="/auth/login/"
+                      className={`
+                          hidden
+                          lg:inline-block rounded-lg px-3 py-1.5 
+                          text-sm font-semibold leading-6 
+                          text-gray-900 shadow-sm
+                          dark:text-white 
+                          ring-1 ring-gray-900/10 hover:ring-gray-900/20
+                          dark:ring-gray-50/10 dark:hover:ring-gray-50/20
+                        `}>
+                      Log in
+                </Link>
+            }
           </div>
         </div>
       </nav>
@@ -138,7 +144,7 @@ export default function NavBar(): JSX.Element {
               {/** Login Button */}
               <div className="py-6">
                 <Link
-                  href="/login/"
+                  href="/auth/login/"
                   onClick={() => setMobileMenuOpen(false)}
                   className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-6 text-gray-900 hover:bg-gray-400/10 dark:text-white"
                 >

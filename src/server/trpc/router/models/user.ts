@@ -1,5 +1,5 @@
-import { router, publicProcedure } from "../../trpc";
-import { prisma } from "../../../db/client";
+import { router, publicProcedure } from "server/trpc/trpc";
+import { prisma } from "server/db/client";
 import { z } from "zod";
 
 export const UserRouter = router({

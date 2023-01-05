@@ -1,14 +1,12 @@
 import { publicProcedure, router } from "../trpc";
 import { authRouter } from "./auth";
-import { exampleRouter } from "./example";
 
-import connectDB from "../../db/client";
+import connectDB from "server/db/client";
 import { modelsRouter } from "./models";
 
 connectDB();
 
 export const appRouter = router({
-  example: exampleRouter,
   auth: authRouter,
   model: modelsRouter,
 });
