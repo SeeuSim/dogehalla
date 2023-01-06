@@ -138,6 +138,8 @@ model RankTableEntry {
   table         RankTable         @relation(fields: [tableId], references: [id], onDelete: Cascade)
   collectionId  String
   collection    Collection        @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, tableId])
 }
 
 model DataPoint {
@@ -152,7 +154,9 @@ model DataPoint {
   tokensBurned  String?
   totalMinted   String?
   totalBurned   String?
-  tokenCount    String?
+  ownersCount    String?
   collectionId  String
   collection    Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, timestamp])
 }

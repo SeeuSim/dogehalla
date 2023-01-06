@@ -1,5 +1,4 @@
-import { env } from "../../../env/server.mjs";
-import { prisma } from "../../db/client";
+// import { env } from "../../../env/server.mjs";
 
 import type { 
   MnemonicQuery__DataTimeGroup,
@@ -16,7 +15,7 @@ import type {
 // THIS SHOULD ONLY RESIDE ON THE SERVER
 
 const MNEMONIC_AUTH_HEADER = {
-  'X-API-Key': env.MNEMONIC_API_KEY
+  'X-API-Key': process.env.MNEMONIC_API_KEY??""
 };
 
 /**
@@ -44,7 +43,7 @@ export async function collectionMeta(contractAddress: string) {
 }
 
 /**
- * Given a ranking metric and a time period, retrieves the top 500 collections from the Mnemonic API
+ * Given a ranking metric and a time period, retrieves the top 125 collections from the Mnemonic API
  * 
  * @CollectionsRank
  * 
@@ -59,7 +58,7 @@ export async function collectionMeta(contractAddress: string) {
 export async function getTopCollections(
     rank: MnemonicQuery__RankType, 
     timePeriod: MnemonicQuery__RecordsDuration,
-    limit: string = '500',
+    limit: string = '125',
     offset: string= '0'
   ) {
   

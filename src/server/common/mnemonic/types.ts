@@ -30,7 +30,7 @@ export enum MnemonicQuery__DataTimeGroup {
  * data.
  */
 export enum MnemonicQuery__RecordsDuration {
-  unspecified = "DURATION_UNSPECIFIED",
+  // unspecified = "DURATION_UNSPECIFIED",
   oneDay = "DURATION_1_DAY",
   sevenDays = "DURATION_7_DAYS",
   thirtyDays = "DURATION_30_DAYS",
@@ -43,7 +43,7 @@ export enum MnemonicQuery__RecordsDuration {
  * 
  * @CollectionsMeta
  */
-enum MnemonicResponse__CollectionMeta__Metadata__Type {
+export enum MnemonicResponse__CollectionMeta__Metadata__Type {
   bannerImage = "TYPE_BANNER_IMAGE_URL", 
   description = "TYPE_DESCRIPTION", 
   image = "TYPE_IMAGE_URL", 
@@ -93,18 +93,14 @@ export enum MnemonicQuery__RankType {
  * @CollectionsRank
  */
 type MnemonicResponse__Rank__Response = {
-  "avg_price": {
+
     avgPrice: string
-  },
-  "max_price": {
+
     maxPrice: string
-  },
-  "sales_count": {
+
     salesCount: string
-  },
-  "sales_volume": {
+
     salesVolume: string
-  }
 };
 
 /**
@@ -116,7 +112,7 @@ export type MnemonicResponse__Rank = {
   collections: Array<{
     contractAddress: string,
     contractName: string
-  } & MnemonicResponse__Rank__Response[keyof MnemonicResponse__Rank__Response]>
+  } & MnemonicResponse__Rank__Response>
 }
 
 export type MnemonicResponse__PriceHistory = {
