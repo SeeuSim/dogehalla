@@ -1,6 +1,8 @@
-// import { env } from "../../../env/server.mjs";
+import { env } from "../../../env/server.mjs";
 
-import type { 
+import { CollectionsRank, RankPeriod } from "@prisma/client";
+
+import { 
   MnemonicQuery__DataTimeGroup,
   MnemonicQuery__RankType,
   MnemonicQuery__RecordsDuration,
@@ -11,12 +13,27 @@ import type {
   MnemonicResponse__SalesVolume,
   MnemonicResponse__TokensSupply,
 } from "./types";
-
 // THIS SHOULD ONLY RESIDE ON THE SERVER
 
+const delay = (ms = 1000) => new Promise(r => setTimeout(r, ms));
+
 const MNEMONIC_AUTH_HEADER = {
-  'X-API-Key': process.env.MNEMONIC_API_KEY??""
+  'X-API-Key': env.MNEMONIC_API_KEY??""
 };
+
+export const RankMapping = {
+  "avg_price": CollectionsRank.avgPrice,
+  "max_price": CollectionsRank.maxPrice,
+  "sales_count": CollectionsRank.salesCount,
+  "sales_volume": CollectionsRank.salesVolume 
+};
+
+export const TimeRanking = {
+  'DURATION_1_DAY': RankPeriod.oneDay,
+  'DURATION_7_DAYS': RankPeriod.sevenDays,
+  'DURATION_30_DAYS': RankPeriod.thirtyDays,
+  'DURATION_365_DAYS': RankPeriod.oneYear
+}
 
 /**
  * Given a 42-character Ethereum contract address, returns the metadata from the Mnemonic API.
@@ -58,7 +75,7 @@ export async function collectionMeta(contractAddress: string) {
 export async function getTopCollections(
     rank: MnemonicQuery__RankType, 
     timePeriod: MnemonicQuery__RecordsDuration,
-    limit: string = '125',
+    limit: string = '10',
     offset: string= '0'
   ) {
   
@@ -113,18 +130,23 @@ export async function collectionPriceHistory(
     groupByPeriod: groupBy.toString()
   }).toString();
 
-  return await fetch(
-    `https://ethereum.rest.mnemonichq.com/pricing/v1beta1/prices/by_contract/${contractAddress}?${query}`,
-    {
-      method: 'GET',
-      headers: MNEMONIC_AUTH_HEADER
-    }
-  ).then(response => {
-    if (!response.ok) {
-      throw new Error(response.statusText);
-    }
-    return response.json() as Promise<MnemonicResponse__PriceHistory>;
-  });
+  const [__, data] = await Promise.all([delay(500),
+    fetch(
+      `https://ethereum.rest.mnemonichq.com/pricing/v1beta1/prices/by_contract/${contractAddress}?${query}`,
+      {
+        method: 'GET',
+        headers: MNEMONIC_AUTH_HEADER
+      }
+    )
+    
+    .then(response => {
+      if (!response.ok) {
+        console.log(`Prices ${response.statusText}`)
+      }
+      return response.json() as Promise<MnemonicResponse__PriceHistory>;
+    })]);
+
+  return data;
 }
 
 /**
@@ -157,18 +179,23 @@ export async function collectionSalesVolume(
     groupByPeriod: groupBy.toString()
   }).toString();
 
-  return await fetch(
+  const [__, data] = await Promise.all([delay(500),
+  fetch(
     `https://ethereum.rest.mnemonichq.com/pricing/v1beta1/volumes/by_contract/${contractAddress}?${query}`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER
     }
-  ).then(response => {
+  )
+  
+  .then(response => {
     if (!response.ok) {
-      throw new Error(response.statusText);
+      console.log(`Sales ${response.statusText}`)
     }
     return response.json() as Promise<MnemonicResponse__SalesVolume>;
-  });
+  })]);
+
+  return data;
 }
 
 /**
@@ -201,18 +228,24 @@ export async function collectionTokensSupply(
     groupByPeriod: groupBy.toString()
   }).toString();
 
-  return await fetch(
-    `https://ethereum.rest.mnemonichq.com/collections/v1beta1/supply/by_contract/${contractAddress}?${query}`,
+  console.log(timeStampLt)
+
+  const [__, data] = await Promise.all([delay(500),
+  fetch(
+    `https://ethereum.rest.mnemonichq.com/collections/v1beta1/supply/${contractAddress}?${query}`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER
     }
-  ).then(response => {
+  )
+  
+  .then(response => {
     if (!response.ok) {
-      throw new Error(response.statusText);
+      console.log(`Tokens + ${response.statusText} + ${response.status}`);
     }
     return response.json() as Promise<MnemonicResponse__TokensSupply>;
-  });
+  })]);
+  return data;
 }
 
 /**
@@ -245,17 +278,20 @@ export async function collectionOwnersCount(
     groupByPeriod: groupBy.toString()
   }).toString();
 
-  return await fetch(`https://ethereum.rest.mnemonichq.com/collections/v1beta1/owners_count/${contractAddress}?${query}`,
+  const [__, data] = await Promise.all([delay(500),
+  fetch(`https://ethereum.rest.mnemonichq.com/collections/v1beta1/owners_count/${contractAddress}?${query}`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER
     }
   )
-  .then(response => {
+  
+  .then(async (response) => {
     if (!response.ok) {
-      throw new Error(response.statusText);
+      console.log(`Owners ${response.statusText}`)
     }
     return response.json() as Promise<MnemonicResponse__OwnersCount>;
-  });
+  })]);
+  return data;
 }
 

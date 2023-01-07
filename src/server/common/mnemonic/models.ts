@@ -1,7 +1,6 @@
 import * as MnemonicQuery from "./mnemonic";
-import { MnemonicQuery__DataTimeGroup, MnemonicQuery__RankType, MnemonicQuery__RecordsDuration, MnemonicResponse__CollectionMeta__Metadata__Type } from "./types";
+import { MnemonicQuery__DataTimeGroup, MnemonicQuery__RankType, MnemonicQuery__RecordsDuration, MnemonicResponse__CollectionMeta__Metadata__Type, MnemonicResponse__OwnersCount, MnemonicResponse__PriceHistory, MnemonicResponse__Rank, MnemonicResponse__SalesVolume, MnemonicResponse__TokensSupply } from "./types";
 import { prisma } from "server/db/client";
-import { CollectionsRank, RankPeriod } from "@prisma/client";
 
 async function findOrCreateCollection(contractAddress: string) {
   const collection = await prisma.collection.findUnique({
@@ -10,11 +9,11 @@ async function findOrCreateCollection(contractAddress: string) {
     }
   });
 
-  if (collection) return collection;
+  if (collection != null) return collection;
 
   const meta = await MnemonicQuery.collectionMeta(contractAddress);
 
-  if (!meta || !meta.name) throw new Error("Invalid contract address supplied");
+  // if (!meta || !meta.name) throw new Error("Invalid contract address supplied");
 
   const bannerImg = meta.metadata.find(
     val => val.type === MnemonicResponse__CollectionMeta__Metadata__Type.bannerImage
@@ -23,29 +22,38 @@ async function findOrCreateCollection(contractAddress: string) {
   const img = meta.metadata.find(
     val => val.type === MnemonicResponse__CollectionMeta__Metadata__Type.image
   );
+  
+  try {
+    const newCollection = await prisma.collection.create({
+      data: {
+        address: contractAddress,
+        name: meta.name,
+        type: "",
+        tokens: meta.tokensCount,
+        owners: meta.ownersCount,
+        salesVolume: meta.salesVolume,
+        bannerImg: bannerImg?.value??"",
+        image: img?.value??"",
+        description: meta.metadata.find(
+          value => value.type === MnemonicResponse__CollectionMeta__Metadata__Type.description
+        )?.value,
+        extURL: meta.metadata.find(
+          value => value.type === MnemonicResponse__CollectionMeta__Metadata__Type.extURL
+        )?.value,
+      }
+    });
+    return newCollection;
+  } catch (err) {
+    //Due to async, another collection may have been created, hence create fails.
+    const fromDb = await prisma.collection.findUnique({
+      where: {
+        address: contractAddress
+      }
+    });
 
-  const newCollection = await prisma.collection.create({
-    data: {
-      address: contractAddress,
-      name: meta.name,
-      type: "",
-      tokens: meta.tokensCount,
-      owners: meta.ownersCount,
-      salesVolume: meta.salesVolume,
-      bannerImg: bannerImg?.value??"",
-      image: img?.value??"",
-      description: meta.metadata.find(
-        value => value.type === MnemonicResponse__CollectionMeta__Metadata__Type.description
-      )?.value,
-      extURL: meta.metadata.find(
-        value => value.type === MnemonicResponse__CollectionMeta__Metadata__Type.extURL
-      )?.value,
-    }
-  });
+    return fromDb;
+  }
 
-  if (!newCollection) throw new Error("Error creating collection");
-
-  return newCollection;
 }
 
 async function findOrCreateDataPoint(collectionID: string, timeStamp: string) {
@@ -58,16 +66,28 @@ async function findOrCreateDataPoint(collectionID: string, timeStamp: string) {
     }
   });
 
-  if (!fromDB) {
-    return await prisma.dataPoint.create({
+  if (fromDB) return fromDB;
+
+  try {
+    const newDp = await prisma.dataPoint.create({
       data: {
         collectionId: collectionID,
         timestamp: timeStamp
       }
     });
-  }
+    return newDp;
+  } catch (err) {
+    const fromDb = await prisma.dataPoint.findUnique({
+      where: {
+        collectionId_timestamp: {
+          collectionId: collectionID,
+          timestamp: timeStamp
+        }
+      }
+    });
 
-  return fromDB;
+    return fromDb;
+  }
 }
 
 async function populateDataPoints(collectionID: string, contractAddress: string) {
@@ -78,112 +98,112 @@ async function populateDataPoints(collectionID: string, contractAddress: string)
     current.getDate(),
     current.getHours()
   ).toJSON();
-
-  //Price History
+  
   const prices = await MnemonicQuery.collectionPriceHistory(
     contractAddress, 
     MnemonicQuery__RecordsDuration.sevenDays,
-    MnemonicQuery__DataTimeGroup.oneHour,
+    MnemonicQuery__DataTimeGroup.oneDay,
     timeStamp
   );
-
-  prices.dataPoints.forEach(
-    async (pt) => {
-      const dP = await findOrCreateDataPoint(collectionID, pt.timestamp);
-      const updated = await prisma.dataPoint.update({
-        where: {
-          collectionId_timestamp: {
-            collectionId: collectionID,
-            timestamp: pt.timestamp
+  
+  try {
+    prices.dataPoints.forEach(
+      async (pt) => {
+        const dP = await findOrCreateDataPoint(collectionID, pt.timestamp);
+        return await prisma.dataPoint.update({
+          where: {
+            id: dP?.id
+          }, 
+          data: {
+            avgPrice: pt.avg,
+            maxPrice: pt.max,
+            minPrice: pt.min
           }
-        }, 
-        data: {
-          avgPrice: pt.avg,
-          maxPrice: pt.max,
-          minPrice: pt.min
-        }
-      });
-    }
-  );
-
-  //Sales Volume
+        });
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
   const sales = await MnemonicQuery.collectionSalesVolume(
     contractAddress, 
     MnemonicQuery__RecordsDuration.sevenDays,
-    MnemonicQuery__DataTimeGroup.oneHour,
-    timeStamp
+    MnemonicQuery__DataTimeGroup.oneDay,
+    timeStamp 
   );
-
-  sales.dataPoints.forEach(
-    async (pt) => {
-      const dP = await findOrCreateDataPoint(collectionID, pt.timestamp);
-      const updated = await prisma.dataPoint.update({
-        where: {
-          collectionId_timestamp: {
-            collectionId: collectionID,
-            timestamp: pt.timestamp
+  
+  try {
+    sales.dataPoints.forEach(
+      async (pt) => {
+        const dP = await findOrCreateDataPoint(collectionID, pt.timestamp);
+        await prisma.dataPoint.update({
+          where: {
+            id: dP?.id
+          }, 
+          data: {
+            salesCount: pt.count,
+            salesVolume: pt.volume
           }
-        }, 
-        data: {
-          salesCount: pt.count,
-          salesVolume: pt.volume
-        }
-      });
-    }
-  );
-
-  //Token Supply
+        });
+      }
+    );
+  } catch (err) {
+    console.log(err)
+  }
+  
   const tokens = await MnemonicQuery.collectionTokensSupply(
-    contractAddress,
+    contractAddress, 
     MnemonicQuery__RecordsDuration.sevenDays,
-    MnemonicQuery__DataTimeGroup.oneHour,
+    MnemonicQuery__DataTimeGroup.oneDay,
+    timeStamp 
+  );
+  
+  try {
+    tokens.dataPoints.forEach(
+      async (pt) => {
+        const dP = await findOrCreateDataPoint(collectionID, pt.timestamp);
+        await prisma.dataPoint.update({
+          where: {
+            id: dP?.id
+          }, 
+          data: {
+            tokensBurned: pt.burned,
+            tokensMinted: pt.minted,
+            totalBurned: pt.totalBurned,
+            totalMinted: pt.totalMinted
+          }
+        });
+      }
+    );
+  } catch (err) {
+    console.log(err)
+  }
+  
+  const owners = await MnemonicQuery.collectionOwnersCount(
+    contractAddress, 
+    MnemonicQuery__RecordsDuration.sevenDays,
+    MnemonicQuery__DataTimeGroup.oneDay,
     timeStamp
   );
-
-  tokens.dataPoints.forEach(
-    async (pt) => {
-      const dP = await findOrCreateDataPoint(collectionID, pt.timestamp);
-      const updated = await prisma.dataPoint.update({
-        where: {
-          collectionId_timestamp: {
-            collectionId: collectionID,
-            timestamp: pt.timestamp
+  
+  try {
+    owners.dataPoints.forEach(
+      async (pt) => {
+        const dP = await findOrCreateDataPoint(collectionID, pt.timestamp);
+        await prisma.dataPoint.update({
+          where: {
+            id: dP?.id
+          }, 
+          data: {
+            ownersCount: pt.count
           }
-        }, 
-        data: {
-          tokensBurned: pt.burned,
-          tokensMinted: pt.minted,
-          totalBurned: pt.totalBurned,
-          totalMinted: pt.totalMinted
-        }
-      });
-    }
-  );
+        });
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
 
-  //Owners Count
-  const ownerFigures = await MnemonicQuery.collectionOwnersCount(
-    contractAddress,
-    MnemonicQuery__RecordsDuration.sevenDays,
-    MnemonicQuery__DataTimeGroup.oneHour,
-    timeStamp
-  );
-
-  ownerFigures.dataPoints.forEach(
-    async (pt) => {
-      const dP = await findOrCreateDataPoint(collectionID, pt.timestamp);
-      const updated = await prisma.dataPoint.update({
-        where: {
-          collectionId_timestamp: {
-            collectionId: collectionID,
-            timestamp: pt.timestamp
-          }
-        }, 
-        data: {
-          ownersCount: pt.count
-        }
-      });
-    }
-  );
 }
 
 async function updateOrCreateRankTableEntry(collectionID: string, tableID: string, value: string) {
@@ -216,8 +236,8 @@ async function findOrCreateRankTable(rank: MnemonicQuery__RankType, timePeriod: 
   const fromDb = await prisma.rankTable.findUnique({
     where: {
       type_timePeriod: {
-        type: rank.toString() as CollectionsRank,
-        timePeriod: timePeriod.toString() as RankPeriod
+        type: MnemonicQuery.RankMapping[rank],
+        timePeriod: MnemonicQuery.TimeRanking[timePeriod]
       }
     }
   });
@@ -225,45 +245,62 @@ async function findOrCreateRankTable(rank: MnemonicQuery__RankType, timePeriod: 
   
   const newTable = await prisma.rankTable.create({
     data: {
-      type: rank.toString() as CollectionsRank,
-      timePeriod: timePeriod.toString() as RankPeriod
+      type: MnemonicQuery.RankMapping[rank],
+      timePeriod: MnemonicQuery.TimeRanking[timePeriod]
     }
   });
 
   return newTable;
 }
 
+//Can be called to refresh every day
 export async function populateDb() {
-  Object.values(MnemonicQuery__RankType).forEach(
-    async (rank, _) => { 
-      console.log(`===========${rank}=========`)
-      await Object.values(MnemonicQuery__RecordsDuration).forEach(
-        async (time, _) => {
-          console.log(`=========${time}========`)
-          const rankTable = await findOrCreateRankTable(rank, time);
-          const collections = await MnemonicQuery.getTopCollections(rank, time);
-          collections.collections.forEach(
-            async (clctn) => {
-              const collection = await findOrCreateCollection(clctn.contractAddress);
-              console.log(collection.name)
-              await updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
-              await populateDataPoints(collection.id, collection.address);
-          })
+
+  const delay = (ms = 1000) => new Promise(r => setTimeout(r, ms));
+
+  for (let rank of Object.values(MnemonicQuery__RankType)) {
+    for (let time of Object.values(MnemonicQuery__RecordsDuration)) {
+      const rankTable = await findOrCreateRankTable(rank, time);
+      const { count } = await prisma.rankTableEntry.deleteMany({
+        where: {
+          tableId: rankTable.id
         }
-      )
+      });
+
+      //Query data
+      const collections = await MnemonicQuery.getTopCollections(rank, time);
+
+      await delay(100);
+
+      for (let clctn of collections.collections) {
+        const collection = await findOrCreateCollection(clctn.contractAddress);
+
+          if (collection) {
+            //Create the ranking.
+            await updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
+
+            //Populate timeseries
+            await populateDataPoints(collection.id, collection.address);
+
+            //Avoid rate limiting
+            await delay();
+          }
+      }
+
     }
-  ); 
+  }
+
+  
 }
 
-async function main() {
-  await populateDb();
-}
+// export async function refreshTimeSeries() {
+//   const delay = (ms = 1000) => new Promise(r => setTimeout(r, ms));
 
-main().then(async () => {
-  await prisma.$disconnect()
-})
-.catch(async (e) => {
-  console.error(e)
-  await prisma.$disconnect()
-  process.exit(1)
-})
+//   const collections = await prisma.collection.findMany({});
+
+//   for (let clctn of collections) {
+//     await populateDataPoints(clctn.id, clctn.address);
+//     await delay(500);
+//   }
+
+// }

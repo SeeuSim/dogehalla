@@ -57,11 +57,11 @@ export const getSession = nextSession({
   cookie: {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    maxAge: 4 * 60 * 60, //4 hours
+    maxAge: 2 * 7 * 24 * 60 * 60,
     path: "/",
     sameSite: 'strict',
   },
-  touchAfter: 60 * 60 // 1 hour
+  touchAfter: 7 * 24 * 60 * 60
 });
 
 export default async function session(request: NextApiRequest, response: NextApiResponse, next: () => any){

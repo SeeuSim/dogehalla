@@ -92,16 +92,7 @@ export enum MnemonicQuery__RankType {
  * 
  * @CollectionsRank
  */
-type MnemonicResponse__Rank__Response = {
-
-    avgPrice: string
-
-    maxPrice: string
-
-    salesCount: string
-
-    salesVolume: string
-};
+type MnemonicResponse__Rank__Response = { avgPrice: string } & { maxPrice: string } & { salesCount: string } & { salesVolume: string };
 
 /**
  * The response type Mnemonic provides for its `Top Collections by` endpoint.

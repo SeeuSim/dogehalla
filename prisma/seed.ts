@@ -1,10 +1,21 @@
-import { populateDb } from "server/common/mnemonic/models";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, RoleEnumType } from "@prisma/client";
+import argon2 from "argon2";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  await populateDb();
+  const hashedPwd = await argon2.hash(process.env.ADMIN_PASSWORD??"AdminPwd2");
+
+  //Create default admin user.
+  await prisma.user.create({
+    data: {
+      name: "Dev Admin",
+      email: "cryptodogettm@gmail.com",
+      password: hashedPwd,
+      role: RoleEnumType.admin,
+      verified: true
+    }
+  });
 }
 
 main().then(async () => {
