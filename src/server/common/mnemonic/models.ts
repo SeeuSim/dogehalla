@@ -1,7 +1,14 @@
-import * as MnemonicQuery from "./mnemonic";
-import { MnemonicQuery__DataTimeGroup, MnemonicQuery__RankType, MnemonicQuery__RecordsDuration, MnemonicResponse__CollectionMeta__Metadata__Type, MnemonicResponse__OwnersCount, MnemonicResponse__PriceHistory, MnemonicResponse__Rank, MnemonicResponse__SalesVolume, MnemonicResponse__TokensSupply } from "./types";
-import { prisma } from "server/db/client";
 import type { Collection, DataPoint, Prisma, RankTableEntry } from "@prisma/client";
+import { prisma } from "server/db/client";
+
+import * as MnemonicQuery from "./mnemonic";
+
+import { 
+  MnemonicQuery__DataTimeGroup, 
+  MnemonicQuery__RankType, 
+  MnemonicQuery__RecordsDuration, 
+  MnemonicResponse__CollectionMeta__Metadata__Type 
+} from "./types";
 
 /**
  * Given an Ethereum contract address, retrieves the associated collection from
@@ -29,6 +36,7 @@ async function findOrCreateCollection(contractAddress: string) {
   //Only query metadata on creation
   const meta = await MnemonicQuery.collectionMeta(contractAddress);
 
+
   const bannerImg = meta.metadata.find(
     val => val.type === MnemonicResponse__CollectionMeta__Metadata__Type.bannerImage
   );
@@ -36,6 +44,18 @@ async function findOrCreateCollection(contractAddress: string) {
   const img = meta.metadata.find(
     val => val.type === MnemonicResponse__CollectionMeta__Metadata__Type.image
   );
+
+  const desc = meta.metadata.find(
+    val => val.type === MnemonicResponse__CollectionMeta__Metadata__Type.description
+  );
+
+  const exturl = meta.metadata.find(
+    val => val.type === MnemonicResponse__CollectionMeta__Metadata__Type.extURL
+  );
+  
+  //Highly likely to be a bogus collection if all three are missing, and there are few owners
+  if (!Boolean(meta.name) && !Boolean(desc) && !Boolean(exturl) && new Number(meta.ownersCount) <= 5) return null; 
+
   
   try {
     const newCollection = await prisma.collection.create({
@@ -43,17 +63,13 @@ async function findOrCreateCollection(contractAddress: string) {
         address: contractAddress,
         name: meta.name,
         type: meta.types.join(" "),
-        tokens: meta.tokensCount,
-        owners: meta.ownersCount,
-        salesVolume: meta.salesVolume,
-        bannerImg: bannerImg?.value??"",
-        image: img?.value??"",
-        description: meta.metadata.find(
-          value => value.type === MnemonicResponse__CollectionMeta__Metadata__Type.description
-        )?.value,
-        extURL: meta.metadata.find(
-          value => value.type === MnemonicResponse__CollectionMeta__Metadata__Type.extURL
-        )?.value,
+        tokens: new Number(meta.tokensCount?? 0).valueOf(),
+        owners: new Number(meta.ownersCount?? 0).valueOf(),
+        salesVolume: Boolean(meta.salesVolume)? meta.salesVolume : 0,
+        bannerImg: bannerImg?.value?? "",
+        image: img?.value?? "",
+        description: desc?.value?? "",
+        extURL: exturl?.value,
       }
     });
     
@@ -128,39 +144,33 @@ async function populateDataPoints(
   let jobs: Prisma.Prisma__DataPointClient<DataPoint, never>[] = [];
 
   prices.dataPoints.forEach(
-    async (value, index) => {
+    async (prc, index) => {
+      const [ownr, sls, tkn] = [owners.dataPoints[index], sales.dataPoints[index], tokens.dataPoints[index]];
+      const data = {
+        avgPrice: Boolean(prc.avg)? prc.avg : null,
+        maxPrice: Boolean(prc.max)? prc.max : null,
+        minPrice: Boolean(prc.min)? prc.min : null,
+        salesVolume: Boolean(sls?.volume)? sls?.volume : null,
+        tokensBurned: Boolean(tkn?.burned)? tkn?.burned : null,
+        tokensMinted: Boolean(tkn?.minted)? tkn?.minted : null,
+        totalBurned: Boolean(tkn?.totalBurned)? tkn?.totalBurned : null,
+        totalMinted: Boolean(tkn?.totalMinted)? tkn?.totalMinted : null,
+        ownersCount: BigInt(ownr?.count?? 0).valueOf(),
+        salesCount: BigInt(sls?.count?? 0).valueOf(),
+      };
+
       const job = prisma.dataPoint.upsert({
         where: {
           collectionId_timestamp: {
             collectionId: collectionID,
-            timestamp: value.timestamp
+            timestamp: prc.timestamp
           }
         },
-        update: {
-          avgPrice: value.avg,
-          maxPrice: value.max,
-          minPrice: value.min,
-          tokensBurned: tokens.dataPoints[index]?.burned,
-          tokensMinted: tokens.dataPoints[index]?.minted,
-          totalBurned: tokens.dataPoints[index]?.totalBurned,
-          totalMinted: tokens.dataPoints[index]?.totalMinted,
-          salesCount: sales.dataPoints[index]?.count,
-          salesVolume: sales.dataPoints[index]?.volume,
-          ownersCount: owners.dataPoints[index]?.count
-        },
+        update: data,
         create: {
           collectionId: collectionID,
-          timestamp: value.timestamp,
-          avgPrice: value.avg,
-          maxPrice: value.max,
-          minPrice: value.min,
-          tokensBurned: tokens.dataPoints[index]?.burned,
-          tokensMinted: tokens.dataPoints[index]?.minted,
-          totalBurned: tokens.dataPoints[index]?.totalBurned,
-          totalMinted: tokens.dataPoints[index]?.totalMinted,
-          salesCount: sales.dataPoints[index]?.count,
-          salesVolume: sales.dataPoints[index]?.volume,
-          ownersCount: owners.dataPoints[index]?.count
+          timestamp: prc.timestamp,
+          ...data
         }
       });
       jobs.push(job);
@@ -170,14 +180,15 @@ async function populateDataPoints(
 }
 
 /**
- * Updates an existing ranking entry, or creates a new one.
+ * Returns a transaction that updates an existing ranking entry, or creates a new one.
  * 
  * @param collectionID The parent collection.
  * @param tableID The parent ranking table.
  * @param value The ranking value to be updated.
- * @returns The entry that is retrieved from the database.
+ * @returns The transaction that retrieves an entry from the database.
  */
 function updateOrCreateRankTableEntry(collectionID: string, tableID: string, value: string) {
+  const data = { value: value };
   return prisma.rankTableEntry.upsert({
     where: {
       collectionId_tableId: {
@@ -185,13 +196,11 @@ function updateOrCreateRankTableEntry(collectionID: string, tableID: string, val
         tableId: tableID
       }
     },
-    update: {
-      value: value
-    },
+    update: data,
     create: {
       collectionId: collectionID,
       tableId: tableID,
-      value: value
+      ...data
     }
   });
 }
@@ -234,6 +243,7 @@ async function updateRankings() {
   // await populateDataPoints(boredApe.id, boredApe.address)
   // const delay = (ms = 1000) => new Promise(r => setTimeout(r, ms));
 
+  let rankingJobs: Prisma.Prisma__RankTableEntryClient<RankTableEntry, never>[] = [];
 
   for (let rank of Object.values(MnemonicQuery__RankType)) {
     for (let time of Object.values(MnemonicQuery__RecordsDuration)) {
@@ -247,7 +257,7 @@ async function updateRankings() {
       //Query data
       const collections = await MnemonicQuery.getTopCollections(rank, time);
 
-      let rankingJobs: Prisma.Prisma__RankTableEntryClient<RankTableEntry, never>[] = [];
+      
       for (let clctn of collections.collections) {
         const collection = await findOrCreateCollection(clctn.contractAddress);
 
@@ -257,9 +267,9 @@ async function updateRankings() {
             rankingJobs.push(job);
           }
       }
-      await prisma.$transaction(rankingJobs);
     }
   }
+  await prisma.$transaction(rankingJobs);
 }
 
 /**
@@ -297,7 +307,7 @@ const refreshFloorPrice = async () => {
         id: clc.id
       }, 
       data: {
-        floor: data.price.totalNative
+        floor: data.price.totalNative?? 0
       }
     });
     jobs.push(job);
@@ -307,10 +317,11 @@ const refreshFloorPrice = async () => {
 }
 
 /**
- * The function to be run daily to ensure the database is relevant with respect to the API.
+ * The function to be run daily to ensure the database is relevant with 
+ * respect to the API and market conditions.
  */
 export const dailyJob = async () => {
-  
+
   const collections = await prisma.collection.count();
 
   if (collections > 0) {

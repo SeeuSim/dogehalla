@@ -89,12 +89,12 @@ model Collection {
   address       String
   name          String?
   type          String?
-  tokens        String
-  owners        String
-  salesVolume   String
+  tokens        Int
+  owners        Int
+  salesVolume   Decimal
 
   //Floor
-  floor         String?
+  floor         Decimal?
   
   //Metadata
   description   String?
@@ -149,16 +149,16 @@ model RankTableEntry {
 model DataPoint {
   id            String          @id @default(cuid())
   timestamp     DateTime      
-  avgPrice      String?
-  maxPrice      String?
-  minPrice      String?
-  salesCount    String?
-  salesVolume   String?
-  tokensMinted  String?
-  tokensBurned  String?
-  totalMinted   String?
-  totalBurned   String?
-  ownersCount    String?
+  avgPrice      Decimal?
+  maxPrice      Decimal?
+  minPrice      Decimal?
+  salesCount    BigInt?
+  salesVolume   Decimal?
+  tokensMinted  Decimal?
+  tokensBurned  Decimal?
+  totalMinted   Decimal?
+  totalBurned   Decimal?
+  ownersCount   BigInt?
   collectionId  String
   collection    Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 

@@ -1,16 +1,22 @@
+import { RoleEnumType } from "@prisma/client";
 import { NextApiRequest, NextApiResponse, NextPage } from "next";
+import { useState } from "react";
+
+import { CogIcon } from "@heroicons/react/24/outline";
+
+import { trpc } from "utils/trpc";
+
 import { getSession } from "server/auth/session";
 import { prisma } from "server/db/client";
-import { RoleEnumType } from "@prisma/client";
-import { useState } from "react";
 import { BASEURL } from "utils/base";
-import { CogIcon } from "@heroicons/react/24/outline";
 
 const AdminPage: NextPage<{
   name: string,
   id: string,
   image: string
 }> = (props) => {
+
+  // const { data } = trpc.model.nft.getTopCollections.useQuery();
 
   const [ploading, psetLoading] = useState(false);
   const [dloading, dsetLoading] = useState(false);
