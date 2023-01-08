@@ -59,7 +59,7 @@ model User {
   verified      Boolean?        @default(false)
   emailVerified DateTime?
   canLink       Boolean         @default(false)
-  image         String?         @default("../public/user_profilepic.png")
+  image         String?         @default("user_profilepic.png")
   role          RoleEnumType?   @default(user)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -92,6 +92,9 @@ model Collection {
   tokens        String
   owners        String
   salesVolume   String
+
+  //Floor
+  floor         String?
   
   //Metadata
   description   String?
@@ -104,6 +107,7 @@ model Collection {
 
   //Data
   data          DataPoint[]
+
 
   @@unique([address])
 }

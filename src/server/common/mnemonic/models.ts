@@ -1,8 +1,23 @@
 import * as MnemonicQuery from "./mnemonic";
 import { MnemonicQuery__DataTimeGroup, MnemonicQuery__RankType, MnemonicQuery__RecordsDuration, MnemonicResponse__CollectionMeta__Metadata__Type, MnemonicResponse__OwnersCount, MnemonicResponse__PriceHistory, MnemonicResponse__Rank, MnemonicResponse__SalesVolume, MnemonicResponse__TokensSupply } from "./types";
 import { prisma } from "server/db/client";
+import type { Collection, DataPoint, Prisma, RankTableEntry } from "@prisma/client";
 
+/**
+ * Given an Ethereum contract address, retrieves the associated collection from
+ * the database, OR:
+ * 
+ * Queries the Mnemonic API and populates the database with the associated
+ * collection and its metadata, along with the past thirty days of time series 
+ * data, and finally returns the collection record.
+ * 
+ * @param contractAddress The desired Ethereum contract address.
+ * @returns The collection from the database.
+ */
 async function findOrCreateCollection(contractAddress: string) {
+  //As this function also queries metadata and datapoints only on creation, 
+  //`upsert` cannot be used.
+
   const collection = await prisma.collection.findUnique({
     where: {
       address: contractAddress
@@ -11,6 +26,7 @@ async function findOrCreateCollection(contractAddress: string) {
 
   if (collection != null) return collection;
 
+  //Only query metadata on creation
   const meta = await MnemonicQuery.collectionMeta(contractAddress);
 
   const bannerImg = meta.metadata.find(
@@ -58,41 +74,21 @@ async function findOrCreateCollection(contractAddress: string) {
 
 }
 
-async function findOrCreateDataPoint(collectionID: string, timeStamp: string) {
-  const fromDB = await prisma.dataPoint.findUnique({
-    where: {
-      collectionId_timestamp: {
-        collectionId: collectionID,
-        timestamp: timeStamp
-      }
-    }
-  });
-
-  if (fromDB) return fromDB;
-
-  try {
-    const newDp = await prisma.dataPoint.create({
-      data: {
-        collectionId: collectionID,
-        timestamp: timeStamp
-      }
-    });
-    return newDp;
-  } catch (err) {
-    const fromDb = await prisma.dataPoint.findUnique({
-      where: {
-        collectionId_timestamp: {
-          collectionId: collectionID,
-          timestamp: timeStamp
-        }
-      }
-    });
-
-    return fromDb;
-  }
-}
-
-async function populateDataPoints(collectionID: string, contractAddress: string) {
+/**
+ * Given a collection, populates the datapoints for the collection, with a 
+ * default of the past thirty days.
+ * 
+ * @param collectionID The parent collection's database ID
+ * @param contractAddress The parent collection's contract address.
+ * @param timePeriod The timeperiod for which to query.
+ * @param grouping How closely the datapoints should be grouped.
+ */
+async function populateDataPoints(
+  collectionID: string, 
+  contractAddress: string, 
+  timePeriod: MnemonicQuery__RecordsDuration = MnemonicQuery__RecordsDuration.thirtyDays, 
+  grouping: MnemonicQuery__DataTimeGroup = MnemonicQuery__DataTimeGroup.oneDay
+) {
   const current = new Date(Date.now());
   const timeStamp = new Date(
     current.getFullYear(),
@@ -103,43 +99,58 @@ async function populateDataPoints(collectionID: string, contractAddress: string)
   
   const prices = await MnemonicQuery.collectionPriceHistory(
     contractAddress, 
-    MnemonicQuery__RecordsDuration.thirtyDays,
-    MnemonicQuery__DataTimeGroup.oneDay,
+    timePeriod,
+    grouping,
     timeStamp
   );
   
   const sales = await MnemonicQuery.collectionSalesVolume(
     contractAddress, 
-    MnemonicQuery__RecordsDuration.thirtyDays,
-    MnemonicQuery__DataTimeGroup.oneDay,
+    timePeriod,
+    grouping,
     timeStamp 
   );
   
   const tokens = await MnemonicQuery.collectionTokensSupply(
     contractAddress, 
-    MnemonicQuery__RecordsDuration.thirtyDays,
-    MnemonicQuery__DataTimeGroup.oneDay,
+    timePeriod,
+    grouping,
     timeStamp 
   );
   
   const owners = await MnemonicQuery.collectionOwnersCount(
     contractAddress, 
-    MnemonicQuery__RecordsDuration.thirtyDays,
-    MnemonicQuery__DataTimeGroup.oneDay,
+    timePeriod,
+    grouping,
     timeStamp
   );
   
+  let jobs: Prisma.Prisma__DataPointClient<DataPoint, never>[] = [];
 
   prices.dataPoints.forEach(
     async (value, index) => {
-      const dP = await findOrCreateDataPoint(collectionID, value.timestamp);
-
-      if (!dP) return;
-      await prisma.dataPoint.update({
+      const job = prisma.dataPoint.upsert({
         where: {
-          id: dP.id
+          collectionId_timestamp: {
+            collectionId: collectionID,
+            timestamp: value.timestamp
+          }
         },
-        data: {
+        update: {
+          avgPrice: value.avg,
+          maxPrice: value.max,
+          minPrice: value.min,
+          tokensBurned: tokens.dataPoints[index]?.burned,
+          tokensMinted: tokens.dataPoints[index]?.minted,
+          totalBurned: tokens.dataPoints[index]?.totalBurned,
+          totalMinted: tokens.dataPoints[index]?.totalMinted,
+          salesCount: sales.dataPoints[index]?.count,
+          salesVolume: sales.dataPoints[index]?.volume,
+          ownersCount: owners.dataPoints[index]?.count
+        },
+        create: {
+          collectionId: collectionID,
+          timestamp: value.timestamp,
           avgPrice: value.avg,
           maxPrice: value.max,
           minPrice: value.min,
@@ -152,67 +163,70 @@ async function populateDataPoints(collectionID: string, contractAddress: string)
           ownersCount: owners.dataPoints[index]?.count
         }
       });
+      jobs.push(job);
     }
   );
-
+  await prisma.$transaction(jobs);
 }
 
-async function updateOrCreateRankTableEntry(collectionID: string, tableID: string, value: string) {
-  
-  const fromDb = await prisma.rankTableEntry.findUnique({
+/**
+ * Updates an existing ranking entry, or creates a new one.
+ * 
+ * @param collectionID The parent collection.
+ * @param tableID The parent ranking table.
+ * @param value The ranking value to be updated.
+ * @returns The entry that is retrieved from the database.
+ */
+function updateOrCreateRankTableEntry(collectionID: string, tableID: string, value: string) {
+  return prisma.rankTableEntry.upsert({
     where: {
       collectionId_tableId: {
         collectionId: collectionID,
         tableId: tableID
       }
-    }, 
+    },
+    update: {
+      value: value
+    },
+    create: {
+      collectionId: collectionID,
+      tableId: tableID,
+      value: value
+    }
   });
-  if (!fromDb) {
-    const newEntry = await prisma.rankTableEntry.create({
-      data: {
-        collectionId: collectionID,
-        tableId: tableID,
-        value: value
-      }
-    });
-  } else {
-    const updated = await prisma.rankTableEntry.update({
-      where: {
-        id: fromDb.id
-      },
-      data: {
-        value: value
-      }
-    });
-  }
-
 }
 
+/**
+ * Retrieves or creates a ranking table to rank collections in the database.
+ * 
+ * @param rank The desired ranking metric. 
+ * @param timePeriod The time period for which that metric is valid.
+ * @returns The table used to rank the collections by that metric.
+ */
 async function findOrCreateRankTable(rank: MnemonicQuery__RankType, timePeriod: MnemonicQuery__RecordsDuration) {
-  const fromDb = await prisma.rankTable.findUnique({
+  const out = await prisma.rankTable.upsert({
     where: {
       type_timePeriod: {
         type: MnemonicQuery.RankMapping[rank],
         timePeriod: MnemonicQuery.TimeRanking[timePeriod]
       }
-    }
-  });
-  if (fromDb) return fromDb;
-  
-  const newTable = await prisma.rankTable.create({
-    data: {
+    },
+    update: {},
+    create: {
       type: MnemonicQuery.RankMapping[rank],
       timePeriod: MnemonicQuery.TimeRanking[timePeriod]
     }
-  });
+  })
 
-  return newTable;
+  return out;
 }
 
 /**
- * To be run daily to refresh rankings
+ * A daily job.
+ * 
+ * To be run daily to refresh collection rankings, or seed an empty database.
  */
-export async function updateRankings() {
+async function updateRankings() {
 
   //FOR TESTING
   // const boredApe = await findOrCreateCollection("0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D");
@@ -233,90 +247,77 @@ export async function updateRankings() {
       //Query data
       const collections = await MnemonicQuery.getTopCollections(rank, time);
 
+      let rankingJobs: Prisma.Prisma__RankTableEntryClient<RankTableEntry, never>[] = [];
       for (let clctn of collections.collections) {
         const collection = await findOrCreateCollection(clctn.contractAddress);
 
           if (collection) {
             //Create the ranking.
-            await updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
+            const job = updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
+            rankingJobs.push(job);
           }
       }
+      await prisma.$transaction(rankingJobs);
     }
   }
 }
 
 /**
- * To be run daily.
+ * A daily job.
+ * 
+ * To be run daily to refresh the timeseries for existing collections in the 
+ * database.
  */
-export const refreshTimeSeries = async () => {
-  const collections = await prisma.collection.findMany({});
+const refreshTimeSeries = async () => {
+  const collections = await prisma.collection.findMany();
 
   for (let clc of collections) {
-    const earliest = new Date(Date.now())
-
-    const timeStamp = new Date(earliest.getFullYear(), earliest.getMonth(), earliest.getDate()).toJSON();
-    const prices = await MnemonicQuery.collectionPriceHistory(
-      clc.address, 
-      MnemonicQuery__RecordsDuration.oneDay,
-      MnemonicQuery__DataTimeGroup.oneDay,
-      timeStamp
-    );
-    
-    const sales = await MnemonicQuery.collectionSalesVolume(
-      clc.address, 
-      MnemonicQuery__RecordsDuration.oneDay,
-      MnemonicQuery__DataTimeGroup.oneDay,
-      timeStamp 
-    );
-    
-    const tokens = await MnemonicQuery.collectionTokensSupply(
-      clc.address, 
-      MnemonicQuery__RecordsDuration.oneDay,
-      MnemonicQuery__DataTimeGroup.oneDay,
-      timeStamp 
-    );
-    
-    const owners = await MnemonicQuery.collectionOwnersCount(
-      clc.address, 
-      MnemonicQuery__RecordsDuration.oneDay,
-      MnemonicQuery__DataTimeGroup.oneDay,
-      timeStamp
-    );
-    
-  
-    prices.dataPoints.forEach(
-      async (value, index) => {
-        const dP = await findOrCreateDataPoint(clc.id, value.timestamp);
-  
-        if (!dP) return;
-        await prisma.dataPoint.update({
-          where: {
-            id: dP.id
-          },
-          data: {
-            avgPrice: value.avg,
-            maxPrice: value.max,
-            minPrice: value.min,
-            tokensBurned: tokens.dataPoints[index]?.burned,
-            tokensMinted: tokens.dataPoints[index]?.minted,
-            totalBurned: tokens.dataPoints[index]?.totalBurned,
-            totalMinted: tokens.dataPoints[index]?.totalMinted,
-            salesCount: sales.dataPoints[index]?.count,
-            salesVolume: sales.dataPoints[index]?.volume,
-            ownersCount: owners.dataPoints[index]?.count
-          }
-        });
-      }
-    );
+    await populateDataPoints(
+      clc.id,
+      clc.address,
+      MnemonicQuery__RecordsDuration.oneDay, //Duration
+      MnemonicQuery__DataTimeGroup.oneDay //Grouping - To experiment with 1 Hour, or 15 Mins if database allows
+    )
   }
 }
 
+/**
+ * A daily or hourly job.
+ * 
+ * To retrieve the real time floor price for all collections in the database.
+ */
+const refreshFloorPrice = async () => {
+  const collection = await prisma.collection.findMany();
+
+  let jobs: Prisma.Prisma__CollectionClient<Collection, never>[] = [];
+  for (let clc of collection) {
+    const data = await MnemonicQuery.floorPrice(clc.address);
+    const job = prisma.collection.update({
+      where: {
+        id: clc.id
+      }, 
+      data: {
+        floor: data.price.totalNative
+      }
+    });
+    jobs.push(job);
+  }
+
+  await prisma.$transaction(jobs);
+}
+
+/**
+ * The function to be run daily to ensure the database is relevant with respect to the API.
+ */
 export const dailyJob = async () => {
+  
   const collections = await prisma.collection.count();
 
   if (collections > 0) {
     await refreshTimeSeries();
   }
 
-  await updateRankings();
+  await updateRankings(); 
+  await refreshFloorPrice();
 }
+

@@ -57,6 +57,16 @@ export enum MnemonicResponse__CollectionMeta__Metadata__Type {
 }
 
 /**
+ * The marketplaces for which to query marketplace data.
+ */
+export enum MnemonicQuery__Marketplaces {
+  OpenSea = "MARKETPLACE_ID_OPENSEA",
+  LooksRare = "MARKETPLACE_ID_LOOKSRARE",
+  CryptoRunks = "MARKETPLACE_ID_CRYPTOPUNKS",
+  SuperRare = "MARKETPLACE_ID_SUPERRARE"
+}
+
+/**
  * The response type for the collections metadata Mnemonic endpoint.
  * 
  * @CollectionsMeta
@@ -139,3 +149,14 @@ export type MnemonicResponse__OwnersCount = {
     count: string
   }>
 }
+
+
+export type MnemonicResponse__FloorPrice = {
+  price: {
+    totalNative: string,
+    totalUsd: string,
+    erc20Address: string | null,
+    erc20Value: string | null
+  }
+}
+

@@ -12,11 +12,25 @@ import {
   MnemonicResponse__OwnersCount,
   MnemonicResponse__SalesVolume,
   MnemonicResponse__TokensSupply,
+  MnemonicQuery__Marketplaces,
+  MnemonicResponse__FloorPrice,
 } from "./types";
 
 // THIS SHOULD ONLY RESIDE ON THE SERVER
 
-//MNEMONIC API has a rate limit of 30 calls per second -> 33 ms delay between calls
+/**
+ * Provides a native time delay, mainly for async fetching from external APIs.
+ * As certain APIs (such as Mnemonic) may be rate limited, inserting this
+ * function before any fetch call will prevent the likelihood of HTTP 429 
+ * rate limiting errors for batched fetch calls.
+ * 
+ * This is set to the base delay of 40ms to avoid exceeding Mnemonic's hard 
+ * limit of 30 calls per second.
+ * 
+ * @param ms The desired delay in milliseconds
+ * @returns A `Promise<void>` that contains nothing. To activate the delay, 
+ * simply `await` this function before your fetch call.
+ */
 const delay = (ms = 40) => new Promise(r => setTimeout(r, ms));
 
 const MNEMONIC_AUTH_HEADER = {
@@ -289,3 +303,44 @@ export async function collectionOwnersCount(
   });
 }
 
+/**
+ * Given a contract address, retrieves the floor price for that address.
+ * @param contractAddress The desired contract address to query for.
+ * @param tokenID The optional NFT to query for.
+ * @param marketplace The optional marketplace to query for.
+ * @returns The floor price, in both native ERC20 Ethereum as well as USD.
+ */
+export async function floorPrice(contractAddress: string, tokenID?: string, marketplace?: MnemonicQuery__Marketplaces) {
+  let params;
+  if (marketplace || tokenID) {
+    if (marketplace && tokenID) {
+      params = new URLSearchParams({
+        tokenId: tokenID,
+        marketplaceId: marketplace as string
+      }).toString();
+    } else {
+      params = new URLSearchParams(
+        tokenID
+        ? {
+          tokenId: tokenID
+        }
+        : {
+          marketplaceId: marketplace as string
+        }
+      ).toString();
+    }
+  }
+  return await fetch(`https://ethereum.rest.mnemonichq.com/ethereum/marketplaces/v1beta1/floors/${contractAddress}${params? `?${params}`:""}`,
+    {
+      method: 'GET',
+      headers: MNEMONIC_AUTH_HEADER
+    })
+    .then(
+      (response) => {
+        if (!response.ok) {
+          console.log(response.statusText);
+        }
+        return response.json() as Promise<MnemonicResponse__FloorPrice>
+      }
+    );
+}
