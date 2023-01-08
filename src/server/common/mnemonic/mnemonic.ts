@@ -78,7 +78,7 @@ export async function collectionMeta(contractAddress: string) {
 export async function getTopCollections(
     rank: MnemonicQuery__RankType, 
     timePeriod: MnemonicQuery__RecordsDuration,
-    limit: string = '20',
+    limit: string = '100',
     offset: string= '0'
   ) {
   

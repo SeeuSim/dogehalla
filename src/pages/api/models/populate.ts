@@ -7,7 +7,7 @@ import { prisma } from "server/db/client";
 import { nextConnectOptions } from "server/auth/nextConnect";
 import { authOptions } from "server/auth/session";
 
-import { populateDb } from "server/common/mnemonic/models";
+import { dailyJob } from "server/common/mnemonic/models";
 
 const handler = nextConnect(nextConnectOptions);
 handler.use(...authOptions);
@@ -26,8 +26,8 @@ handler.post(
       return res.status(401).json({ message: "Forbidden" })
     }
 
-    //Is admin, proceed to populate database
-    await populateDb();
+    //Is admin, proceed to populate/refresh database
+    await dailyJob();
 
     return res.status(200).json({ message: "ok" });
   }
