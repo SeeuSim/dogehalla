@@ -14,7 +14,7 @@ const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 
 const menuOptions = [
   { name: 'Home', href: '/' },
-  { name: 'Analytics', href: '#' },
+  { name: 'Analytics', href: '/analytics' },
   { name: 'Account', href: '/account' },
 ]
 

@@ -1,0 +1,12 @@
+volumes:
+  data:
+
+services:
+  redis:
+    image: redis:latest
+    volumes:
+      - data:/data
+    ports:
+      - 6379:6379
+  myapp:
+    image: 0256c63af7dbecdb8783029521d1bcaf02d194d1451ad8cddc193352b6caedd0
