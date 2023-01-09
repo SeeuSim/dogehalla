@@ -16,6 +16,7 @@ const menuOptions = [
   { name: 'Home', href: '/' },
   { name: 'Analytics', href: '#' },
   { name: 'Account', href: '/account' },
+  { name: 'Help', href: '/help' }
 ]
 
 const Logo = () => {
