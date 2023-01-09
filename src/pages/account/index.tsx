@@ -36,6 +36,6 @@ export async function getServerSideProps({ req, res }: {req: NextApiRequest & {u
 
   //Never called, `middleware.ts` blocks navigation here if the session cookie does not exist.
   return {
-    redirect: { destination: "/auth/login", permanent: true }
+    redirect: { destination: "auth/login", permanent: true }
   };
 }

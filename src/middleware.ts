@@ -7,7 +7,8 @@ export async function middleware(request: NextRequest) {
   if (session != undefined) return NextResponse.next();
 
   const origin = request.headers.get("referer");
-  const response = NextResponse.redirect(`${origin}/auth/login`);
+  
+  const response = NextResponse.redirect(`${origin}auth/login`);
 
   response.headers.set("error", "Please login first");
   
