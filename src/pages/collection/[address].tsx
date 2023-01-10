@@ -49,11 +49,16 @@ import {
   Filler
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { ArrowRightIcon } from '@heroicons/react/24/outline';
+
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
 
 //For getServerSideProps
 import type { Collection } from "@prisma/client";
 import { prisma } from "server/db/client";
 import { Decimal } from "@prisma/client/runtime";
+import { blurImageURL } from 'components/images/imageProps';
 
 ChartJS.register(
   CategoryScale,
@@ -119,8 +124,10 @@ const CollectionPage: NextPage<{
    } as const;
 
   const [selector, setSelector] = useState<keyof typeof FNS>(dataOptions[0]);
+  const [records, setRecords] = useState(7);
+  const [imageErr, setImageErr] = useState(false);
 
-  const dataPts = collection.data.map(FNS[selector]);
+  const dataPts = collection.data.map(FNS[selector]).slice(collection.data.length - records);
 
   const patchedHandleSelect = (e: any & {target: { value: keyof typeof FNS}}) => {
     setSelector(e.target.value);
@@ -133,7 +140,7 @@ const CollectionPage: NextPage<{
         day: "numeric",
         month: "short"
       })}`
-    }),
+    }).slice(collection.data.length - records),
     datasets: [
       {
         data: dataPts,
@@ -141,52 +148,7 @@ const CollectionPage: NextPage<{
       }
     ]
   }
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        labels: {
-          font: {
-            family: "sans-serif",
-            size: 14
-          }
-        },
-        display: true
-      }
-    },
-    elements: {
-      line: {
-        tension: 0,
-        borderWidth: 2,
-        borderColor: "rgba(47, 97, 68, 1)",
-        fill: "start",
-        backgroundColor: "rgba(47, 97, 68, 0.3)",
-      },
-      point: {
-        radius: 0,
-        hitRadius: 0
-      },
-    },
-    scales: {
-      y: {
-        type: 'linear' as const,
-        display: true,
-        position: 'left' as const,
-        min: 0,
-        ticks: {
-          callback: function(value: any, index: any, ticks: any) {
-            return selector === "Average Price" || selector === "Maximum Price" || selector ==="Minimum Price" || selector ==="Sales Volume"
-              ? `${value} ETH`
-              : value
-          }
-        }
-      }
-    },
-    interaction: {
-      intersect: false,
-      mode: "index" as const
-    },
-  };
+  
 
   /**
    * PANES
@@ -197,38 +159,132 @@ const CollectionPage: NextPage<{
       bg-white border border-gray-200 rounded-lg shadow-md 
       dark:bg-gray-800 dark:border-gray-700 max-w-full max-h-full
       `}>
-      <a href="#">
-          <Image className="rounded-t-lg max-h-96" 
-                src={collection.image} 
-                alt=""
-                height={300}
-                width={300} />
-      </a>
+      <div className="px-4 pt-4 flex">
+        <div className="h-56 w-56 rounded-lg relative overflow-hidden shadow-md flex">
+          <Image 
+            className="object-cover" 
+            src={imageErr? "/collection_fallback.webp": collection.image} 
+            alt={""}
+            sizes="224px" 
+            fill={true}
+            placeholder="blur"
+            blurDataURL={blurImageURL("64", "64")}
+            onError={() => setImageErr(true)}
+          />
+        </div>
+      </div>
       <div className="p-5">
           <a href="#">
               <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{`Collection ${collection.name}`}</h5>
           </a>
-          <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {collection.description}
-          </p>
+          <ReactMarkdown remarkPlugins={[gfm]} className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+            {collection.description??""}
+          </ReactMarkdown>
           <a href={collection.extURL??"#"} className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-              Read more
-              <svg aria-hidden="true" className="w-4 h-4 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
+            Read more
+            <ArrowRightIcon className="w-4 h-4 ml-2 -mr-1"/>
           </a>
       </div>
     </div>;
+
+  const Graph = () => {
+    const options = {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              size: 14,
+              family: "system-ui"
+            },
+            color: "#64748b"
+          },
+          display: true
+        }
+      },
+      elements: {
+        line: {
+          tension: 0,
+          borderWidth: 2,
+          borderColor: "rgba(47, 97, 68, 1)",
+          fill: "start",
+          backgroundColor: "rgba(47, 97, 68, 0.3)",
+        },
+        point: {
+          radius: 0,
+          hitRadius: 0
+        },
+      },
+      scales: {
+        y: {
+          type: 'linear' as const,
+          display: true,
+          position: 'left' as const,
+          min: 0,
+          ticks: {
+            callback: function(value: any, index: any, ticks: any) {
+              return selector === "Average Price" || selector === "Maximum Price" || selector ==="Minimum Price" || selector ==="Sales Volume"
+                ? `${value} ETH`
+                : value
+            },
+            color: "#64748b" 
+          },
+          labels: {
+            font: {
+              family: "system-ui"
+            }
+          }
+        },
+        x: {
+          ticks: {
+            color: "#64748b" 
+          },
+          label: {
+            font: {
+              family: "system-ui"
+            }
+          }
+        }
+      },
+      interaction: {
+        intersect: false,
+        mode: "index" as const
+      },
+    };
+    return (
+      <Line options={options} data={data} width={400} height={300}/>
+    );
+  }
 
   const graphPane: JSX.Element = 
     <div className={`
     bg-white border border-gray-200 rounded-lg shadow-md 
     dark:bg-gray-800 dark:border-gray-700 max-w-full max-h-full
     `}>
-      <select value={selector} onChange={patchedHandleSelect}>
-        {dataOptions.map((o) => {
-          return <option key={o} value={o}>{o}</option>
-        })}
-      </select>
-      <Line options={options} data={data} width={400} height={300}/>
+
+      <div className="p-2 space-x-2">
+        <select 
+          className="rounded-md p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 shadow-md"
+          value={selector} 
+          onChange={patchedHandleSelect}
+          >
+          {dataOptions.map((o) => {
+            return <option key={o} value={o}>{o}</option>
+          })}
+        </select>
+        <select 
+          className="rounded-md p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 shadow-md"
+          value={records} 
+          onChange={(e: any & {target: {value: number}}) => setRecords(e.target.value)}
+          >
+          <option key={7} value={7}>7d</option>
+          <option key={30} value={30}>30d</option>
+        </select>
+      </div>
+
+      <div className="px-4">
+        <Graph/>
+      </div>
     </div>
 
 
@@ -248,25 +304,18 @@ export default CollectionPage;
 export async function getServerSideProps(context: GetServerSidePropsContext & {params: {address?: string}}) {
   const { address } = context.params;
 
-  //Set ISR
-  const ONE_HOUR_IN_SECONDS = 60 * 60;
-  const REVALIDATE_TIME = 15;
-  // context.res.setHeader(
-  //   'Cache-Control',
-  //   `public, s-maxage=${ONE_HOUR_IN_SECONDS}, stale-while-revalidate=${REVALIDATE_TIME}`
-  // );
-
+  
   if (!address) return {
     redirect: { destination: "/", permanent: true }
   };
-
+  
   const current = new Date(Date.now());
-  current.setDate(current.getDate() - 7);
-
+  current.setDate(current.getDate() - 30);
+  
   const numberFmt = (n: Decimal | bigint | null | undefined ) => {
     return new Number(n?? 0).valueOf()
   }
-
+  
   const collection = await prisma.collection.findUnique({
     where: {
       address: address
@@ -284,11 +333,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext & {p
       }
     }
   });
-
+  
   if (!collection) return {
     redirect: { destination: "/", permanent: true }
   };
-
+  
   const out = {
     address: collection?.address,
     name: collection?.name,
@@ -296,11 +345,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext & {p
     bannerImg: collection?.bannerImg,
     description: collection?.description,
     extURL: collection?.extURL,
-
+    
     floor: numberFmt(collection?.floor),
     salesVolume: numberFmt(collection?.salesVolume),
     owners: collection?.owners,
-
+    
     data: collection?.data.map(
       (d) => {
         return {
@@ -317,9 +366,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext & {p
           ownersCount: numberFmt(d.ownersCount)
         }
       }
-    )
-  }
+    ),
+  };
 
+  //Set ISR
+  const ONE_HOUR_IN_SECONDS = 60 * 60;
+  const REVALIDATE_TIME = 15;
+  context.res.setHeader(
+    'Cache-Control',
+    `public, s-maxage=${ONE_HOUR_IN_SECONDS}, stale-while-revalidate=${REVALIDATE_TIME}`
+  );
+    
   return {
     props: {
       collection: out

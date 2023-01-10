@@ -297,7 +297,7 @@ export default function CollectionsDash() {
                     className="object-cover"
                     placeholder="blur"
                     blurDataURL={blurImageURL("64", "64")}
-                    onError={() => setImageErr(true)}/>
+                    />
                 </div>
               </div>
               <div className="block">
