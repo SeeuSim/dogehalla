@@ -41,7 +41,7 @@ CREATE TABLE "RankTable" (
 -- CreateTable
 CREATE TABLE "RankTableEntry" (
     "id" TEXT NOT NULL,
-    "value" TEXT NOT NULL,
+    "value" DECIMAL(65,30) NOT NULL,
     "tableId" TEXT NOT NULL,
     "collectionId" TEXT NOT NULL,
 

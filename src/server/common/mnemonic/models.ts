@@ -15,7 +15,6 @@ const prisma = new PrismaClient({
   log: ["error", "warn"]
 });
 
-
 /**
  * Given an Ethereum contract address, retrieves the associated collection from
  * the database, OR:
@@ -118,7 +117,7 @@ async function populateDataPoints(
     current.getFullYear(),
     current.getMonth(),
     current.getDate() + 1,
-    // -1 * Math.round(current.getTimezoneOffset()/60),
+    -1 * Math.round(current.getTimezoneOffset()/60),
   ).toJSON();
   
   const prices = await MnemonicQuery.collectionPriceHistory(
@@ -283,7 +282,9 @@ async function updateRankings() {
       }
     }
   }
+  console.log("Pushing to database...")
   await prisma.$transaction(rankingJobs);
+  console.log("==========>> Rankings Refreshed!")
 }
 
 /**
@@ -296,7 +297,7 @@ const refreshTimeSeries = async () => {
   const collections = await prisma.collection.findMany();
   console.log("////////////////////////////////////////////////")
   console.log("//////////////Refreshing TIMESERIES/////////////")
-  console.log(`////Awaiting ${collections.length} collections//`)
+  console.log(`//////////////Awaiting ${collections.length} collections////////`)
   console.log("////////////////////////////////////////////////")
   let ct = 1;
   for (let clc of collections) {
@@ -339,6 +340,7 @@ const refreshFloorPrice = async () => {
   }
   console.log("Pushing to database...")
   await prisma.$transaction(jobs);
+  console.log("=======>> Floor Price refreshed! :)")
 }
 
 /**

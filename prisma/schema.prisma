@@ -137,7 +137,7 @@ model RankTable {
 
 model RankTableEntry {
   id            String            @id @default(cuid())
-  value         String
+  value         Decimal
   tableId       String
   table         RankTable         @relation(fields: [tableId], references: [id], onDelete: Cascade)
   collectionId  String
