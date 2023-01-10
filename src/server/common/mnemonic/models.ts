@@ -1,5 +1,5 @@
-import type { Collection, DataPoint, Prisma, RankTableEntry } from "@prisma/client";
-import { prisma } from "server/db/client";
+import { Collection, DataPoint, Prisma, PrismaClient, RankTableEntry } from "@prisma/client";
+// import { prisma } from "server/db/client";
 
 import * as MnemonicQuery from "./mnemonic";
 
@@ -9,6 +9,12 @@ import {
   MnemonicQuery__RecordsDuration, 
   MnemonicResponse__CollectionMeta__Metadata__Type 
 } from "./types";
+
+//ONLY FOR THIS FILE
+const prisma = new PrismaClient({
+  log: ["error", "warn"]
+});
+
 
 /**
  * Given an Ethereum contract address, retrieves the associated collection from
@@ -106,11 +112,13 @@ async function populateDataPoints(
   grouping: MnemonicQuery__DataTimeGroup = MnemonicQuery__DataTimeGroup.oneDay
 ) {
   const current = new Date(Date.now());
+
+  //Set to previous day T00:00 - current day T00:00 is not avail
   const timeStamp = new Date(
     current.getFullYear(),
     current.getMonth(),
-    current.getDate(),
-    // current.getHours()
+    current.getDate() + 1,
+    // -1 * Math.round(current.getTimezoneOffset()/60),
   ).toJSON();
   
   const prices = await MnemonicQuery.collectionPriceHistory(
@@ -147,14 +155,14 @@ async function populateDataPoints(
     async (prc, index) => {
       const [ownr, sls, tkn] = [owners.dataPoints[index], sales.dataPoints[index], tokens.dataPoints[index]];
       const data = {
-        avgPrice: Boolean(prc.avg)? prc.avg : null,
-        maxPrice: Boolean(prc.max)? prc.max : null,
-        minPrice: Boolean(prc.min)? prc.min : null,
-        salesVolume: Boolean(sls?.volume)? sls?.volume : null,
-        tokensBurned: Boolean(tkn?.burned)? tkn?.burned : null,
-        tokensMinted: Boolean(tkn?.minted)? tkn?.minted : null,
-        totalBurned: Boolean(tkn?.totalBurned)? tkn?.totalBurned : null,
-        totalMinted: Boolean(tkn?.totalMinted)? tkn?.totalMinted : null,
+        avgPrice: Boolean(prc.avg)? prc.avg : 0,
+        maxPrice: Boolean(prc.max)? prc.max : 0,
+        minPrice: Boolean(prc.min)? prc.min : 0,
+        salesVolume: Boolean(sls?.volume)? sls?.volume : 0,
+        tokensBurned: Boolean(tkn?.burned)? tkn?.burned : 0,
+        tokensMinted: Boolean(tkn?.minted)? tkn?.minted : 0,
+        totalBurned: Boolean(tkn?.totalBurned)? tkn?.totalBurned : 0,
+        totalMinted: Boolean(tkn?.totalMinted)? tkn?.totalMinted : 0,
         ownersCount: BigInt(ownr?.count?? 0).valueOf(),
         salesCount: BigInt(sls?.count?? 0).valueOf(),
       };
@@ -257,14 +265,20 @@ async function updateRankings() {
       //Query data
       const collections = await MnemonicQuery.getTopCollections(rank, time);
 
-      
+      console.log("=========================================================================================");
+      console.log(`==Refreshing ${rank} ${time} Rankings for ${collections.collections.length} collections==`);
+      console.log("=========================================================================================");
+      let ct = 1;
+
       for (let clctn of collections.collections) {
         const collection = await findOrCreateCollection(clctn.contractAddress);
 
           if (collection) {
             //Create the ranking.
+            console.log(`${ct}. ${collection.name || collection.address}`)
             const job = updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
             rankingJobs.push(job);
+            ct += 1;
           }
       }
     }
@@ -280,15 +294,22 @@ async function updateRankings() {
  */
 const refreshTimeSeries = async () => {
   const collections = await prisma.collection.findMany();
-
+  console.log("////////////////////////////////////////////////")
+  console.log("//////////////Refreshing TIMESERIES/////////////")
+  console.log(`////Awaiting ${collections.length} collections//`)
+  console.log("////////////////////////////////////////////////")
+  let ct = 1;
   for (let clc of collections) {
+    console.log(`${ct}. ${clc.name || clc.address}`)
     await populateDataPoints(
       clc.id,
       clc.address,
       MnemonicQuery__RecordsDuration.oneDay, //Duration
       MnemonicQuery__DataTimeGroup.oneDay //Grouping - To experiment with 1 Hour, or 15 Mins if database allows
     )
+    ct += 1
   }
+  console.log("=====>> TimeSeries Refreshed!! :)")
 }
 
 /**
@@ -298,9 +319,12 @@ const refreshTimeSeries = async () => {
  */
 const refreshFloorPrice = async () => {
   const collection = await prisma.collection.findMany();
+  console.log(`////////////////Refreshing Floor Price for ${collection.length} Collections`)
 
   let jobs: Prisma.Prisma__CollectionClient<Collection, never>[] = [];
+  let ct = 1;
   for (let clc of collection) {
+    console.log(`${ct}. ${clc.name || clc.address}`)
     const data = await MnemonicQuery.floorPrice(clc.address);
     const job = prisma.collection.update({
       where: {
@@ -311,8 +335,9 @@ const refreshFloorPrice = async () => {
       }
     });
     jobs.push(job);
+    ct += 1;
   }
-
+  console.log("Pushing to database...")
   await prisma.$transaction(jobs);
 }
 
@@ -321,7 +346,6 @@ const refreshFloorPrice = async () => {
  * respect to the API and market conditions.
  */
 export const dailyJob = async () => {
-
   const collections = await prisma.collection.count();
 
   if (collections > 0) {
