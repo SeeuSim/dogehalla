@@ -5,7 +5,6 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 import OAuthButton from "components/buttons/OAuthButton";
-import { BASEURL } from "utils/base";
 
 const ModalUI: React.FC<{
   closeButton: JSX.Element
@@ -14,7 +13,7 @@ const ModalUI: React.FC<{
   const router = useRouter();
 
   const linkOAuthCallback =  async (authProvider: string) => {
-    const response = await fetch(`${BASEURL}/api/auth/linkAuth`, {
+    const response = await fetch(`/api/auth/linkAuth`, {
       method: "POST", 
       headers: {
         'Content-Type': 'application/json'

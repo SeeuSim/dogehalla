@@ -254,11 +254,11 @@ export default function CollectionsDash() {
     image: string,
     address: string,
     floor: Decimal | null,
-    value?: string
+    value?: Decimal 
   }> = ({index, name, image, address, floor, value}) => {
     const [imageErr, setImageErr] = useState(false);
 
-    const formatVal = (v?: string) => {
+    const formatVal = (v?: string | Decimal) => {
       if (!v) return "0"
       const actual = new Number(v);
       return actual > 1e9
@@ -282,6 +282,7 @@ export default function CollectionsDash() {
       <tr
         className="bg-gray-50 dark:bg-gray-700"
         key={index}>
+        <td>
         <Link href={`/collection/${address}`}>
           <div className="px-4 py-2 sm:px-6 w-full inline-flex items-center justify-between space-x-2 hover:bg-slate-100 dark:hover:bg-slate-600">
             <div className="inline-flex items-center">
@@ -291,7 +292,8 @@ export default function CollectionsDash() {
                   <Image
                     src={imageErr? "/collection_fallback.webp": image} 
                     alt={""} 
-                    fill={true} 
+                    fill={true}
+                    sizes="64px" 
                     className="object-cover"
                     placeholder="blur"
                     blurDataURL={blurImageURL("64", "64")}
@@ -321,6 +323,7 @@ export default function CollectionsDash() {
             </div>
           </div>
         </Link>
+        </td>
       </tr>
     )
   }

@@ -77,7 +77,7 @@ export default function SignUp() {
   //Submission Logic
   async function onSubmit (data: any) {
     setSubmitting(true);
-    const res = await fetch(`${BASEURL}/api/auth/signup`, {
+    const res = await fetch(`../api/auth/signup`, {
       method: "POST",
       body: JSON.stringify(data)
     });

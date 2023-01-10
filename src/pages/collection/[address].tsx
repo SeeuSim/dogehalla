@@ -1,4 +1,3 @@
-"use client"
 /**
  * Ideal Layout:
  * 
@@ -31,7 +30,9 @@
  * |                  |
  * --------------------
  */
+import { useState } from 'react';
 import { GetServerSidePropsContext, NextPage } from "next";
+
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -50,10 +51,9 @@ import {
 import { Line } from "react-chartjs-2";
 
 //For getServerSideProps
-import type { Collection, DataPoint } from "@prisma/client";
+import type { Collection } from "@prisma/client";
 import { prisma } from "server/db/client";
 import { Decimal } from "@prisma/client/runtime";
-
 
 ChartJS.register(
   CategoryScale,
@@ -66,36 +66,93 @@ ChartJS.register(
   Filler
 );
 
+type DataType = {
+  timestamp: string,
+  avgPrice: number,
+  maxPrice: number,
+  minPrice: number,
+  salesCount: number,
+  salesVolume: number,
+  tokensMinted: number,
+  tokensBurned: number,
+  totalMinted: number,
+  totalBurned: number,
+  ownersCount: number
+}
+
 const CollectionPage: NextPage<{
-  collection: (Collection & { data: DataPoint[]}) | null
+  collection: (Collection & { data: DataType[]}) | null
 }> = ( { collection } ) => {
   const router = useRouter();
 
-  if (!collection) {
-    router.push("/");
+  if (!collection) { //Redirect for invalid queries
+    router.push("/")
     return <div></div>
   }
 
   const address = collection.address;
 
-  /**
-   * TODO: Add fetched data from prisma/postgres 
-   */
+  const dataOptions = [
+    "Average Price",
+    "Maximum Price",
+    "Minimum Price",
+    "Sales Count",
+    "Sales Volume",
+    "Tokens Minted",
+    "Tokens Burned",
+    "Total Tokens Minted",
+    "Total Tokens Burned",
+    "Owners"
+  ] as const;
+
+  const FNS = {
+    "Average Price": (i: DataType) => i.avgPrice,
+    "Maximum Price": (i: DataType) => i.maxPrice,
+    "Minimum Price":(i: DataType) => i.minPrice,
+    "Sales Count": (i: DataType) => i.salesCount,
+    "Sales Volume": (i: DataType) => i.salesVolume,
+    "Tokens Minted": (i: DataType) => i.tokensMinted,
+    "Tokens Burned": (i: DataType) => i.tokensBurned,
+    "Total Tokens Minted": (i: DataType) => i.totalMinted,
+    "Total Tokens Burned": (i: DataType) => i.totalBurned,
+    "Owners": (i: DataType) => i.ownersCount
+   } as const;
+
+  const [selector, setSelector] = useState<keyof typeof FNS>(dataOptions[0]);
+
+  const dataPts = collection.data.map(FNS[selector]);
+
+  const patchedHandleSelect = (e: any & {target: { value: keyof typeof FNS}}) => {
+    setSelector(e.target.value);
+  }
 
   const data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July", "August"],
+    labels: collection.data.map(i => {
+      const d = new Date(i.timestamp);
+      return `${d.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short"
+      })}`
+    }),
     datasets: [
       {
-        data: [0.1, 0.4, 0.2, 0.3, 0.7, 0.4, 0.6, 0.3]
+        data: dataPts,
+        label: `${selector}`
       }
     ]
   }
-
   const options = {
+    responsive: true,
     plugins: {
       legend: {
-        display: false,
-      },
+        labels: {
+          font: {
+            family: "sans-serif",
+            size: 14
+          }
+        },
+        display: true
+      }
     },
     elements: {
       line: {
@@ -107,16 +164,27 @@ const CollectionPage: NextPage<{
       },
       point: {
         radius: 0,
-        hitRadius: 0,
+        hitRadius: 0
       },
     },
     scales: {
-      xAxis: {
-        display: false,
-      },
-      yAxis: {
-        display: false,
-      },
+      y: {
+        type: 'linear' as const,
+        display: true,
+        position: 'left' as const,
+        min: 0,
+        ticks: {
+          callback: function(value: any, index: any, ticks: any) {
+            return selector === "Average Price" || selector === "Maximum Price" || selector ==="Minimum Price" || selector ==="Sales Volume"
+              ? `${value} ETH`
+              : value
+          }
+        }
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: "index" as const
     },
   };
 
@@ -124,7 +192,8 @@ const CollectionPage: NextPage<{
    * PANES
    */
   const pane: JSX.Element = 
-    <div className={`
+    <div 
+      className={`
       bg-white border border-gray-200 rounded-lg shadow-md 
       dark:bg-gray-800 dark:border-gray-700 max-w-full max-h-full
       `}>
@@ -154,7 +223,12 @@ const CollectionPage: NextPage<{
     bg-white border border-gray-200 rounded-lg shadow-md 
     dark:bg-gray-800 dark:border-gray-700 max-w-full max-h-full
     `}>
-      <Line data={data} width={400} height={300} options={options}/>
+      <select value={selector} onChange={patchedHandleSelect}>
+        {dataOptions.map((o) => {
+          return <option key={o} value={o}>{o}</option>
+        })}
+      </select>
+      <Line options={options} data={data} width={400} height={300}/>
     </div>
 
 
@@ -174,10 +248,20 @@ export default CollectionPage;
 export async function getServerSideProps(context: GetServerSidePropsContext & {params: {address?: string}}) {
   const { address } = context.params;
 
-  if (!address) return { props: {}}
+  //Set ISR
+  const ONE_HOUR_IN_SECONDS = 60 * 60;
+  const REVALIDATE_TIME = 15;
+  // context.res.setHeader(
+  //   'Cache-Control',
+  //   `public, s-maxage=${ONE_HOUR_IN_SECONDS}, stale-while-revalidate=${REVALIDATE_TIME}`
+  // );
+
+  if (!address) return {
+    redirect: { destination: "/", permanent: true }
+  };
 
   const current = new Date(Date.now());
-  current.setDate(current.getDate() - 7 * 24 * 60 * 60);
+  current.setDate(current.getDate() - 7);
 
   const numberFmt = (n: Decimal | bigint | null | undefined ) => {
     return new Number(n?? 0).valueOf()
@@ -193,10 +277,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext & {p
           timestamp: {
             gte: current
           }
+        },
+        orderBy: {
+          timestamp: "asc"
         }
       }
     }
   });
+
+  if (!collection) return {
+    redirect: { destination: "/", permanent: true }
+  };
 
   const out = {
     address: collection?.address,

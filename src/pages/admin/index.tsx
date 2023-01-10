@@ -23,7 +23,7 @@ const AdminPage: NextPage<{
 
   const populateBtnCallback = async () => {
     psetLoading(true);
-    const res = await fetch(`${BASEURL}/api/models/populate`,
+    const res = await fetch(`api/models/populate`,
       {
         method: "POST",
         body: JSON.stringify({
@@ -37,7 +37,7 @@ const AdminPage: NextPage<{
 
   const deleteBtnCallback = async () => {
     dsetLoading(true);
-    const res = await fetch(`${BASEURL}/api/models/populate`,
+    const res = await fetch(`api/models/populate`,
       {
         method: "DELETE",
         body: JSON.stringify({
