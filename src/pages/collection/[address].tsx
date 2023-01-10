@@ -31,6 +31,7 @@
  * |                  |
  * --------------------
  */
+import { GetServerSidePropsContext, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -48,6 +49,12 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
+//For getServerSideProps
+import type { Collection, DataPoint } from "@prisma/client";
+import { prisma } from "server/db/client";
+import { Decimal } from "@prisma/client/runtime";
+
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -59,9 +66,17 @@ ChartJS.register(
   Filler
 );
 
-export default function Collection() {
+const CollectionPage: NextPage<{
+  collection: (Collection & { data: DataPoint[]}) | null
+}> = ( { collection } ) => {
   const router = useRouter();
-  const { address } = router.query;
+
+  if (!collection) {
+    router.push("/");
+    return <div></div>
+  }
+
+  const address = collection.address;
 
   /**
    * TODO: Add fetched data from prisma/postgres 
@@ -115,25 +130,19 @@ export default function Collection() {
       `}>
       <a href="#">
           <Image className="rounded-t-lg max-h-96" 
-                src="https://i.seadn.io/gae/Ju9CkWtV-1Okvf45wo8UctR-M9He2PjILP0oOvxE89AyiPPGtrR3gysu1Zgy0hjd2xKIgjJJtWIc0ybj4Vd7wv8t3pxDGHoJBzDB?auto=format&w=384" 
+                src={collection.image} 
                 alt=""
                 height={300}
                 width={300} />
       </a>
       <div className="p-5">
           <a href="#">
-              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{`Collection ${address}`}</h5>
+              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{`Collection ${collection.name}`}</h5>
           </a>
           <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do 
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut 
-            enim ad minim veniam, quis nostrud exercitation ullamco laboris 
-            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor 
-            in reprehenderit in voluptate velit esse cillum dolore eu fugiat 
-            nulla pariatur. Excepteur sint occaecat cupidatat non proident, 
-            sunt in culpa qui officia deserunt mollit anim id est laborum.
+            {collection.description}
           </p>
-          <a href="#" className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          <a href={collection.extURL??"#"} className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
               Read more
               <svg aria-hidden="true" className="w-4 h-4 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
           </a>
@@ -158,4 +167,71 @@ export default function Collection() {
       {graphPane}
     </div>
   );
+}
+
+export default CollectionPage;
+
+export async function getServerSideProps(context: GetServerSidePropsContext & {params: {address?: string}}) {
+  const { address } = context.params;
+
+  if (!address) return { props: {}}
+
+  const current = new Date(Date.now());
+  current.setDate(current.getDate() - 7 * 24 * 60 * 60);
+
+  const numberFmt = (n: Decimal | bigint | null | undefined ) => {
+    return new Number(n?? 0).valueOf()
+  }
+
+  const collection = await prisma.collection.findUnique({
+    where: {
+      address: address
+    },
+    include: {
+      data: {
+        where: {
+          timestamp: {
+            gte: current
+          }
+        }
+      }
+    }
+  });
+
+  const out = {
+    address: collection?.address,
+    name: collection?.name,
+    image: collection?.image,
+    bannerImg: collection?.bannerImg,
+    description: collection?.description,
+    extURL: collection?.extURL,
+
+    floor: numberFmt(collection?.floor),
+    salesVolume: numberFmt(collection?.salesVolume),
+    owners: collection?.owners,
+
+    data: collection?.data.map(
+      (d) => {
+        return {
+          timestamp: d.timestamp.toJSON(),
+          avgPrice: numberFmt(d.avgPrice),
+          maxPrice: numberFmt(d.maxPrice),
+          minPrice: numberFmt(d.minPrice),
+          salesCount: numberFmt(d.salesCount),
+          salesVolume: numberFmt(d.salesVolume),
+          tokensMinted: numberFmt(d.tokensMinted),
+          tokensBurned: numberFmt(d.tokensBurned),
+          totalMinted: numberFmt(d.totalMinted),
+          totalBurned: numberFmt(d.totalBurned),
+          ownersCount: numberFmt(d.ownersCount)
+        }
+      }
+    )
+  }
+
+  return {
+    props: {
+      collection: out
+    }
+  }
 }

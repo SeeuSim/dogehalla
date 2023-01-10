@@ -27,6 +27,7 @@ export const NFTRouter = router({
             id: true,
             entries: {
               select: {
+                id: true,
                 collection: {
                   select: {
                     name: true,
@@ -58,4 +59,29 @@ export const NFTRouter = router({
         };   
       }
     ),
+  getCollection: publicProcedure
+    .input(z.object({
+      address: z.string().min(42)
+    }))
+    .query(
+      async ({input}) => {
+        const current = new Date(Date.now());
+        current.setDate(current.getDate() - 7);
+        const collection = await prisma.collection.findUnique({
+          where: {
+            address: input.address
+          },
+          include: {
+            data: {
+              where: {
+                timestamp: {
+                  gte: current
+                }
+              }
+            }
+          }
+        });
+        return collection;
+      }
+    )
 });
