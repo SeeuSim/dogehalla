@@ -61,27 +61,35 @@ export const NFTRouter = router({
     ),
   getCollection: publicProcedure
     .input(z.object({
-      address: z.string().min(42)
+      field: z.string().min(1),
+      filter: z.enum(["All", "Name", "Address"])
     }))
     .query(
-      async ({input}) => {
-        const current = new Date(Date.now());
-        current.setDate(current.getDate() - 7);
-        const collection = await prisma.collection.findUnique({
-          where: {
-            address: input.address
-          },
-          include: {
-            data: {
-              where: {
-                timestamp: {
-                  gte: current
-                }
-              }
-            }
-          }
-        });
-        return collection;
-      }
-    )
+      async ({input}) => { //As these have very few word vectors as compared to paragraphs, `contains` shall suffice
+        const searchQ = input.filter === "All"
+          ? { OR: [{ name: { contains: input.field, mode: 'insensitive' as const } }, { address: { contains: input.field, mode: 'insensitive' as const } }] }
+          : input.filter === "Name"
+          ? { name: { contains: input.field, mode: 'insensitive' as const } }
+          : { address: { contains: input.field, mode: 'insensitive' as const } };
+
+        try {
+          const collections = await prisma.collection.findMany({
+            where: searchQ, 
+            select: {
+              name: true,
+              address: true,
+              floor: true,
+              image: true,
+              
+            },
+            orderBy: {
+              name: "asc"
+            },
+            take: 10
+          });
+          return collections;
+        } catch (err) {
+          return []
+        }
+    })
 });

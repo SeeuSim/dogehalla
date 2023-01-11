@@ -7,8 +7,9 @@ import { Decimal } from "@prisma/client/runtime";
 
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
+import { formatFloor, formatVal } from "utils/ethereum/price";
+import { blurImageURL } from "utils/images/imageProps";
 import { trpc } from "utils/trpc";
-import { blurImageURL } from "components/images/imageProps";
 
 export default function CollectionsDash() {
   const RECORDS_PER_PAGE = 10;
@@ -258,26 +259,6 @@ export default function CollectionsDash() {
   }> = ({index, name, image, address, floor, value}) => {
     const [imageErr, setImageErr] = useState(false);
 
-    const formatVal = (v?: string | Decimal) => {
-      if (!v) return "0"
-      const actual = new Number(v);
-      return actual > 1e9
-        ? `${actual.toExponential(3).toLocaleUpperCase("en-US")}`
-        : actual > 1e6
-        ? `${new Number(actual.valueOf()/1e6).toLocaleString("en-US", {maximumSignificantDigits: 4})} M`
-        : actual > 1e3
-        ? `${actual.toLocaleString("en-US", {maximumSignificantDigits: 5})}`
-        : actual.toLocaleString("en-US", {maximumFractionDigits: 3})
-    }
-    
-    const formatFloor = () => {
-      if (floor === null) return "0"
-      const flr = new Number(floor);
-      return flr < 1e-6
-        ? flr.toExponential(2)
-        : flr.toLocaleString("en-US", {maximumFractionDigits: 3})
-    }
-
     return (
       <tr
         className="bg-gray-50 dark:bg-gray-700"
@@ -297,6 +278,7 @@ export default function CollectionsDash() {
                     className="object-cover"
                     placeholder="blur"
                     blurDataURL={blurImageURL("64", "64")}
+                    onError={() => setImageErr(true)}
                     />
                 </div>
               </div>
@@ -308,11 +290,11 @@ export default function CollectionsDash() {
                     : <code className="font-light">collection_name</code>
                   }
                 </div>
-                <div className="md:hidden mx-2 text-xs truncate max-w-[27vw] sm:max-w-none sm:text-clip">Floor:&nbsp;{formatFloor()}&nbsp;ETH</div>
+                <div className="md:hidden mx-2 text-xs truncate max-w-[27vw] sm:max-w-none sm:text-clip">Floor:&nbsp;{formatFloor(floor)}&nbsp;ETH</div>
               </div>
             </div>
             <div className="inline-flex sm:px-4">
-              <div className="hidden md:block w-24 px-2 text-center mr-6 font-medium">{formatFloor()}&nbsp;ETH</div>
+              <div className="hidden md:block w-24 px-2 text-center mr-6 font-medium">{formatFloor(floor)}&nbsp;ETH</div>
               <div className="w-28 text-center pr-2 font-medium">
                 {
                   ranking != CollectionsRank.salesCount

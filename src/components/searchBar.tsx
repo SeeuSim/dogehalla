@@ -1,13 +1,36 @@
+import { useState, Fragment } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
+
 import { Listbox, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { useState, Fragment } from "react";
 
-export default function Searchbar() {
+import { blurImageURL } from "utils/images/imageProps";
+import { trpc } from "utils/trpc";
+import { formatFloor } from "utils/ethereum/price";
 
-  const searchFilters = ["All", "Collections", "Tokens"];
+//Pass in the refocus function from Popover to close the searchbar
+export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) {
+
+  const router = useRouter();
+
+  const searchFilters = ["All", "Name", "Address"] as const;
 
   const [searchFilterState, setSearchFilterState] = useState(searchFilters[0]);
+  const [searchField, setSearchField] = useState("");
+  const [refetch, triggerRefetch] = useState(false);
+
+  const {data: collections} = trpc.model.nft.getCollection.useQuery({
+    field: searchField,
+    filter: searchFilterState
+  }, {
+    onSuccess: (data) => {
+      triggerRefetch(false);
+    },
+    enabled: refetch && searchField.length > 0
+  })
 
   const searchFilterComponent = 
     <Listbox value={searchFilterState} onChange={setSearchFilterState}>
@@ -69,12 +92,23 @@ export default function Searchbar() {
     </Listbox>;
 
   return (
-    <form>
-      <div className="flex">
+    <form onSubmit={(e) => {
+      if (collections != undefined && collections.length > 0) {
+        //Should push a search page - WIP
+        router.push(`/collection/${collections[0]?.address}`)
+      }
+      //Replace with toast
+      console.log("Please search for a collection first");
+    }}>
+      <div className="flex relative">
         {searchFilterComponent}
         <div className="relative w-full">
             <input type="search" 
-                    id="search-dropdown" 
+                    id="search-dropdown"
+                    onChange={(e) => {
+                      setSearchField(e.target.value);
+                      triggerRefetch(true);
+                    }}
                     className={`
                       block p-2.5 w-full z-20 
                       text-sm text-gray-900 
@@ -106,6 +140,53 @@ export default function Searchbar() {
               </svg>
               <span className="sr-only">Search</span>
             </button>
+        </div>
+      </div>
+      <div className="absolute right-2 mt-1 w-full pl-[152px]">
+        <div className="bg-slate-50 dark:bg-blue-300 rounded-md grid grid-cols-1">
+        {
+          collections != undefined && collections.length > 0
+          ? collections.map((i, idx) => {
+              
+              return (
+                <div key={i.address} className="py-1 px-2 hover:bg-blue-400 rounded-md">
+                  <Link 
+                    href={`/collection/${i.address}`} 
+                    onClick={() => {
+                      fn();
+                      setSearchField("");
+                    }}>
+                    <div className="inline-flex items-center p-1">
+                      { i.name 
+                        ? <p className="w-40 truncate font-bold text-slate-800">{i.name}</p>
+                        : <p className="w-40 truncate text-xs font-light font-mono text-slate-700">{i.address}</p>
+                      }
+                      <div className="w-24 text-xs ml-2 py-px px-1.5 rounded-xl justify-between bg-blue-600">
+                        <span className="font-medium">Floor Price:&nbsp;</span>
+                        <div>
+                        <span className="w-16 truncate font-mono font-light">{formatFloor(i.floor)}</span>
+                        <span className="font-medium">&nbsp;ETH</span>
+                        </div>
+                      </div>
+                      <Image 
+                        className="rounded-lg ml-2"
+                        src={i.image} 
+                        alt=""
+                        height="44"
+                        width="44"
+                        sizes="44px" 
+                        placeholder="blur"
+                        blurDataURL={blurImageURL("40", "40")}
+                        />
+                    </div>
+                    </Link>
+                </div>
+              );
+            })
+          : searchField.length > 0 
+          ? <div className="p-2 font-medium text-blue-900">There are no collections available with that {searchFilterState === "All" ? "name/address" : searchFilterState === "Name" ? "name" : "address"}. Please try again.</div>
+          : <div className="p-2 font-medium text-blue-900">Enter your query</div>
+        }
         </div>
       </div>
     </form>

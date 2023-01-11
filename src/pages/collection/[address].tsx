@@ -58,7 +58,8 @@ import gfm from 'remark-gfm';
 import type { Collection } from "@prisma/client";
 import { prisma } from "server/db/client";
 import { Decimal } from "@prisma/client/runtime";
-import { blurImageURL } from 'components/images/imageProps';
+import { blurImageURL } from 'utils/images/imageProps';
+import { formatFloor, formatVal } from 'utils/ethereum/price';
 
 ChartJS.register(
   CategoryScale,
@@ -178,7 +179,7 @@ const CollectionPage: NextPage<{
       </div>
       </div>
       
-      <div className="px-4 pt-4 flex absolute -translate-y-20">
+      <div className="px-3 sm:px-4 pt-4 flex absolute -translate-y-20">
         <div className="h-32 w-32 rounded-lg relative overflow-hidden shadow-sm flex border-[1px] dark:border-slate-700">
           <Image 
             className="object-cover bg-slate-50 dark:bg-slate-600" 
@@ -193,19 +194,31 @@ const CollectionPage: NextPage<{
         </div>
       </div>
 
-      <div className="m-2 rounded-md p-2 bg-slate-700 float-right shadow-md text-slate-300">
-        <div className="">{`Floor Price: ${collection.floor} ETH`}</div>
-        <div>{`Market Cap: ${new Number(collection.salesVolume).toLocaleString("en-US")} ETH`}</div>
+      <div className="mr-5 mt-3 rounded-md p-2 bg-slate-100 dark:bg-slate-700 float-right shadow-md text-slate-800 dark:text-slate-300 hidden sm:block">
+        <div className="">{`Floor Price: ${formatFloor(collection.floor)} ETH`}</div>
+        <div>{`Market Cap: ${formatVal(collection.salesVolume)} ETH`}</div>
         <div>{`Owners: ${collection.owners}`}</div>
       </div>
 
-      <div className="p-5 mt-14">
-          <a href="#">
-              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{collection.name}</h5>
-          </a>
-          <ReactMarkdown remarkPlugins={[gfm]} className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {collection.description??""}
-          </ReactMarkdown>
+      <div className="m-3 p-2 text-xs space-y-1 rounded-md float-right sm:hidden bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300">
+        <div>
+          <div className="font-semibold">Floor Price:</div>
+          <div>{`${collection.floor} ETH`}</div>
+        </div>
+        <div>
+          <div className="font-semibold">Market Cap:</div>
+          <div>{`${new Number(collection.salesVolume).toLocaleString("en-US")} ETH`}</div>
+        </div>
+      </div>
+
+      <div className="p-4 sm:p-5 mt-14">
+          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{collection.name}</h5>
+          
+          <article className="prose xl:prose-lg prose-p:dark:text-gray-300 prose-p:text-gray-800 prose-a:text-blue-700 prose-a:dark:text-blue-500">
+            <ReactMarkdown remarkPlugins={[gfm]} className="mb-3">
+              {collection.description??""}
+            </ReactMarkdown>
+          </article>
           <a href={collection.extURL??"#"} className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             Read more
             <ArrowRightIcon className="w-4 h-4 ml-2 -mr-1"/>
@@ -263,13 +276,15 @@ const CollectionPage: NextPage<{
         },
         x: {
           ticks: {
-            color: "#64748b" 
+            color: "#64748b",
+            autoSkip: true,
+            maxTicksLimit: 7
           },
           label: {
             font: {
               family: "system-ui"
             }
-          }
+          },
         }
       },
       interaction: {
@@ -315,9 +330,9 @@ const CollectionPage: NextPage<{
 
 
   return (
-    <div className="py-4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 grid-rows-2 lg:grid-rows-1 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 grid-rows-2 lg:grid-rows-1 h-full">
       <Head>
-        <title>{`Collection ${address} | DogeTTM`}</title>
+        <title>{`Collection ${collection.name || address} | DogeTTM`}</title>
       </Head>
       {pane}
       {graphPane}
