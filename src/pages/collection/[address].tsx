@@ -126,8 +126,11 @@ const CollectionPage: NextPage<{
   const [selector, setSelector] = useState<keyof typeof FNS>(dataOptions[0]);
   const [records, setRecords] = useState(7);
   const [imageErr, setImageErr] = useState(false);
+  const [bgImgErr, setBgImgErr] = useState(false);
 
-  const dataPts = collection.data.map(FNS[selector]).slice(collection.data.length - records);
+  const startIDX = collection.data.length - records < 0? 0 : collection.data.length - records
+
+  const dataPts = collection.data.map(FNS[selector]).slice(startIDX);
 
   const patchedHandleSelect = (e: any & {target: { value: keyof typeof FNS}}) => {
     setSelector(e.target.value);
@@ -140,7 +143,7 @@ const CollectionPage: NextPage<{
         day: "numeric",
         month: "short"
       })}`
-    }).slice(collection.data.length - records),
+    }).slice(startIDX),
     datasets: [
       {
         data: dataPts,
@@ -159,13 +162,29 @@ const CollectionPage: NextPage<{
       bg-white border border-gray-200 rounded-lg shadow-md 
       dark:bg-gray-800 dark:border-gray-700 max-w-full max-h-full
       `}>
-      <div className="px-4 pt-4 flex">
-        <div className="h-56 w-56 rounded-lg relative overflow-hidden shadow-md flex">
+      <div className="">
+      <div className="relative w-full h-36 overflow-hidden rounded-t-lg shadow-md">
+        <Image 
+          className="object-cover"
+          src={bgImgErr? "/collection_fallback.webp": collection.bannerImg}
+          alt={""}
+          sizes="(max-width: 768px) 100vw,
+                 (max-width: 1200px) 50vw,
+                 33vw" 
+          fill={true}
+          placeholder="blur"
+          blurDataURL={blurImageURL("64", "64")}
+          onError={() => setBgImgErr(true)}/>
+      </div>
+      </div>
+      
+      <div className="px-4 pt-4 flex absolute -translate-y-20">
+        <div className="h-32 w-32 rounded-lg relative overflow-hidden shadow-sm flex border-[1px] dark:border-slate-700">
           <Image 
-            className="object-cover" 
+            className="object-cover bg-slate-50 dark:bg-slate-600" 
             src={imageErr? "/collection_fallback.webp": collection.image} 
             alt={""}
-            sizes="224px" 
+            sizes="128" 
             fill={true}
             placeholder="blur"
             blurDataURL={blurImageURL("64", "64")}
@@ -173,9 +192,16 @@ const CollectionPage: NextPage<{
           />
         </div>
       </div>
-      <div className="p-5">
+
+      <div className="m-2 rounded-md p-2 bg-slate-700 float-right shadow-md text-slate-300">
+        <div className="">{`Floor Price: ${collection.floor} ETH`}</div>
+        <div>{`Market Cap: ${new Number(collection.salesVolume).toLocaleString("en-US")} ETH`}</div>
+        <div>{`Owners: ${collection.owners}`}</div>
+      </div>
+
+      <div className="p-5 mt-14">
           <a href="#">
-              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{`Collection ${collection.name}`}</h5>
+              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{collection.name}</h5>
           </a>
           <ReactMarkdown remarkPlugins={[gfm]} className="mb-3 font-normal text-gray-700 dark:text-gray-400">
             {collection.description??""}
@@ -262,7 +288,7 @@ const CollectionPage: NextPage<{
     dark:bg-gray-800 dark:border-gray-700 max-w-full max-h-full
     `}>
 
-      <div className="p-2 space-x-2">
+      <div className="float-right p-2 space-x-2">
         <select 
           className="rounded-md p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 shadow-md"
           value={selector} 

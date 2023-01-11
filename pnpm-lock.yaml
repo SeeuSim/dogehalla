@@ -13,6 +13,7 @@ specifiers:
   '@trpc/next': ^10.8.1
   '@trpc/react-query': ^10.8.1
   '@trpc/server': ^10.8.1
+  '@types/chartjs': ^0.0.31
   '@types/node': ^18.11.18
   '@types/nodemailer': ^6.4.7
   '@types/passport': ^1.0.11
@@ -95,6 +96,7 @@ dependencies:
 
 devDependencies:
   '@tanstack/react-query-devtools': 4.20.9_hin5uqs2feg5fwcu6eooischsu
+  '@types/chartjs': 0.0.31
   '@types/node': 18.11.18
   '@types/nodemailer': 6.4.7
   '@types/passport': 1.0.11
@@ -575,6 +577,11 @@ packages:
     dependencies:
       '@types/connect': 3.4.35
       '@types/node': 18.11.18
+    dev: true
+
+  /@types/chartjs/0.0.31:
+    resolution: {integrity: sha512-eF1AgrIO0qP9KJYwM2dTKL2pczTjiLa0hfmZdQfKiqFq5WIvFTKPn1gkgADitF5sT4byEyq4EFdMVvuPIk6zeQ==}
+    deprecated: '''@types/chartjs'' is now ''@types/chart.js'''
     dev: true
 
   /@types/connect/3.4.35:

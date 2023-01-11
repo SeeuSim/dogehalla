@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^4.20.9",
+    "@types/chartjs": "^0.0.31",
     "@types/node": "^18.11.18",
     "@types/nodemailer": "^6.4.7",
     "@types/passport": "^1.0.11",
