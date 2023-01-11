@@ -14,12 +14,22 @@ const config = {
     defaultLocale: "en",
   },
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'i.seadn.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ethereum.cdn-proxy.mnemonichq.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'ethereum.cdn.mnemonichq.com'
       }
-    ]
+    ],
+    dangerouslyAllowSVG: true,
   },
 };
 export default config;

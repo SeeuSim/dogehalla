@@ -51,9 +51,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           verified: false
         }
       });
-
+      
       //Redirect and generate magic link
-      const genLink = await fetch(`${BASEURL}/api/auth/signup/token`, {
+      const genLink = await fetch(`${req.headers.origin}/api/auth/signup/token`, {
         method: "POST", 
         headers: {
           'Content-Type': 'application/json'

@@ -5,7 +5,6 @@ import { authOptions } from "server/auth/session";
 import { nextConnectOptions } from "server/auth/nextConnect";
 
 import { prisma } from "server/db/client";
-import { BASEURL } from "utils/base";
 
 const handler = nextConnect(nextConnectOptions).use(...authOptions);
 
@@ -32,8 +31,9 @@ handler.post(async (req: NextApiRequest & { user: { id: string } }, res: NextApi
 
     return res.status(200).json({ message: "ok" });
   } catch (err) {
+    const origin = req.headers.referer;
     res.setHeader("error", new String(err).valueOf());
-    return res.redirect(`${BASEURL}/account/settings`);
+    return res.redirect(`${origin}/account/settings`);
   }
 });
 
