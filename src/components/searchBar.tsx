@@ -1,15 +1,14 @@
 import { useState, Fragment } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 import { Listbox, Transition } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
 
-import { blurImageURL } from "utils/images/imageProps";
 import { trpc } from "utils/trpc";
 import { formatFloor } from "utils/ethereum/price";
+import ImageWithFallback from "./images/imageWithFallback";
 
 //Pass in the refocus function from Popover to close the searchbar
 export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) {
@@ -22,6 +21,7 @@ export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) 
   const [searchField, setSearchField] = useState("");
   const [refetch, triggerRefetch] = useState(false);
 
+  //Data Fetching
   const {data: collections} = trpc.model.nft.getCollection.useQuery({
     field: searchField,
     filter: searchFilterState
@@ -91,63 +91,82 @@ export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) 
       </Transition>
     </Listbox>;
 
+  const searchFn = async () => {
+    if (searchField === "" || collections == undefined || collections.length < 1) {
+      //Add a toast
+      console.log("Please search for a valid collection");
+      return;
+    } 
+    const res = await fetch("/api/search", {
+      method: "POST",
+      body: JSON.stringify({
+        collectionAddress: collections[0]?.address?? ""
+      })
+    });
+    const payload = await res.json();
+    
+    const body = JSON.parse(JSON.stringify(payload))
+    if (res.ok) {
+      router.push(body.url);
+      fn();
+    } else {
+      //Toast
+      console.log(res.statusText);
+    }
+  }
+
   return (
-    <form onSubmit={(e) => {
-      if (collections != undefined && collections.length > 0) {
-        //Should push a search page - WIP
-        router.push(`/collection/${collections[0]?.address}`)
-      }
-      //Replace with toast
-      console.log("Please search for a collection first");
-    }}>
+    <div>
       <div className="flex relative">
         {searchFilterComponent}
         <div className="relative w-full">
-            <input type="search" 
-                    id="search-dropdown"
-                    onChange={(e) => {
-                      setSearchField(e.target.value);
-                      triggerRefetch(true);
-                    }}
-                    className={`
-                      block p-2.5 w-full z-20 
-                      text-sm text-gray-900 
-                      bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 
-                      focus:ring-blue-500 focus:border-blue-500 
+          <input 
+            type="search" 
+            id="search-dropdown"
+            onChange={(e) => {
+              setSearchField(e.target.value);
+              triggerRefetch(true);
+            }}
+            className={`
+              block p-2.5 w-full z-20 
+              text-sm text-gray-900 
+              bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 
+              focus:ring-blue-500 focus:border-blue-500 
 
-                      dark:bg-gray-700 dark:border-l-gray-700  dark:border-gray-600 dark:placeholder-gray-400 
-                      dark:text-white dark:focus:border-blue-500
-                    `}
-                    placeholder="Search Your NFT" required/>
-            <button type="submit" 
-                    className={`
-                      absolute top-0 right-0 p-2.5 
-                      text-sm font-medium text-white 
-                      bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
-                      dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800
-                    `}>
-              <svg aria-hidden="true" 
-                  className="w-5 h-5" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
-                  xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth="2" 
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z">
-                </path>
-              </svg>
-              <span className="sr-only">Search</span>
-            </button>
+              dark:bg-gray-700 dark:border-l-gray-700  dark:border-gray-600 dark:placeholder-gray-400 
+              dark:text-white dark:focus:border-blue-500
+            `}
+            placeholder="Search Your NFT" required
+            onKeyUp={async (e) => {
+              switch (e.key) {
+                case "Enter":
+                  await searchFn();
+              }
+            }}
+          />
+          <button 
+            type="submit" 
+            className={`
+              absolute top-0 right-0 p-2.5 
+              text-sm font-medium text-white 
+              bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
+              dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+            `}
+            onClick={
+              async (e) => {
+                await searchFn();
+              }
+            }>
+            <MagnifyingGlassIcon className="h-5 w-5"/>
+            <span className="sr-only">Search</span>
+          </button>
         </div>
       </div>
       <div className="absolute right-2 mt-1 w-full pl-[152px]">
         <div className="bg-slate-50 dark:bg-blue-300 rounded-md grid grid-cols-1">
         {
           collections != undefined && collections.length > 0
-          ? collections.map((i, idx) => {
-              
+          ? collections.map((i) => {
               return (
                 <div key={i.address} className="py-1 px-2 hover:bg-blue-400 rounded-md">
                   <Link 
@@ -168,16 +187,9 @@ export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) 
                         <span className="font-medium">&nbsp;ETH</span>
                         </div>
                       </div>
-                      <Image 
-                        className="rounded-lg ml-2"
-                        src={i.image} 
-                        alt=""
-                        height="44"
-                        width="44"
-                        sizes="44px" 
-                        placeholder="blur"
-                        blurDataURL={blurImageURL("40", "40")}
-                        />
+                      <div className="h-11 w-11 relative overflow-hidden rounded-lg ml-2">
+                        <ImageWithFallback src={i.image} style="" size="44" height={44} width={44}/>
+                      </div>
                     </div>
                     </Link>
                 </div>
@@ -189,6 +201,6 @@ export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) 
         }
         </div>
       </div>
-    </form>
+    </div>
   );
 }

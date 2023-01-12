@@ -30,25 +30,13 @@
  * |                  |
  * --------------------
  */
-import { useState } from 'react';
 import { GetServerSidePropsContext, NextPage } from "next";
+import { useState } from 'react';
 
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
-import {
-  Chart as ChartJS,
-  LinearScale,
-  CategoryScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-} from "chart.js";
-import { Line } from "react-chartjs-2";
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 
 import ReactMarkdown from 'react-markdown';
@@ -56,21 +44,13 @@ import gfm from 'remark-gfm';
 
 //For getServerSideProps
 import type { Collection } from "@prisma/client";
-import { prisma } from "server/db/client";
 import { Decimal } from "@prisma/client/runtime";
+import { prisma } from "server/db/client";
+
 import { blurImageURL } from 'utils/images/imageProps';
 import { formatFloor, formatVal } from 'utils/ethereum/price';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+import LineGraph from 'components/graphs/lineGraph';
+import ImageWithFallback from "components/images/imageWithFallback";
 
 type DataType = {
   timestamp: string,
@@ -98,6 +78,7 @@ const CollectionPage: NextPage<{
 
   const address = collection.address;
 
+  // Graph Filter Options
   const dataOptions = [
     "Average Price",
     "Maximum Price",
@@ -125,35 +106,27 @@ const CollectionPage: NextPage<{
    } as const;
 
   const [selector, setSelector] = useState<keyof typeof FNS>(dataOptions[0]);
-  const [records, setRecords] = useState(7);
-  const [imageErr, setImageErr] = useState(false);
-  const [bgImgErr, setBgImgErr] = useState(false);
-
-  const startIDX = collection.data.length - records < 0? 0 : collection.data.length - records
-
-  const dataPts = collection.data.map(FNS[selector]).slice(startIDX);
-
   const patchedHandleSelect = (e: any & {target: { value: keyof typeof FNS}}) => {
     setSelector(e.target.value);
   }
 
-  const data = {
-    labels: collection.data.map(i => {
-      const d = new Date(i.timestamp);
-      return `${d.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short"
-      })}`
-    }).slice(startIDX),
-    datasets: [
-      {
-        data: dataPts,
-        label: `${selector}`
-      }
-    ]
+  //Graph Options
+  const [records, setRecords] = useState(7);
+  const startIDX = collection.data.length - records < 0? 0 : collection.data.length - records
+  const dataPts = collection.data.map(FNS[selector]).slice(startIDX);
+  const graphLabels = collection.data.map(i => {
+    const d = new Date(i.timestamp);
+    return `${d.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short"
+    })}`
+  }).slice(startIDX);
+  const yAxisCallback = (value: any, index: any, ticks: any) => {
+    return selector === "Average Price" || selector === "Maximum Price" || selector ==="Minimum Price" || selector ==="Sales Volume"
+    ? `${value} ETH`
+    : value
   }
   
-
   /**
    * PANES
    */
@@ -161,36 +134,24 @@ const CollectionPage: NextPage<{
     <div 
       className={`
       bg-white border border-gray-200 rounded-lg shadow-md 
-      dark:bg-gray-800 dark:border-gray-700 max-w-full max-h-full
+      dark:bg-gray-800 dark:border-gray-700 max-w-full
       `}>
       <div className="">
       <div className="relative w-full h-36 overflow-hidden rounded-t-lg shadow-md">
-        <Image 
-          className="object-cover"
-          src={bgImgErr? "/collection_fallback.webp": collection.bannerImg}
-          alt={""}
-          sizes="(max-width: 768px) 100vw,
+        <ImageWithFallback 
+          src={collection.bannerImg}
+          style=""
+          height={300} 
+          width={800} 
+          size={`(max-width: 768px) 100vw,
                  (max-width: 1200px) 50vw,
-                 33vw" 
-          fill={true}
-          placeholder="blur"
-          blurDataURL={blurImageURL("64", "64")}
-          onError={() => setBgImgErr(true)}/>
+                 33vw`}/>
       </div>
       </div>
       
       <div className="px-3 sm:px-4 pt-4 flex absolute -translate-y-20">
         <div className="h-32 w-32 rounded-lg relative overflow-hidden shadow-sm flex border-[1px] dark:border-slate-700">
-          <Image 
-            className="object-cover bg-slate-50 dark:bg-slate-600" 
-            src={imageErr? "/collection_fallback.webp": collection.image} 
-            alt={""}
-            sizes="128" 
-            fill={true}
-            placeholder="blur"
-            blurDataURL={blurImageURL("64", "64")}
-            onError={() => setImageErr(true)}
-          />
+          <ImageWithFallback style="bg-slate-50 dark:bg-slate-600" src={collection.image} height={128} width={128} size={128}/>
         </div>
       </div>
 
@@ -220,82 +181,11 @@ const CollectionPage: NextPage<{
             </ReactMarkdown>
           </article>
           <a href={collection.extURL??"#"} className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-            Read more
+            Find out more
             <ArrowRightIcon className="w-4 h-4 ml-2 -mr-1"/>
           </a>
       </div>
     </div>;
-
-  const Graph = () => {
-    const options = {
-      responsive: true,
-      plugins: {
-        legend: {
-          labels: {
-            font: {
-              size: 14,
-              family: "system-ui"
-            },
-            color: "#64748b"
-          },
-          display: true
-        }
-      },
-      elements: {
-        line: {
-          tension: 0,
-          borderWidth: 2,
-          borderColor: "rgba(47, 97, 68, 1)",
-          fill: "start",
-          backgroundColor: "rgba(47, 97, 68, 0.3)",
-        },
-        point: {
-          radius: 0,
-          hitRadius: 0
-        },
-      },
-      scales: {
-        y: {
-          type: 'linear' as const,
-          display: true,
-          position: 'left' as const,
-          min: 0,
-          ticks: {
-            callback: function(value: any, index: any, ticks: any) {
-              return selector === "Average Price" || selector === "Maximum Price" || selector ==="Minimum Price" || selector ==="Sales Volume"
-                ? `${value} ETH`
-                : value
-            },
-            color: "#64748b" 
-          },
-          labels: {
-            font: {
-              family: "system-ui"
-            }
-          }
-        },
-        x: {
-          ticks: {
-            color: "#64748b",
-            autoSkip: true,
-            maxTicksLimit: 7
-          },
-          label: {
-            font: {
-              family: "system-ui"
-            }
-          },
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: "index" as const
-      },
-    };
-    return (
-      <Line options={options} data={data} width={400} height={300}/>
-    );
-  }
 
   const graphPane: JSX.Element = 
     <div className={`
@@ -320,17 +210,18 @@ const CollectionPage: NextPage<{
           >
           <option key={7} value={7}>7d</option>
           <option key={30} value={30}>30d</option>
+          <option key={365} value={365}>1y</option>
         </select>
       </div>
 
       <div className="px-4">
-        <Graph/>
+        <LineGraph width={400} height={400} yCallback={yAxisCallback} graphLabel={selector} labels={graphLabels} dataPts={dataPts}/> 
       </div>
     </div>
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 grid-rows-2 lg:grid-rows-1 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 grid-rows-2 lg:grid-rows-1">
       <Head>
         <title>{`Collection ${collection.name || address} | DogeTTM`}</title>
       </Head>

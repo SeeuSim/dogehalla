@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 
@@ -8,8 +7,9 @@ import { Decimal } from "@prisma/client/runtime";
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 import { formatFloor, formatVal } from "utils/ethereum/price";
-import { blurImageURL } from "utils/images/imageProps";
 import { trpc } from "utils/trpc";
+
+import ImageWithFallback from "components/images/imageWithFallback";
 
 export default function CollectionsDash() {
   const RECORDS_PER_PAGE = 10;
@@ -257,7 +257,6 @@ export default function CollectionsDash() {
     floor: Decimal | null,
     value?: Decimal 
   }> = ({index, name, image, address, floor, value}) => {
-    const [imageErr, setImageErr] = useState(false);
 
     return (
       <tr
@@ -270,16 +269,7 @@ export default function CollectionsDash() {
               <div className="inline-flex items-center">
                 <div className="text-start font-medium w-8">{index + 1}</div>
                 <div className="relative h-16 w-16 rounded-md overflow-hidden shadow-sm border-[0.5px] dark:border-slate-800">
-                  <Image
-                    src={imageErr? "/collection_fallback.webp": image} 
-                    alt={""} 
-                    fill={true}
-                    sizes="64px" 
-                    className="object-cover"
-                    placeholder="blur"
-                    blurDataURL={blurImageURL("64", "64")}
-                    onError={() => setImageErr(true)}
-                    />
+                  <ImageWithFallback src={image} size="64" height={64} width={64} style=""/>
                 </div>
               </div>
               <div className="block">

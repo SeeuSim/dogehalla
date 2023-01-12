@@ -17,7 +17,7 @@ const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 
 const menuOptions = [
   { name: 'Home', href: '/' },
-  { name: 'Analytics', href: '#' },
+  { name: 'Analytics', href: '/#' },
   { name: 'Account', href: '/account' },
 ]
 
@@ -105,7 +105,7 @@ const NavBar: React.FC = () => {
 
             {/** Company Logo */}
             <div className="flex">
-              <Link href="#" className="-m-1.5 p-1.5">
+              <Link href="/#" className="-m-1.5 p-1.5">
                 <span className="sr-only">Your Company</span>
                 <img
                   className="h-8"
