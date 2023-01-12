@@ -11,7 +11,7 @@ import { formatFloor } from "utils/ethereum/price";
 import ImageWithFallback from "./images/imageWithFallback";
 
 //Pass in the refocus function from Popover to close the searchbar
-export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) {
+export default function Searchbar({ closeSearchFn } : { closeSearchFn: (ref?: HTMLElement) => void }) {
 
   const router = useRouter();
 
@@ -32,64 +32,67 @@ export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) 
     enabled: refetch && searchField.length > 0
   })
 
-  const searchFilterComponent = 
-    <Listbox value={searchFilterState} onChange={setSearchFilterState}>
-      <Listbox.Button className={`
-        px-2.5 rounded-none rounded-l-lg
-        w-44 inline-flex justify-between items-center
-        bg-gray-50 border border-gray-300 
-        hover:bg-gray-200
-        focus:ring-blue-500 focus:border-blue-500 
-        text-gray-600
-        dark:hover:bg-gray-600
-        dark:bg-gray-700 dark:border-gray-600 
-        dark:placeholder-gray-400 dark:text-white 
-        dark:focus:ring-blue-500 dark:focus:border-blue-500
-        `}>
-        <span className="block">{searchFilterState}</span>
-        <ChevronDownIcon className="block h-5 w-5"></ChevronDownIcon>
-      </Listbox.Button>
-      <Transition as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-        >
-        <Listbox.Options className={`
-            absolute w-32 max-h-60 overflow-auto rounded-md 
-            bg-white py-1 text-base shadow-lg dark:bg-gray-700 
-            ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm
-            `}>
-          {searchFilters.map((filterOption) => (
-            <Listbox.Option
-              key={filterOption}
-              className={({ active }) =>
-                `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                  active ? ' bg-slate-300 text-slate-900' : 'text-gray-900 dark:text-white'
-                }`
-              }
-              value={filterOption}
-            >
-              {({ selected }) => (
-                <>
-                  <span
-                    className={`block truncate ${
-                      selected ? 'font-medium' : 'font-normal'
-                    }`}
-                  >
-                    {filterOption}
-                  </span>
-                  {selected ? (
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
-                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+  const SearchFilterComponent: React.FC = () => { 
+    return (
+      <Listbox value={searchFilterState} onChange={setSearchFilterState}>
+        <Listbox.Button className={`
+          px-2.5 rounded-none rounded-l-lg
+          w-44 inline-flex justify-between items-center
+          bg-gray-50 border border-gray-300 
+          hover:bg-gray-200
+          focus:ring-blue-500 focus:border-blue-500 
+          text-gray-600
+          dark:hover:bg-gray-600
+          dark:bg-gray-700 dark:border-gray-600 
+          dark:placeholder-gray-400 dark:text-white 
+          dark:focus:ring-blue-500 dark:focus:border-blue-500
+          `}>
+          <span className="block">{searchFilterState}</span>
+          <ChevronDownIcon className="block h-5 w-5"></ChevronDownIcon>
+        </Listbox.Button>
+        <Transition as={Fragment}
+              leave="transition ease-in duration-100"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+          >
+          <Listbox.Options className={`
+              absolute w-32 max-h-60 overflow-auto rounded-md 
+              bg-white py-1 text-base shadow-lg dark:bg-gray-700 
+              ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm
+              `}>
+            {searchFilters.map((filterOption) => (
+              <Listbox.Option
+                key={filterOption}
+                className={({ active }) =>
+                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                    active ? ' bg-slate-300 text-slate-900' : 'text-gray-900 dark:text-white'
+                  }`
+                }
+                value={filterOption}
+              >
+                {({ selected }) => (
+                  <>
+                    <span
+                      className={`block truncate ${
+                        selected ? 'font-medium' : 'font-normal'
+                      }`}
+                    >
+                      {filterOption}
                     </span>
-                  ) : null}
-                </>
-              )}
-            </Listbox.Option>
-          ))}
-        </Listbox.Options>
-      </Transition>
-    </Listbox>;
+                    {selected ? (
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
+                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                    ) : null}
+                  </>
+                )}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </Transition>
+      </Listbox>
+    );
+  }
 
   const searchFn = async () => {
     if (searchField === "" || collections == undefined || collections.length < 1) {
@@ -108,7 +111,7 @@ export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) 
     const body = JSON.parse(JSON.stringify(payload))
     if (res.ok) {
       router.push(body.url);
-      fn();
+      closeSearchFn();
     } else {
       //Toast
       console.log(res.statusText);
@@ -118,7 +121,7 @@ export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) 
   return (
     <div>
       <div className="flex relative">
-        {searchFilterComponent}
+        <SearchFilterComponent/>
         <div className="relative w-full">
           <input 
             type="search" 
@@ -172,7 +175,7 @@ export default function Searchbar({ fn } : { fn: (ref?: HTMLElement) => void }) 
                   <Link 
                     href={`/collection/${i.address}`} 
                     onClick={() => {
-                      fn();
+                      closeSearchFn();
                       setSearchField("");
                     }}>
                     <div className="inline-flex items-center p-1">

@@ -7,11 +7,12 @@ export default function SearchDropDown() {
   return (
     <Popover className="relative">
       {
-        ({open, close}) => (
+        ({ close }) => (
           <>
-            <Popover.Button className={`group inline-flex items-center rounded-md px-3 py-2 text-base font-medium text-white hover:text-opacity-100 focus:outline-none `}>
-              <MagnifyingGlassIcon className={`h-5 w-5 text-gray-500 dark:text-white transition duration-150 ease-in-out group-hover:text-opacity-80`}
-              aria-hidden="true" />
+            <Popover.Button className={`group inline-flex items-center rounded-md px-3 py-2 text-base font-medium text-white hover:text-opacity-100 focus:outline-none`}>
+              <MagnifyingGlassIcon 
+                className={`h-5 w-5 text-gray-500 dark:text-white transition duration-150 ease-in-out group-hover:text-opacity-80`}
+                aria-hidden="true" />
               <span className="sr-only">Search</span>
             </Popover.Button>
             <Transition
@@ -25,7 +26,7 @@ export default function SearchDropDown() {
               >
               <Popover.Panel className="fixed right-0 mt-2 drop-shadow">
                 <div className="z-10 mt-1 ml-1 [width:96vw] md:[width:33rem] transform px-2">
-                  <Searchbar fn={close}/>
+                  <Searchbar closeSearchFn={close}/>
                 </div>
                 {/* <div className="h-2"></div> */}
               </Popover.Panel>
