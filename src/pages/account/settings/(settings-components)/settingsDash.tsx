@@ -191,7 +191,8 @@ const SettingsDash: React.FC<{
       <div className="text-sm hidden sm:block font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
         <ul className="flex flex-wrap -mb-px">
           {settings.map((i, idx) => 
-            <SettingsNav  label={i.name} 
+            <SettingsNav  key={idx.toExponential(3).toString()}
+                          label={i.name} 
                           active={idx === main} 
                           index={idx} 
                           icon={i.icon} 
@@ -202,7 +203,7 @@ const SettingsDash: React.FC<{
       {/* Actual Settings */}
       <div>
         {settings[main]?.sections.map(
-          (el) => <Pane title={el.title} subPanes={el.subPanes}></Pane>
+          (el, idx) => <Pane key={idx.toExponential(5).toString()} title={el.title} subPanes={el.subPanes}></Pane>
         )}
       </div>
       

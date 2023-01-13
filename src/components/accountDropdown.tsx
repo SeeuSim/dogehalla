@@ -1,5 +1,7 @@
 import { Fragment } from "react";
+import Link from "next/link";
 import { useRouter } from "next/router";
+
 import { useMutation } from "@tanstack/react-query";
 
 import { Popover, Transition } from "@headlessui/react";
@@ -63,7 +65,7 @@ export default function AccountDropdown() {
               <Popover.Panel className="absolute left-1/2 z-10 mt-3 w-screen max-w-xs -translate-x-1/2 transform px-4 sm:px-0 lg:max-w-1">
                 <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
                   <div className=" dark:bg-gray-700 p-1">
-                    <a
+                    <Link
                       href="/"
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
@@ -72,10 +74,10 @@ export default function AccountDropdown() {
                           Home
                         </span>
                       </span>
-                    </a>
+                    </Link>
                   </div>
                   <div className=" dark:bg-gray-700 p-1">
-                    <a
+                    <Link
                       href="##"
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
@@ -84,10 +86,10 @@ export default function AccountDropdown() {
                           Search
                         </span>
                       </span>
-                    </a>
+                    </Link>
                   </div>
                   <div className=" dark:bg-gray-700 p-1">
-                    <a
+                    <Link
                       href="##"
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
@@ -96,7 +98,7 @@ export default function AccountDropdown() {
                           Analytics
                         </span>
                       </span>
-                    </a>
+                    </Link>
                   </div>
                   <div className=" dark:bg-gray-700 p-1">
                     <button

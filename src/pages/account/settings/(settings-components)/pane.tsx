@@ -49,9 +49,9 @@ const Pane: React.FC<{
 
       {/* Pane Body */}
       <div>
-        {props.subPanes.map(e => 
+        {props.subPanes.map((e, idx) => 
           e.copytext != undefined // Those with copytext can apply the copytext/copytext + button layout
-            ? <ButtonSubPane copytext={e.copytext} button={e.button} />
+            ? <ButtonSubPane key={idx.toExponential(6).toString()} copytext={e.copytext} button={e.button} />
             : e.element // Without copytext -> Custom subpane
         )}
       </div>

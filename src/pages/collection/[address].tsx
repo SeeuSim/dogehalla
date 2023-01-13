@@ -34,7 +34,6 @@ import { GetServerSidePropsContext, NextPage } from "next";
 import { useState } from 'react';
 
 import Head from "next/head";
-import Image from "next/image";
 import { useRouter } from "next/router";
 
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
@@ -47,7 +46,6 @@ import type { Collection } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime";
 import { prisma } from "server/db/client";
 
-import { blurImageURL } from 'utils/images/imageProps';
 import { formatFloor, formatVal } from 'utils/ethereum/price';
 import LineGraph from 'components/graphs/lineGraph';
 import ImageWithFallback from "components/images/imageWithFallback";
@@ -71,13 +69,8 @@ const CollectionPage: NextPage<{
 }> = ( { collection } ) => {
   const router = useRouter();
 
-  if (!collection) { //Redirect for invalid queries
-    router.push("/")
-    return <div></div>
-  }
-
-  const address = collection.address;
-
+  const address = collection?.address;
+  
   // Graph Filter Options
   const dataOptions = [
     "Average Price",
@@ -91,7 +84,7 @@ const CollectionPage: NextPage<{
     "Total Tokens Burned",
     "Owners"
   ] as const;
-
+  
   const FNS = {
     "Average Price": (i: DataType) => i.avgPrice,
     "Maximum Price": (i: DataType) => i.maxPrice,
@@ -103,15 +96,20 @@ const CollectionPage: NextPage<{
     "Total Tokens Minted": (i: DataType) => i.totalMinted,
     "Total Tokens Burned": (i: DataType) => i.totalBurned,
     "Owners": (i: DataType) => i.ownersCount
-   } as const;
-
+  } as const;
+  
   const [selector, setSelector] = useState<keyof typeof FNS>(dataOptions[0]);
+  const [records, setRecords] = useState(7);
+
   const patchedHandleSelect = (e: any & {target: { value: keyof typeof FNS}}) => {
     setSelector(e.target.value);
   }
 
-  //Graph Options
-  const [records, setRecords] = useState(7);
+  if (!collection || !address) { //Redirect for invalid queries
+    router.push("/")
+    return <div></div>
+  }
+
   const startIDX = collection.data.length - records < 0? 0 : collection.data.length - records
   const dataPts = collection.data.map(FNS[selector]).slice(startIDX);
   const graphLabels = collection.data.map(i => {
@@ -129,13 +127,13 @@ const CollectionPage: NextPage<{
   
   /**
    * PANES
-   */
-  const pane: JSX.Element = 
-    <div 
-      className={`
-      bg-white border border-gray-200 rounded-lg shadow-md 
-      dark:bg-gray-800 dark:border-gray-700 max-w-full
-      `}>
+  */
+ const pane: JSX.Element = 
+ <div 
+ className={`
+ bg-white border border-gray-200 rounded-lg shadow-md 
+ dark:bg-gray-800 dark:border-gray-700 max-w-full
+ `}>
       <div className="">
       <div className="relative w-full h-36 overflow-hidden rounded-t-lg shadow-md">
         <ImageWithFallback 

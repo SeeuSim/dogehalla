@@ -94,7 +94,7 @@ export default function SignUp() {
 
   useEffect(() => {
     router.prefetch("/message/signupSuccess");
-  }, []);
+  }, [router]);
 
   //Submission Logic
   async function onSubmit (data: any) {
