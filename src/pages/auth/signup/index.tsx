@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import { env } from "env/client.mjs";
+import ReCAPTCHA from "react-google-recaptcha";
+
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { BASEURL } from "utils/base";
 
 import { AlertInput } from "components/forms/alert";
 import OAuthButton from "components/buttons/OAuthButton";
@@ -61,6 +62,27 @@ export default function SignUp() {
   //Hide ConfirmPassword element
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const gCAPTCHARef = useRef<ReCAPTCHA>(null);
+
+  const verifyCAPTCHA = async () => {
+    const token = gCAPTCHARef.current?.getValue();
+    const verify = await fetch(
+      `../api/auth/verifyCaptcha`, {
+        method: "POST",
+        body: JSON.stringify({
+          token
+        })
+      }
+    );
+
+    if (verify.ok) {
+      return true;
+    }
+
+    console.log(verify.text());
+    return false;
+  }
+
   //React Form Hooks
   const {
     register, handleSubmit, formState: {errors},
@@ -76,6 +98,11 @@ export default function SignUp() {
 
   //Submission Logic
   async function onSubmit (data: any) {
+    const proceed = await verifyCAPTCHA();
+    if (!proceed) {
+      return;
+    }
+
     setSubmitting(true);
     const res = await fetch(`../api/auth/signup`, {
       method: "POST",
@@ -92,7 +119,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex flex-col items-center mx-auto md:h-screen lg:py-0 bg-inherit">
+    <div className="flex flex-col items-center mx-auto md:h-full lg:py-0 bg-inherit">
       <Head>
         <title>Sign Up | DogeTTM</title>
       </Head>
@@ -193,6 +220,16 @@ export default function SignUp() {
                   : <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>}
               </button>
             </div>
+
+            <div className="relative flex items-center justify-center py-2">
+                <label htmlFor="recaptcha" className="sr-only">Recaptcha</label>
+                <ReCAPTCHA
+                  className="flex object-cover"
+                  sitekey={env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                  ref={gCAPTCHARef}
+                  
+                />
+              </div>
             
             {/* Loading UI | Errors UI | Normal UI */}
             { submitting

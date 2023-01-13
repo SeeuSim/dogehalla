@@ -1,12 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import Head from "next/head";
 import Link from "next/link";
 
-// import { useSession, signOut } from "next-auth/react";
 import OAuthButton from "components/buttons/OAuthButton";
-import { getSession} from "server/auth/session";
-import { trpc } from "utils/trpc";
-
 const labelStyle = "block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 const fieldStyle = `
   bg-gray-50 
@@ -20,23 +15,6 @@ const fieldStyle = `
 `
 
 export default function Page() {
-  // const { data: session } = useSession();
-
-  // if (session) {
-  //   const emailAddr = session.user?.email 
-  //     ? session.user.email
-  //     : "random user"
-
-  //   return (
-  //     <div className="flex flex-col items-center px-6 mx-auto md:h-screen lg:py-0">
-  //       <p className="text-gray-800 dark:text-white text-center">
-  //         Signed in as <br/><a className="text-blue-500" href={`mailto:${emailAddr}`}>{emailAddr}</a> <br />
-  //       </p>
-  //       {/* <UserInformation data={session.user} /> */}
-  //       <button className="border border-gray-500 rounded px-3 py-1 text-gray-800 dark:text-white " onClick={() => signOut()}>Sign out</button>
-  //     </div>
-  //   );
-  // }
 
   //Sign in Form
   return (
@@ -44,7 +22,7 @@ export default function Page() {
       <Head>
         <title>{`Login | DogeTTM`}</title>
       </Head>
-      <div className="flex flex-col items-center mx-auto md:h-screen lg:py-0 bg-inherit">
+      <div className="flex flex-col items-center mx-auto lg:py-0 bg-inherit">
         {/** Main Form */}
         <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -112,6 +90,8 @@ export default function Page() {
                 </div>
                 <a href="#" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500">Forgot password?</a>
               </div>
+
+
               <button type="submit" 
                       className={`
                         flex items-center justify-center
