@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { hash } from "argon2";
 
 import { prisma } from "server/db/client";
-import { BASEURL } from "utils/base";
 
 type SignUpData = {
   firstName: string,

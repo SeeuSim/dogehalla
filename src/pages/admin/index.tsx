@@ -4,11 +4,8 @@ import { useState } from "react";
 
 import { CogIcon } from "@heroicons/react/24/outline";
 
-import { trpc } from "utils/trpc";
-
 import { getSession } from "server/auth/session";
 import { prisma } from "server/db/client";
-import { BASEURL } from "utils/base";
 
 const AdminPage: NextPage<{
   name: string,

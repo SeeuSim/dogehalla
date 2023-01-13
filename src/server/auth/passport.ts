@@ -74,7 +74,7 @@ passport.use(
     {
       clientID: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/api/auth/callback/google",
+      callbackURL: `${BASEURL}/api/auth/callback/google`,
       scope: ["email", "profile"],
       passReqToCallback: true,
     },
@@ -188,7 +188,7 @@ passport.use(
   new CoinbaseStrategy({
     clientID: env.COINBASE_CLIENT_ID,
     clientSecret: env.COINBASE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/api/auth/callback/coinbase",
+    callbackURL: `${BASEURL}/api/auth/callback/coinbase`,
     scope: ["wallet:user:email", "wallet:user:read"],
     
   },
