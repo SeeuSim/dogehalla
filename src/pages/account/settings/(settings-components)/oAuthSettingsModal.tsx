@@ -59,11 +59,11 @@ const ModalUI: React.FC<{
 }
 
 const OAuthSettingsModal: React.FC<{
-  isOpen: boolean,
+  isOpen?: boolean,
   setOpen: Dispatch<SetStateAction<boolean>>
-}> = (props) => {
+}> = ({ isOpen=false, setOpen}) => {
   
-  const { isOpen, setOpen } = props;
+  // const { isOpen, setOpen } = props;
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
