@@ -8,23 +8,27 @@ import Header from "components/header";
 import NavBar from "components/navbar";
 
 import "styles/globals.css";
-import { SessionProps } from "types/sessions";
 
 const queryclient = new QueryClient();
+
+//Make default theme dark. 
+const theme = "dark" //TODO: Feed state as props to Navbar and visualThemeToggle component 
 
 const MyApp: AppType = ({
   Component,
   pageProps: { ...pageProps },
 }) => {
   return (
+    <html className = {theme}>  
     <QueryClientProvider client={queryclient}>
       <Header/>
-      <main className="min-h-screen max-h-full py-16 px-2 justify-center items-center bg-gray-100 dark:bg-slate-900 overflow-x-clip">
+      <main className="min-h-screen h-max pt-16 pb-4 px-2 justify-center items-center bg-gray-100 dark:bg-slate-900 overflow-x-clip">
         <NavBar/>
         <Component {...pageProps}/>
       </main>
       <ReactQueryDevtools initialIsOpen={false}/>
     </QueryClientProvider>
+    </html>
   );
 };
 

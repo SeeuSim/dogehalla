@@ -8,13 +8,14 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import AccountDropdown from './accountDropdown';
 import SearchDropDown from './searchDropdown';
+import VisualThemeToggle from './visualThemeToggle'
 
 //TO BE CHANGED
 const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 
 const menuOptions = [
   { name: 'Home', href: '/' },
-  { name: 'Analytics', href: '#' },
+  { name: 'Analytics', href: '/#' },
   { name: 'Account', href: '/account' },
 ]
 
@@ -29,11 +30,12 @@ const Logo = () => {
   );
 }
 
-export default function NavBar(): JSX.Element {
+const NavBar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: session } = trpc.auth.getSession.useQuery(undefined);
   
+  //const theme = props;
 
   return (
     <div className="px-6 pt-2 lg:px-8">
@@ -74,7 +76,8 @@ export default function NavBar(): JSX.Element {
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="h-6 w-6 text-gray-600 dark:text-white" aria-hidden="true" />
             </button>
-
+            {/** <VisualThemeToggle {...theme} /> */}
+            <VisualThemeToggle/>
             {/**If not logged in -> Display Log In button */}
             { session
               ? <AccountDropdown/>
@@ -102,7 +105,7 @@ export default function NavBar(): JSX.Element {
 
             {/** Company Logo */}
             <div className="flex">
-              <Link href="#" className="-m-1.5 p-1.5">
+              <Link href="/#" className="-m-1.5 p-1.5">
                 <span className="sr-only">Your Company</span>
                 <img
                   className="h-8"
@@ -158,3 +161,5 @@ export default function NavBar(): JSX.Element {
     </div>
   );
 }
+
+export default NavBar;
