@@ -1,5 +1,7 @@
 import { Fragment } from "react";
+import Link from "next/link";
 import { useRouter } from "next/router";
+
 import { useMutation } from "@tanstack/react-query";
 
 import { Popover, Transition } from "@headlessui/react";
@@ -29,6 +31,7 @@ export default function AccountDropdown() {
       return fetch("/api/auth/logout", {method: "DELETE"});
     },
     onSuccess: () => {
+      router.replace("/");
       router.reload();
     }
   })
@@ -62,49 +65,49 @@ export default function AccountDropdown() {
             >
               <Popover.Panel className="absolute left-1/2 z-10 mt-3 w-screen max-w-xs -translate-x-1/2 transform px-4 sm:px-0 lg:max-w-1">
                 <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-                  <div className=" dark:bg-gray-700 p-1">
-                    <a
+                <div className="bg-white dark:bg-gray-700 p-1">
+                    <Link
                       href="/"
-                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
+                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-blue-300 dark:hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
                       <span className="flex items-center">
-                        <span className="text-sm font-medium  text-white">
+                        <span className="text-sm font-medium text-black dark:text-white">
                           Home
                         </span>
                       </span>
-                    </a>
+                    </Link>
                   </div>
-                  <div className=" dark:bg-gray-700 p-1">
-                    <a
+                  <div className="bg-white dark:bg-gray-700 p-1">
+                    <Link
                       href="##"
-                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
+                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-blue-300 dark:hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
                       <span className="flex items-center">
-                        <span className="text-sm font-medium  text-white">
+                      <span className="text-sm font-medium text-black dark:text-white">
                           Search
                         </span>
                       </span>
-                    </a>
+                    </Link>
                   </div>
-                  <div className=" dark:bg-gray-700 p-1">
-                    <a
+                  <div className="bg-white dark:bg-gray-700 p-1">
+                    <Link
                       href="##"
-                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
+                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-blue-300 dark:hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
                       <span className="flex items-center">
-                        <span className="text-sm font-medium  text-white">
+                      <span className="text-sm font-medium text-black dark:text-white">
                           Analytics
                         </span>
                       </span>
-                    </a>
+                    </Link>
                   </div>
-                  <div className=" dark:bg-gray-700 p-1">
+                  <div className="bg-white dark:bg-gray-700 p-1">
                     <button
                       onClick={signout}
-                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
+                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-blue-300 dark:hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                       >
                       <span className="flex items-center">
-                        <span className="text-sm font-medium  text-white">
+                      <span className="text-sm font-medium text-black dark:text-white">
                           Sign Out
                         </span>
                       </span>
