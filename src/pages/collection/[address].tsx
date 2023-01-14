@@ -31,7 +31,7 @@
  * --------------------
  */
 import { GetServerSidePropsContext, NextPage } from "next";
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -223,8 +223,10 @@ const CollectionPage: NextPage<{
       <Head>
         <title>{`Collection ${collection.name || address} | NFinsighT`}</title>
       </Head>
-      {pane}
-      {graphPane}
+      <Suspense fallback={<div className="text-9xl m-10 text-white">Loading</div>}>
+        {pane}
+        {graphPane}
+      </Suspense>
     </div>
   );
 }
@@ -240,7 +242,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext & {p
   };
   
   const current = new Date(Date.now());
-  current.setDate(current.getDate() - 30);
+  current.setDate(current.getDate() - 365);
   
   const numberFmt = (n: Decimal | bigint | null | undefined ) => {
     return new Number(n?? 0).valueOf()

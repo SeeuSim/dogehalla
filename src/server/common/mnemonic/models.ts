@@ -14,6 +14,7 @@ import {
 const prisma = new PrismaClient({
   log: ["error", "warn"]
 });
+const maxInt = Math.pow(2, 62);
 
 /**
  * Given an Ethereum contract address, retrieves the associated collection from
@@ -107,7 +108,7 @@ async function findOrCreateCollection(contractAddress: string) {
 async function populateDataPoints(
   collectionID: string, 
   contractAddress: string, 
-  timePeriod: MnemonicQuery__RecordsDuration = MnemonicQuery__RecordsDuration.thirtyDays, 
+  timePeriod: MnemonicQuery__RecordsDuration = MnemonicQuery__RecordsDuration.oneYear, 
   grouping: MnemonicQuery__DataTimeGroup = MnemonicQuery__DataTimeGroup.oneDay
 ) {
   const current = new Date(Date.now());
@@ -149,7 +150,7 @@ async function populateDataPoints(
   );
   
   let jobs: Prisma.Prisma__DataPointClient<DataPoint, never>[] = [];
-
+  
   prices.dataPoints.forEach(
     async (prc, index) => {
       const [ownr, sls, tkn] = [owners.dataPoints[index], sales.dataPoints[index], tokens.dataPoints[index]];
@@ -162,8 +163,8 @@ async function populateDataPoints(
         tokensMinted: Boolean(tkn?.minted)? tkn?.minted : 0,
         totalBurned: Boolean(tkn?.totalBurned)? tkn?.totalBurned : 0,
         totalMinted: Boolean(tkn?.totalMinted)? tkn?.totalMinted : 0,
-        ownersCount: BigInt(ownr?.count?? 0).valueOf(),
-        salesCount: BigInt(sls?.count?? 0).valueOf(),
+        ownersCount: Math.min(new Number(ownr?.count?? 0).valueOf(), maxInt),
+        salesCount: Math.min(new Number(sls?.count?? 0).valueOf(), maxInt),
       };
 
       const job = prisma.dataPoint.upsert({
@@ -294,7 +295,15 @@ async function updateRankings() {
  * database.
  */
 const refreshTimeSeries = async () => {
-  const collections = await prisma.collection.findMany();
+  const collections = await prisma.collection.findMany({
+    select: {
+      name: true,
+      id: true,
+      address: true
+    }
+  });
+  
+  let errors = [];
   console.log("////////////////////////////////////////////////")
   console.log("//////////////Refreshing TIMESERIES/////////////")
   console.log(`//////////////Awaiting ${collections.length} collections////////`)
@@ -302,15 +311,22 @@ const refreshTimeSeries = async () => {
   let ct = 1;
   for (let clc of collections) {
     console.log(`${ct}. ${clc.name || clc.address}`)
+    try {
     await populateDataPoints(
       clc.id,
       clc.address,
-      MnemonicQuery__RecordsDuration.oneDay, //Duration
+      MnemonicQuery__RecordsDuration.oneYear, //Duration
       MnemonicQuery__DataTimeGroup.oneDay //Grouping - To experiment with 1 Hour, or 15 Mins if database allows
     )
+    } catch(err) {
+      errors.push(clc.name || clc.address)
+    }
     ct += 1
   }
   console.log("=====>> TimeSeries Refreshed!! :)")
+  if (!errors) return;
+  console.log("ERRORS: ")
+  errors.forEach(console.log);
 }
 
 /**
