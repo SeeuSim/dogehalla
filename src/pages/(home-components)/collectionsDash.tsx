@@ -300,23 +300,54 @@ export default function CollectionsDash() {
     )
   }
 
+  const indexes = [1,2,3,4,5,6,7,8,9,10];
+  const LoadingFallback:React.FC = () => {
+    return (
+      <tr className="bg-gray-50 dark:bg-gray-700 h-20 w-full">
+        <td>
+          <div className="px-4 py-2 sm:px-6 w-full inline-flex items-center justify-between space-x-2">
+            <div className="inline-flex items-center">
+              <div className="inline-flex items-center">
+                <div className="h-5 w-4 py-0.5 mr-4 pl-0.5 animate-pulse bg-gray-500 rounded-lg"/>
+                <div className="h-16 w-16 animate-pulse bg-gray-500 rounded-md"/>
+              </div>
+              <div className="block">
+                <div className="mx-2 h-5 w-20 rounded-md animate-pulse bg-gray-500"/>
+                <div className="md:hidden mx-2 w-8 rounded-sm h-3 mt-2 animate-pulse bg-gray-500"/>
+              </div>
+            </div>
+            <div className="inline-flex sm:px-4">
+              <div className="hidden md:block w-20 h-4 mx-2 animate-pulse bg-gray-500 rounded-md"/>
+              <div className="animate-pulse ml-8 mr-2 bg-gray-500 w-24 h-4 rounded-md"/>
+            </div>
+            
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
   return (
     <>
       <Table>
-        {collectionsData?.collections.map((clc, idx) => {
-          const k = clc.collection.floor;
-          return (
-            <CollectionRow
-              key={clc.id}
-              index={idx + pageIndex * (viewLength < RECORDS_PER_PAGE? RECORDS_PER_PAGE: viewLength)} 
-              name={clc.collection.name??""} 
-              address={clc.collection.address} 
-              image={clc.collection.image}
-              value={clc.value}
-              floor={clc.collection.floor}
-            />
-          );
-        })}
+        {collectionsData
+          ?
+            collectionsData.collections.map((clc, idx) => {
+            const k = clc.collection.floor;
+            return (
+              <CollectionRow
+                key={clc.id}
+                index={idx + pageIndex * (viewLength < RECORDS_PER_PAGE? RECORDS_PER_PAGE: viewLength)} 
+                name={clc.collection.name??""} 
+                address={clc.collection.address} 
+                image={clc.collection.image}
+                value={clc.value}
+                floor={clc.collection.floor}
+              />
+            );
+          })
+          : indexes.map(i => <LoadingFallback key={i}/>)
+        }
       </Table>
     </>
   );

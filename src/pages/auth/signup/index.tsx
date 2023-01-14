@@ -124,7 +124,7 @@ export default function SignUp() {
   return (
     <div className="flex flex-col items-center mx-auto md:h-full lg:py-0 bg-inherit">
       <Head>
-        <title>Sign Up | DogeTTM</title>
+        <title>Sign Up | NFinsighT</title>
       </Head>
 
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">

@@ -22,8 +22,8 @@ const Logo = () => {
   return (
     <div className="flex lg:min-w-0 lg:flex-1" aria-label="Global">
       <Link href="/" className="flex items-center">
-        <img src={dogeLogo} className="h-6 mr-3 sm:h-9" alt="DogeTTM"/>
-        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">DogeTTM</span>
+        <img src={dogeLogo} className="h-6 mr-3 sm:h-9" alt="NFinsighT"/>
+        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">NFinsighT</span>
       </Link>
     </div>
   );

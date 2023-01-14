@@ -74,7 +74,7 @@ const VERIFYEMAILTEMPLATE = (name: string, link: string) => `
                   <tr>
                     <td class="sm-px-6" style="background-color: #fff; padding: 8px 48px; text-align: left">
                       <p style="margin: 0 0 32px; font-size: 18px; font-weight: 600; color: #374151">Hey ${name},</p>
-                      <p style="font-size: 16px; color: #374151">We're thrilled to welcome you to DogeTTM. <br> <br>To get started, confirm your email address:</p>
+                      <p style="font-size: 16px; color: #374151">We're thrilled to welcome you to NFinsighT. <br> <br>To get started, confirm your email address:</p>
                       <div class="sm-h-8" style="line-height: 16px">&zwnj;</div>
                       <a href="${link}" class="hover-bg-blue-600" style="text-decoration: none; display: inline-block; border-radius: 4px; background-color: #3b82f6; padding: 20px 24px; font-size: 14px; font-weight: 600; text-transform: uppercase; line-height: 1; color: #fff">
                         <!--[if mso]><i style="letter-spacing: 24px; mso-font-width: -100%; mso-text-raise: 26pt;">&nbsp;</i><![endif]-->
@@ -94,7 +94,7 @@ const VERIFYEMAILTEMPLATE = (name: string, link: string) => `
                   </tr>
                   <tr>
                     <td style="padding: 32px; text-align: center; font-size: 12px; color: #4b5563">
-                      <p style="margin: 0 0 16px">© DogeTTM 2022</p>
+                      <p style="margin: 0 0 16px">© NFinsighT 2022</p>
                       <p style="margin: 0; font-style: italic">Your #1 source of upcoming trends in NFT and Crypto</p>
                       <p style="margin: 0"> </p>
                     </td>
@@ -113,7 +113,7 @@ const VERIFYEMAILTEMPLATE = (name: string, link: string) => `
 
 export function VerifyEmail ({ name, link } : { name: string, link: string}) {
   return {
-    subject: "Verify Email Address for DogeTTM",
+    subject: "Verify Email Address for NFinsighT",
     body: (
       <div dangerouslySetInnerHTML={ { __html: VERIFYEMAILTEMPLATE(name, link) } }/>
     )

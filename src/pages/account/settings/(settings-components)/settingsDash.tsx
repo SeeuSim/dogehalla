@@ -125,7 +125,7 @@ const SettingsDash: React.FC<{
             },
             {
               type: "OAuth Accounts Table",
-              element: <OAuthManager oauths={props.oauths}/>,
+              element: <OAuthManager key="OAuthManager" oauths={props.oauths}/>,
             }
           ],
           

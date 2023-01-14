@@ -8,7 +8,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>DogeTTM</title>
+        <title>NFinsighT</title>
       </Head>
       <div className="w-full">
         <CollectionsDash/>

@@ -23,7 +23,7 @@ export default function Page() {
   return (
     <div className="">
       <Head>
-        <title>{`Login | DogeTTM`}</title>
+        <title>{`Login | NFinsighT`}</title>
       </Head>
       <div className="flex flex-col items-center mx-auto lg:py-0 bg-inherit">
         {/** Main Form */}

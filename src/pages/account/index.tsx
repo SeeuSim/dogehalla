@@ -11,7 +11,7 @@ export default function Account({user}: {user: {name: string, image: string, id:
   return (
     <div>
       <Head>
-        <title>Account | DogeTTM</title>
+        <title>Account | NFinsighT</title>
       </Head>
       <ul>
       <li>My Assets</li>

@@ -221,7 +221,7 @@ const CollectionPage: NextPage<{
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 grid-rows-2 lg:grid-rows-1">
       <Head>
-        <title>{`Collection ${collection.name || address} | DogeTTM`}</title>
+        <title>{`Collection ${collection.name || address} | NFinsighT`}</title>
       </Head>
       {pane}
       {graphPane}
