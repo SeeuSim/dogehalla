@@ -29,7 +29,7 @@ const AccountSettings: NextPage<{
       <Head>
         <title>Account Settings | DogeTTM</title>
       </Head>
-      <div className="flex flex-col items-center px-2">
+      <div className="flex flex-col items-center p-2">
         <SettingsDash oauths={oauths} user={user}/>
       </div>
     </>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { NextApiRequest, NextApiResponse } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -9,6 +10,8 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+import { getSession } from "server/auth/session";
 
 import { AlertInput } from "components/forms/alert";
 import OAuthButton from "components/buttons/OAuthButton";
@@ -290,4 +293,13 @@ export default function SignUp() {
     </div>
   );
 
+}
+
+export async function getServerSideProps ({req, res}: {req: NextApiRequest, res: NextApiResponse}) {
+  const session = await getSession(req, res);
+  const user = session?.passport?.user;
+  if (!user) {
+    return { props: {} }
+  }
+  return { redirect: { destination: "/", permanent: true } };
 }

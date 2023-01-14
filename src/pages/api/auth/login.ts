@@ -4,6 +4,7 @@ import nextConnect from "next-connect";
 
 import { nextConnectOptions } from "server/auth/nextConnect";
 import { authOptions } from "server/auth/session";
+import { BASEURL } from "utils/base";
 
 /**
  * Login Strategy for password login
@@ -25,9 +26,10 @@ handler.post(
     console.log(req.headers.origin)
     console.log(req.headers["user-agent"])
     */
-
     res.setHeader("user", req.user);
-    return res.redirect("/");
+    res.setHeader("message", "Logged In :)");
+
+    res.redirect(`${BASEURL}/account/settings`);
   });
 
 export default handler;

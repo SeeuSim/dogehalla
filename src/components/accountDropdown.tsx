@@ -28,9 +28,10 @@ export default function AccountDropdown() {
 
   const mutation = useMutation({
     mutationFn: (key) => {
-      return fetch("api/auth/logout", {method: "DELETE"});
+      return fetch("/api/auth/logout", {method: "DELETE"});
     },
     onSuccess: () => {
+      router.replace("/");
       router.reload();
     }
   })

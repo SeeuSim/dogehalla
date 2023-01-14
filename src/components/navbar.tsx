@@ -1,13 +1,10 @@
 import { useState } from 'react';
-import { NextApiRequest, NextApiResponse } from 'next';
 import Link from 'next/link';
 
 import { trpc } from 'utils/trpc';
 
 import { Dialog } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-
-import { getSession } from 'server/auth/session';
 
 import AccountDropdown from './accountDropdown';
 import SearchDropDown from './searchDropdown';

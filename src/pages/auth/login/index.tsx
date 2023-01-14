@@ -1,7 +1,10 @@
 import Head from "next/head";
 import Link from "next/link";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getSession } from "server/auth/session";
 
 import OAuthButton from "components/buttons/OAuthButton";
+
 const labelStyle = "block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 const fieldStyle = `
   bg-gray-50 
@@ -121,12 +124,12 @@ export default function Page() {
   );
 }
 
-// export async function getServerSideProps ({req, res}: {req: NextApiRequest, res: NextApiResponse}) {
-//   const session = await getSession(req, res);
-//   const id = session?.id;
-//   if (!id) {
-//     return null;
-//   }
-//   return "";
-//   // const user = await trpc.model.user.getUser.useQuery() 
-// }
+export async function getServerSideProps ({req, res}: {req: NextApiRequest, res: NextApiResponse}) {
+  const session = await getSession(req, res);
+  const user = session?.passport?.user;
+
+  if (!user) {
+    return { props: {} }
+  }
+  return { redirect: { destination: "/", permanent: true } };
+}

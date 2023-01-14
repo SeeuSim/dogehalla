@@ -151,7 +151,7 @@ const SettingsDash: React.FC<{
 
   return (
     <div className={`
-          mx-2 px-2 w-full sm:max-w-xl h-screen
+          mx-2 p-2 w-full sm:max-w-xl
           bg-white rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700`}>
       
 
