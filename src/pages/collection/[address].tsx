@@ -213,7 +213,7 @@ const CollectionPage: NextPage<{
       </div>
 
       <div className="px-4">
-        <LineGraph width={400} height={400} yCallback={yAxisCallback} graphLabel={selector} labels={graphLabels} dataPts={dataPts}/> 
+        <LineGraph width={800} height={400} yCallback={yAxisCallback} graphLabel={selector} labels={graphLabels} dataPts={dataPts}/> 
       </div>
     </div>
 

@@ -7,16 +7,15 @@ In order to test the app, follow the [Setup Instructions](#dev-environment-setup
 
 ### **Prerequisites**
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [`docker-compose`](https://docs.docker.com/get-started/08_using_compose/)
 - [`pnpm`](https://pnpm.io/installation) or [`npm`](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) (`npm` can be used, but all `pnpm` scripts in `package.json` will need to be altered)
 
 1. Run `npm install` after cloning the repository.
-2. Configure the OAuth setup as described in the following sections:
+2. Configure the setup as described in the following sections:
 
   - [Google Auth](#google-auth)
   - [Coinbase Auth](#coinbase-auth)
-  - [Database Setup](#database-setup) or [Docker Setup](#docker-setup)
+  - [ReCAPTCHA Setup](#recaptcha-setup)
+  - [Database Setup](#database-setup)
 
 3. Configure the JWT (JSON Web Token) setup in the section [JWT Setup](#jwt-setup).
 4. Once done, open the application by running `npm run dev` in the terminal in the project root directory.
@@ -41,6 +40,13 @@ the required credentials for the dev server.
 2. Configure the redirect URI as `http://localhost:3000/api/auth/callback/coinbase`
 3. Copy and paste the client ID and client Secret into your `.env` file in the root directory.
 
+### **ReCAPTCHA Setup**
+
+1. In your Google Account, visit the [Google ReCAPTCHA Site](https://www.google.com/u/1/recaptcha/admin) to obtain the required credentials for the dev server. It can be configured under 
+""
+2. Configure the allowed uri as `localhost`.
+3. Copy the `SITE_KEY` into your `.env` as `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`, and `SITE_SECRET` as `RECAPTCHA_SITE_SECRET`.
+
 ### **Database Setup**
 
 You only need this section if you are not using Docker and have your own Docker and Redis instance on your system.
@@ -48,13 +54,6 @@ You only need this section if you are not using Docker and have your own Docker 
 1. Using `psql` or your system PostgreSQL client, setup a database instance and configure the `DATABASE_URL` in the `.env` as per the format given.
 2. Start your own Redis server and paste the URL in `src/server/db/connectRedis.ts` under `redisUrl`.
 3. Run `pnpm db:migrate && pnpm db:push` to migrate your database. If using `npm`, replace `pnpm` with `npm run`.
-
-### **Docker Setup**
-
-You only need this section if you have Docker on your system, as well as Docker Compose.
-
-1. Run `docker-compose up -d`. Your databases will then be setup automatically.
-2. Run `pnpm db:migrate && pnpm db:push` to migrate your database. If using `npm`, replace `pnpm` with `npm run`.
 
 ### **JWT Setup**
 
