@@ -166,7 +166,7 @@ export default function Searchbar({ closeSearchFn } : { closeSearchFn: (ref?: HT
         </div>
       </div>
       <div className="absolute right-2 mt-1 w-full pl-[152px]">
-        <div className="bg-slate-50 dark:bg-blue-300 rounded-md grid grid-cols-1">
+        <div className="bg-slate-50 dark:bg-blue-300 rounded-md grid grid-cols-1 opacity-70">
         {
           collections != undefined && collections.length > 0
           ? collections.map((i) => {
@@ -200,7 +200,7 @@ export default function Searchbar({ closeSearchFn } : { closeSearchFn: (ref?: HT
             })
           : searchField.length > 0 
           ? <div className="p-2 font-medium text-blue-900">There are no collections available with that {searchFilterState === "All" ? "name/address" : searchFilterState === "Name" ? "name" : "address"}. Please try again.</div>
-          : <div className="p-2 font-medium text-blue-900">Enter your query</div>
+          : <div className="p-2 font-medium text-blue-900 opacity-80">Enter your query</div>
         }
         </div>
       </div>
