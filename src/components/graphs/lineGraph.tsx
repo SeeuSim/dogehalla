@@ -39,7 +39,7 @@ const LineGraph: React.FC<{
             size: 18,
             family: "system-ui"
           },
-          color: "#FFFFFF"
+          color: "#64748b"
         },
         display: true
       }
