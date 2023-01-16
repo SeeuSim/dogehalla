@@ -1,6 +1,6 @@
 import passport, { use } from "passport";
 import { Strategy as CoinbaseStrategy } from "passport-coinbase";
-import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
+import { Strategy as GoogleStrategy, type VerifyCallback } from "passport-google-oauth2";
 import MagicLoginStrategy from "passport-magic-login";
 
 import { Strategy as LocalStrategy } from "passport-local";
@@ -74,7 +74,7 @@ passport.use(
     {
       clientID: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/api/auth/callback/google",
+      callbackURL: `${BASEURL}/api/auth/callback/google`,
       scope: ["email", "profile"],
       passReqToCallback: true,
     },
@@ -104,7 +104,6 @@ passport.use(
           });
 
           if (!user) { // create
-            console.log("Creating user " + profile.email);
             
             const user = await prisma.user.create({
               data: {
@@ -131,7 +130,6 @@ passport.use(
             done(null, user, { message: "User created successfully"});
           } else { //User exists
             if (user.canLink) {
-              console.log("/////USER CAN LINK")
               //Check if existing profile with Google is linked to the user
               const googleProfileExists = user.authprofiles.filter(e => e.provider === "google").length > 0;
 
@@ -190,7 +188,7 @@ passport.use(
   new CoinbaseStrategy({
     clientID: env.COINBASE_CLIENT_ID,
     clientSecret: env.COINBASE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/api/auth/callback/coinbase",
+    callbackURL: `${BASEURL}/api/auth/callback/coinbase`,
     scope: ["wallet:user:email", "wallet:user:read"],
     
   },

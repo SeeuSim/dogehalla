@@ -4,21 +4,23 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { prisma } from "../db/client";
 
 import { getSession } from "server/auth/session";
+import { SessionRecord, Session } from "next-session/lib/types";
 
-export type Session = {
-  passport: {
-    user: {
-      name: string,
-      id: string,
-      image: string
-    }
-  }
-}
+
+// export type Session = {
+//   passport: {
+//     user: {
+//       name: string,
+//       id: string,
+//       image: string
+//     }
+//   }
+// }
 
 export type SessionProps = Session["passport"]["user"] | boolean | undefined;
 
 type CreateContextOptions = {
-  session: Session | null;
+  session: Session<SessionRecord> | null;
 };
 
 /** Use this helper for:

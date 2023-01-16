@@ -6,23 +6,25 @@ import { z } from "zod";
  * This way you can ensure the app isn't built with invalid env vars.
  */
 export const serverSchema = z.object({
-  DATABASE_PORT: z.string(),
-  POSTGRES_PASSWORD: z.string(),
-  POSTGRES_USER: z.string(),
-  POSTGRES_DB: z.string(),
-  POSTGRES_HOST: z.string(),
-  POSTGRES_HOSTNAME: z.string(),
+  // DATABASE_PORT: z.string(),
+  // POSTGRES_PASSWORD: z.string(),
+  // POSTGRES_USER: z.string(),
+  // POSTGRES_DB: z.string(),
+  // POSTGRES_HOST: z.string(),
+  // POSTGRES_HOSTNAME: z.string(),
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]),
   COINBASE_CLIENT_ID: z.string(),
   COINBASE_CLIENT_SECRET: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
+  MNEMONIC_API_KEY: z.string(),
   EMAIL_USER: z.string().email(),
   EMAIL_PASSWORD: z.string(),
   EMAIL_HOST: z.string(),
   EMAIL_PORT: z.string(),
   JWT_SECRET: z.string().length(44),
+  RECAPTCHA_SITE_SECRET: z.string(),
 });
 
 /**
@@ -32,6 +34,7 @@ export const serverSchema = z.object({
  */
 export const clientSchema = z.object({
   // NEXT_PUBLIC_CLIENTVAR: z.string(),
+  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: z.string()
 });
 
 /**
@@ -42,4 +45,5 @@ export const clientSchema = z.object({
  */
 export const clientEnv = {
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
 };

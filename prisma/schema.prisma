@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -21,10 +22,10 @@ model Example {
 }
 
 model OAuthProfile {
-  id                String  @id @default(cuid())
+  id                String      @id @default(cuid())
   userId            String
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
 
   type              String
   provider          String
@@ -52,17 +53,17 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?   @db.VarChar(255)
+  id            String          @id @default(cuid())
+  name          String?         @db.VarChar(255)
   email         String?   
   password      String?
-  verified      Boolean?  @default(false)
+  verified      Boolean?        @default(false)
   emailVerified DateTime?
-  canLink       Boolean   @default(false)
-  image         String?   @default("../public/user_profilepic.png")
-  role          RoleEnumType? @default(user)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  canLink       Boolean         @default(false)
+  image         String?         @default("user_profilepic.png")
+  role          RoleEnumType?   @default(user)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   authprofiles  OAuthProfile[]
   // sessions      Session[]
   
@@ -80,4 +81,87 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+
+//NFT Metadata
+model Collection {
+  id            String    @id @default(cuid())
+  address       String
+  name          String?
+  type          String?
+  tokens        Int
+  owners        Int
+  salesVolume   Decimal
+
+  //Floor
+  floor         Decimal?
+  
+  //Metadata
+  description   String?
+  bannerImg     String
+  image         String
+  extURL        String?
+
+  //Ranking     
+  ranking       RankTableEntry[]
+
+  //Data
+  data          DataPoint[]
+
+
+  @@unique([address])
+}
+
+enum CollectionsRank {
+  avgPrice      @map("avg_price")
+  maxPrice      @map("max_price")
+  salesCount    @map("sales_count")
+  salesVolume   @map("sales_volume")
+}
+
+enum RankPeriod {
+  oneDay      @map("1_DAY")
+  sevenDays   @map("7_DAYS")
+  thirtyDays  @map("30_DAYS")
+  oneYear     @map("365_DAYS")
+}
+
+model RankTable {
+  id            String            @id @default(cuid())
+  type          CollectionsRank   
+  timePeriod    RankPeriod
+  entries       RankTableEntry[]
+
+  @@unique([type, timePeriod])
+}
+
+model RankTableEntry {
+  id            String            @id @default(cuid())
+  value         Decimal
+  tableId       String
+  table         RankTable         @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  collectionId  String
+  collection    Collection        @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, tableId])
+}
+
+model DataPoint {
+  id            String          @id @default(cuid())
+  timestamp     DateTime      
+  avgPrice      Decimal?
+  maxPrice      Decimal?
+  minPrice      Decimal?
+  salesCount    BigInt?
+  salesVolume   Decimal?
+  tokensMinted  Decimal?
+  tokensBurned  Decimal?
+  totalMinted   Decimal?
+  totalBurned   Decimal?
+  ownersCount   BigInt?
+  collectionId  String
+  collection    Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, timestamp])
 }

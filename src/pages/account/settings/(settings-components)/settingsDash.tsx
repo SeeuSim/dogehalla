@@ -64,9 +64,9 @@ const OAuthManager: React.FC<{
         <h1 className="text-md font-medium dark:text-slate-200">Linked OAuth Accounts:</h1>
       </div>
       <div className="px-1">
-      {props.oauths.length === 0
+      { props.oauths && props.oauths?.length === 0
         ? <p className="dark:text-slate-200 font-light">No accounts linked yet.</p>
-        : props.oauths.map((e) => 
+        : props.oauths && props.oauths.map((e) => 
             <OAuthProfileManager 
               key={e.id}  
               provider={e.provider} 
@@ -125,7 +125,7 @@ const SettingsDash: React.FC<{
             },
             {
               type: "OAuth Accounts Table",
-              element: <OAuthManager oauths={props.oauths}/>,
+              element: <OAuthManager key="OAuthManager" oauths={props.oauths}/>,
             }
           ],
           
@@ -151,7 +151,7 @@ const SettingsDash: React.FC<{
 
   return (
     <div className={`
-          mx-2 px-2 w-full sm:max-w-xl h-screen
+          mx-2 p-2 w-full sm:max-w-xl
           bg-white rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700`}>
       
 
@@ -170,7 +170,8 @@ const SettingsDash: React.FC<{
           <Listbox.Options className={`${open
               ? "mt-2 flex flex-col p-2 bg-gray-100 dark:bg-gray-800 rounded-md shadow dark:border dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600" 
               : "hidden"}`}>
-            {settings.map((i, idx) => 
+            { settings && 
+              settings.map((i, idx) => 
               <Listbox.Option className={`text-gray-800 dark:text-slate-200
                                           inline-flex space-x-2 ${idx === main ? "hidden" : ""}`}
                               key={idx}
@@ -190,8 +191,10 @@ const SettingsDash: React.FC<{
       {/* Nav Section - Tablet/Desktop */}
       <div className="text-sm hidden sm:block font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
         <ul className="flex flex-wrap -mb-px">
-          {settings.map((i, idx) => 
-            <SettingsNav  label={i.name} 
+          { settings && 
+            settings.map((i, idx) => 
+            <SettingsNav  key={idx.toExponential(3).toString()}
+                          label={i.name} 
                           active={idx === main} 
                           index={idx} 
                           icon={i.icon} 
@@ -201,8 +204,9 @@ const SettingsDash: React.FC<{
 
       {/* Actual Settings */}
       <div>
-        {settings[main]?.sections.map(
-          (el) => <Pane title={el.title} subPanes={el.subPanes}></Pane>
+        { settings[main]?.sections &&
+          settings[main]?.sections.map(
+          (el, idx) => <Pane key={idx.toExponential(5).toString()} title={el.title} subPanes={el.subPanes}></Pane>
         )}
       </div>
       

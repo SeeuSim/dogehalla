@@ -1,20 +1,21 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import Link from 'next/link';
 
 import { trpc } from 'utils/trpc';
 
 import { Dialog } from '@headlessui/react';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, SunIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import AccountDropdown from './accountDropdown';
 import SearchDropDown from './searchDropdown';
+import { MoonIcon } from '@heroicons/react/24/solid';
 
 //TO BE CHANGED
 const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
 
 const menuOptions = [
   { name: 'Home', href: '/' },
-  { name: 'Analytics', href: '#' },
+  { name: 'Analytics', href: '/#' },
   { name: 'Account', href: '/account' },
 ]
 
@@ -22,14 +23,17 @@ const Logo = () => {
   return (
     <div className="flex lg:min-w-0 lg:flex-1" aria-label="Global">
       <Link href="/" className="flex items-center">
-        <img src={dogeLogo} className="h-6 mr-3 sm:h-9" alt="DogeTTM"/>
-        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">DogeTTM</span>
+        <img src={dogeLogo} className="h-6 mr-3 sm:h-9" alt="NFinsighT"/>
+        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">NFinsighT</span>
       </Link>
     </div>
   );
 }
 
-export default function NavBar(): JSX.Element {
+const NavBar: React.FC<{
+  dark: boolean,
+  setDark: Dispatch<SetStateAction<boolean>>
+}> = ({ dark, setDark }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: session } = trpc.auth.getSession.useQuery(undefined);
@@ -66,6 +70,12 @@ export default function NavBar(): JSX.Element {
           {/** Search | Hamburger (Medium and below) | Login Button (Large only) */}
            
           <div className="flex min-w-0 flex-1 justify-end gap-x-2">
+            <button className='px-2 py-1 rounded-xl self-center text-slate-800 dark:text-slate-50 hover:bg-slate-100 dark:hover:bg-slate-700 dark:border-slate-700 border-[0.5px]' onClick={() => setDark(!dark)}>
+              { dark 
+                ? <MoonIcon className='h-4 w-4'/>
+                : <SunIcon className='h-4 w-4'/>
+              }
+            </button>
             <SearchDropDown/>
             <button
               type="button"
@@ -97,12 +107,12 @@ export default function NavBar(): JSX.Element {
 
       {/** Medium Screens and Below - Hamburger Menu */}
       <Dialog as="div" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
-        <Dialog.Panel onFocus={() => {}} className="fixed inset-0 z-10 overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 lg:hidden">
+        <Dialog.Panel onFocus={() => {}} className={`fixed inset-0 z-10 overflow-y-auto px-6 py-6 lg:hidden ${dark? "bg-gray-900": "bg-white"}`}>
           <div className="flex h-9 items-center justify-between">
 
             {/** Company Logo */}
             <div className="flex">
-              <Link href="#" className="-m-1.5 p-1.5">
+              <Link href="/#" className="-m-1.5 p-1.5">
                 <span className="sr-only">Your Company</span>
                 <img
                   className="h-8"
@@ -116,7 +126,7 @@ export default function NavBar(): JSX.Element {
             <div className="flex">
               <button
                 type="button"
-                className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+                className={`-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 ${dark? "text-slate-50": "text-gray-700"}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="sr-only">Close menu</span>
@@ -134,7 +144,7 @@ export default function NavBar(): JSX.Element {
                     key={item.name}
                     href={item.href}
                     onClick={() => {setMobileMenuOpen(false)}}
-                    className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-400/10 dark:text-white"
+                    className={`-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-400/10 dark:text-white ${dark? "text-slate-50": "text-gray-900"}`}
                   >
                     {item.name}
                   </Link>
@@ -146,7 +156,7 @@ export default function NavBar(): JSX.Element {
                 <Link
                   href="/auth/login/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-6 text-gray-900 hover:bg-gray-400/10 dark:text-white"
+                  className={`-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-6 text-gray-900 hover:bg-gray-400/10 dark:text-white ${dark? "text-slate-50": "text-gray-900"}`}
                 >
                   Log in
                 </Link>
@@ -158,3 +168,5 @@ export default function NavBar(): JSX.Element {
     </div>
   );
 }
+
+export default NavBar;

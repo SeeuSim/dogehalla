@@ -1,13 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { NextApiRequest, NextApiResponse } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+
+import { env } from "env/client.mjs";
+import ReCAPTCHA from "react-google-recaptcha";
 
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { BASEURL } from "utils/base";
+import { getSession } from "server/auth/session";
 
 import { AlertInput } from "components/forms/alert";
 import OAuthButton from "components/buttons/OAuthButton";
@@ -61,6 +65,27 @@ export default function SignUp() {
   //Hide ConfirmPassword element
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const gCAPTCHARef = useRef<ReCAPTCHA>(null);
+
+  const verifyCAPTCHA = async () => {
+    const token = gCAPTCHARef.current?.getValue();
+    const verify = await fetch(
+      `../api/auth/verifyCaptcha`, {
+        method: "POST",
+        body: JSON.stringify({
+          token
+        })
+      }
+    );
+
+    if (verify.ok) {
+      return true;
+    }
+
+    console.log(verify.text());
+    return false;
+  }
+
   //React Form Hooks
   const {
     register, handleSubmit, formState: {errors},
@@ -72,12 +97,17 @@ export default function SignUp() {
 
   useEffect(() => {
     router.prefetch("/message/signupSuccess");
-  }, []);
+  }, [router]);
 
   //Submission Logic
   async function onSubmit (data: any) {
+    const proceed = await verifyCAPTCHA();
+    if (!proceed) {
+      return;
+    }
+
     setSubmitting(true);
-    const res = await fetch(`${BASEURL}/api/auth/signup`, {
+    const res = await fetch(`../api/auth/signup`, {
       method: "POST",
       body: JSON.stringify(data)
     });
@@ -92,9 +122,9 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex flex-col items-center mx-auto md:h-screen lg:py-0 bg-inherit">
+    <div className="flex flex-col items-center mx-auto md:h-full lg:py-0 bg-inherit">
       <Head>
-        <title>Sign Up | DogeTTM</title>
+        <title>Sign Up | NFinsighT</title>
       </Head>
 
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
@@ -193,6 +223,16 @@ export default function SignUp() {
                   : <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>}
               </button>
             </div>
+
+            <div className="relative flex items-center justify-center py-2">
+                <label htmlFor="recaptcha" className="sr-only">Recaptcha</label>
+                <ReCAPTCHA
+                  className="flex object-cover"
+                  sitekey={env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                  ref={gCAPTCHARef}
+                  
+                />
+              </div>
             
             {/* Loading UI | Errors UI | Normal UI */}
             { submitting
@@ -253,4 +293,13 @@ export default function SignUp() {
     </div>
   );
 
+}
+
+export async function getServerSideProps ({req, res}: {req: NextApiRequest, res: NextApiResponse}) {
+  const session = await getSession(req, res);
+  const user = session?.passport?.user;
+  if (!user) {
+    return { props: {} }
+  }
+  return { redirect: { destination: "/", permanent: true } };
 }

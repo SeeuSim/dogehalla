@@ -5,7 +5,7 @@ const SignupSuccess: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Signup Successful | DogeTTM</title>
+        <title>Signup Successful | NFinsighT</title>
       </Head>
       <div>
         <p className="text-gray-800 dark:text-slate-200">
