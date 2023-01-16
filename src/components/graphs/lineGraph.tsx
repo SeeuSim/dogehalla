@@ -36,10 +36,10 @@ const LineGraph: React.FC<{
       legend: {
         labels: {
           font: {
-            size: 14,
+            size: 20,
             family: "system-ui"
           },
-          color: "#64748b"
+          color: "#FFFFFF"
         },
         display: true
       }
