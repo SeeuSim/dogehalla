@@ -315,7 +315,7 @@ const refreshTimeSeries = async () => {
     await populateDataPoints(
       clc.id,
       clc.address,
-      MnemonicQuery__RecordsDuration.oneYear, //Duration
+      MnemonicQuery__RecordsDuration.oneDay, //Duration
       MnemonicQuery__DataTimeGroup.oneDay //Grouping - To experiment with 1 Hour, or 15 Mins if database allows
     )
     } catch(err) {
