@@ -89,6 +89,7 @@ export const NFTRouter = router({
           });
           return collections;
         } catch (err) {
+          console.error(err);
           return []
         }
     })

@@ -191,7 +191,7 @@ const CollectionPage: NextPage<{
     dark:bg-gray-800 dark:border-gray-700 max-w-full max-h-full
     `}>
 
-      <div className="float-right p-2 space-x-2">
+      <div className="float-right p-2 space-x-2 mb-10">
         <select 
           className="rounded-md p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 shadow-md"
           value={selector} 
@@ -211,8 +211,9 @@ const CollectionPage: NextPage<{
           <option key={365} value={365}>1y</option>
         </select>
       </div>
-
-      <div className="px-4">
+      
+      
+      <div className="px-2 mb-2">
         <LineGraph width={800} height={400} yCallback={yAxisCallback} graphLabel={selector} labels={graphLabels} dataPts={dataPts}/> 
       </div>
     </div>
