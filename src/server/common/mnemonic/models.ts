@@ -442,7 +442,7 @@ export const dailyJob = async () => {
     await refreshTimeSeries();
   }
 
-  // await updateRankings(); 
-  // await refreshFloorPrice();
+  await updateRankings(); 
+  await refreshFloorPrice();
 }
 
