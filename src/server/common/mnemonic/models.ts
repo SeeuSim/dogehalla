@@ -28,21 +28,17 @@ const maxInt = Math.pow(2, 62);
  * @returns The collection from the database.
  */
 async function findOrCreateCollection(contractAddress: string) {
-  //As this function also queries metadata and datapoints only on creation, 
+  //As this function also queries datapoints only on creation, 
   //`upsert` cannot be used.
+  
+  const meta = await MnemonicQuery.collectionMeta(contractAddress);
 
   const collection = await prisma.collection.findUnique({
     where: {
       address: contractAddress
     }
   });
-
-  if (collection != null) return collection;
-
-  //Only query metadata on creation
-  const meta = await MnemonicQuery.collectionMeta(contractAddress);
-
-
+  
   const bannerImg = meta.metadata.find(
     val => val.type === MnemonicResponse__CollectionMeta__Metadata__Type.bannerImage
   );
@@ -61,7 +57,20 @@ async function findOrCreateCollection(contractAddress: string) {
   
   //Highly likely to be a bogus collection if all three are missing, and there are few owners
   if (!Boolean(meta.name) && !Boolean(desc) && !Boolean(exturl) && new Number(meta.ownersCount) <= 5) return null; 
-
+  
+  if (collection != null) {
+    const updated = await prisma.collection.update({
+      where: {
+        id: collection.id
+      },
+      data: {
+        tokens: new Number(meta.tokensCount?? 0).valueOf(),
+        owners: new Number(meta.ownersCount?? 0).valueOf(),
+        salesVolume: Boolean(meta.salesVolume)? meta.salesVolume : 0,
+      }
+    });
+    return updated;
+  }
   
   try {
     const newCollection = await prisma.collection.create({
@@ -153,18 +162,10 @@ async function populateDataPoints(
   
   prices.dataPoints.forEach(
     async (prc, index) => {
-      const [ownr, sls, tkn] = [owners.dataPoints[index], sales.dataPoints[index], tokens.dataPoints[index]];
       const data = {
         avgPrice: Boolean(prc.avg)? prc.avg : 0,
         maxPrice: Boolean(prc.max)? prc.max : 0,
         minPrice: Boolean(prc.min)? prc.min : 0,
-        salesVolume: Boolean(sls?.volume)? sls?.volume : 0,
-        tokensBurned: Boolean(tkn?.burned)? tkn?.burned : 0,
-        tokensMinted: Boolean(tkn?.minted)? tkn?.minted : 0,
-        totalBurned: Boolean(tkn?.totalBurned)? tkn?.totalBurned : 0,
-        totalMinted: Boolean(tkn?.totalMinted)? tkn?.totalMinted : 0,
-        ownersCount: Math.min(new Number(ownr?.count?? 0).valueOf(), maxInt),
-        salesCount: Math.min(new Number(sls?.count?? 0).valueOf(), maxInt),
       };
 
       const job = prisma.dataPoint.upsert({
@@ -184,8 +185,85 @@ async function populateDataPoints(
       jobs.push(job);
     }
   );
+  
+  sales.dataPoints.forEach(
+    async (sls, index) => {
+      const data = {
+        salesVolume: Boolean(sls?.volume)? sls?.volume : 0,
+        salesCount: Math.min(new Number(sls?.count?? 0).valueOf(), maxInt),
+      };
+      const job = prisma.dataPoint.upsert({
+        where: {
+          collectionId_timestamp: {
+            collectionId: collectionID,
+            timestamp: sls.timestamp
+          }
+        },
+        update: data,
+        create: {
+          collectionId: collectionID,
+          timestamp: sls.timestamp,
+          ...data
+        }
+      });
+      jobs.push(job);
+    }
+  )
+
+  owners.dataPoints.forEach(
+    async (ownr, index) => {
+      const data = {
+        ownersCount: Math.min(new Number(ownr?.count?? 0).valueOf(), maxInt),
+      };
+
+      const job = prisma.dataPoint.upsert({
+        where: {
+          collectionId_timestamp: {
+            collectionId: collectionID,
+            timestamp: ownr.timestamp
+          }
+        },
+        update: data,
+        create: {
+          collectionId: collectionID,
+          timestamp: ownr.timestamp,
+          ...data
+        }
+      });
+      jobs.push(job);
+    }
+  )
+
+  tokens.dataPoints.forEach(
+    async (tkn, index) => {
+      const data = {
+        tokensBurned: Boolean(tkn?.burned)? tkn?.burned : 0,
+        tokensMinted: Boolean(tkn?.minted)? tkn?.minted : 0,
+        totalBurned: Boolean(tkn?.totalBurned)? tkn?.totalBurned : 0,
+        totalMinted: Boolean(tkn?.totalMinted)? tkn?.totalMinted : 0,
+      };
+
+      const job = prisma.dataPoint.upsert({
+        where: {
+          collectionId_timestamp: {
+            collectionId: collectionID,
+            timestamp: tkn.timestamp
+          }
+        },
+        update: data,
+        create: {
+          collectionId: collectionID,
+          timestamp: tkn.timestamp,
+          ...data
+        }
+      });
+      jobs.push(job);
+    }
+  )
+
   await prisma.$transaction(jobs);
 }
+
 
 /**
  * Returns a transaction that updates an existing ranking entry, or creates a new one.
@@ -295,13 +373,7 @@ async function updateRankings() {
  * database.
  */
 const refreshTimeSeries = async () => {
-  const collections = await prisma.collection.findMany({
-    select: {
-      name: true,
-      id: true,
-      address: true
-    }
-  });
+  const collections = await prisma.collection.findMany();
   
   let errors = [];
   console.log("////////////////////////////////////////////////")
@@ -315,7 +387,7 @@ const refreshTimeSeries = async () => {
     await populateDataPoints(
       clc.id,
       clc.address,
-      MnemonicQuery__RecordsDuration.oneDay, //Duration
+      MnemonicQuery__RecordsDuration.sevenDays, //Duration
       MnemonicQuery__DataTimeGroup.oneDay //Grouping - To experiment with 1 Hour, or 15 Mins if database allows
     )
     } catch(err) {
@@ -324,7 +396,7 @@ const refreshTimeSeries = async () => {
     ct += 1
   }
   console.log("=====>> TimeSeries Refreshed!! :)")
-  if (!errors) return;
+  if (!errors.length) return;
   console.log("ERRORS: ")
   errors.forEach(console.log);
 }
@@ -370,7 +442,7 @@ export const dailyJob = async () => {
     await refreshTimeSeries();
   }
 
-  await updateRankings(); 
-  await refreshFloorPrice();
+  // await updateRankings(); 
+  // await refreshFloorPrice();
 }
 
