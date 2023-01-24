@@ -26,9 +26,9 @@ handler.post(
       return res.status(401).json({ message: "Forbidden" })
     }
 
-    res.status(200).json({ message: "ok" });
     //Is admin, proceed to populate/refresh database
     await dailyJob();
+    res.status(200).json({ message: "ok" });
 
   }
 )

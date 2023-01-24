@@ -1,14 +1,8 @@
 import { Collection, DataPoint, Prisma, PrismaClient, RankTableEntry } from "@prisma/client";
-// import { prisma } from "server/db/client";
 
 import * as MnemonicQuery from "./mnemonic";
 
-import { 
-  MnemonicQuery__DataTimeGroup, 
-  MnemonicQuery__RankType, 
-  MnemonicQuery__RecordsDuration, 
-  MnemonicResponse__CollectionMeta__Metadata__Type 
-} from "./types";
+import { MnemonicQuery__DataTimeGroup, MnemonicQuery__RankType, MnemonicQuery__RecordsDuration, MnemonicResponse__CollectionMeta__Metadata__Type } from "./types";
 
 //ONLY FOR THIS FILE
 const prisma = new PrismaClient({
@@ -264,7 +258,6 @@ async function populateDataPoints(
   await prisma.$transaction(jobs);
 }
 
-
 /**
  * Returns a transaction that updates an existing ranking entry, or creates a new one.
  * 
@@ -316,53 +309,59 @@ async function findOrCreateRankTable(rank: MnemonicQuery__RankType, timePeriod: 
   return out;
 }
 
+async function rankTimeUpdate(rank: MnemonicQuery__RankType, time: MnemonicQuery__RecordsDuration) {
+  try {
+    let rankingJobs: Prisma.Prisma__RankTableEntryClient<RankTableEntry, never>[] = [];
+    const rankTable = await findOrCreateRankTable(rank, time);
+    const { count } = await prisma.rankTableEntry.deleteMany({
+      where: {
+        tableId: rankTable.id
+      }
+    });
+
+    //Query data
+    const collections = await MnemonicQuery.getTopCollections(rank, time);
+
+    console.log("================================================================================");
+    console.log(`== Refreshing ${rank} ${time} Rankings for ${collections.collections.length} collections ==`);
+    console.log("================================================================================");
+    let ct = 1;
+
+    for (let clctn of collections.collections) {
+      const collection = await findOrCreateCollection(clctn.contractAddress);
+
+      if (collection) {
+        //Create the ranking.
+        console.log(`${ct}. ${collection.name || collection.address}`)
+        const job = updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
+        rankingJobs.push(job);
+        ct += 1;
+      }
+    }
+    console.log("Pushing to database...")
+    await prisma.$transaction(rankingJobs);
+    console.log("Successful!");
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 /**
  * A daily job.
  * 
  * To be run daily to refresh collection rankings, or seed an empty database.
  */
 async function updateRankings() {
-
-  //FOR TESTING
-  // const boredApe = await findOrCreateCollection("0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D");
-  // if (!boredApe) return;
-  // await populateDataPoints(boredApe.id, boredApe.address)
-  // const delay = (ms = 1000) => new Promise(r => setTimeout(r, ms));
-
-  let rankingJobs: Prisma.Prisma__RankTableEntryClient<RankTableEntry, never>[] = [];
-
   for (let rank of Object.values(MnemonicQuery__RankType)) {
     for (let time of Object.values(MnemonicQuery__RecordsDuration)) {
-      const rankTable = await findOrCreateRankTable(rank, time);
-      const { count } = await prisma.rankTableEntry.deleteMany({
-        where: {
-          tableId: rankTable.id
-        }
-      });
-
-      //Query data
-      const collections = await MnemonicQuery.getTopCollections(rank, time);
-
-      console.log("=========================================================================================");
-      console.log(`==Refreshing ${rank} ${time} Rankings for ${collections.collections.length} collections==`);
-      console.log("=========================================================================================");
-      let ct = 1;
-
-      for (let clctn of collections.collections) {
-        const collection = await findOrCreateCollection(clctn.contractAddress);
-
-          if (collection) {
-            //Create the ranking.
-            console.log(`${ct}. ${collection.name || collection.address}`)
-            const job = updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
-            rankingJobs.push(job);
-            ct += 1;
-          }
+      let jobSucceeded = false;
+      while (!jobSucceeded) {
+        jobSucceeded = await rankTimeUpdate(rank, time);
       }
     }
   }
-  console.log("Pushing to database...")
-  await prisma.$transaction(rankingJobs);
+  
   console.log("==========>> Rankings Refreshed!")
 }
 
@@ -414,7 +413,12 @@ const refreshFloorPrice = async () => {
   let ct = 1;
   for (let clc of collection) {
     console.log(`${ct}. ${clc.name || clc.address}`)
-    const data = await MnemonicQuery.floorPrice(clc.address);
+    let data;
+    try {
+      data = await MnemonicQuery.floorPrice(clc.address);
+    } catch (err) {
+      data = await MnemonicQuery.floorPrice(clc.address);
+    }
     const job = prisma.collection.update({
       where: {
         id: clc.id
@@ -445,4 +449,3 @@ export const dailyJob = async () => {
   await updateRankings(); 
   await refreshFloorPrice();
 }
-
