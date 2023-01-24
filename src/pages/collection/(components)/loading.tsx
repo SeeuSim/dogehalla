@@ -1,11 +1,6 @@
-import { Head } from "next/document";
-
 const LoadingUI: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 grid-rows-2 lg:grid-rows-1">
-      <Head>
-        <title>{`Loading Collection`}</title>
-      </Head>
       <div className="bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 max-w-full h-screen">
         <div className="relative w-full h-36 overflow-hidden rounded-t-lg shadow-md animate-pulse bg-slate-500"/>
         <div className="px-3 sm:px-4 pt-4 flex absolute -translate-y-20">
