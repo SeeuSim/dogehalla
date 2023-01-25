@@ -65,6 +65,14 @@ openssl rand -base64 32
 
 Proceed to copy the printed string into your .env file under `JWT_SECRET`. Save, and you're done!
 
+## Additional Steps
+
+Please set up the necessary API Keys and `.env` variables as outlined in the `.env.example`. These include:
+
+- Gallop API Key
+- Mnemonic API Key
+- Mail Setup
+
 ## **Development Paradigms to follow**
 
 1. Follow the NextJS 12 and T3 App File structure. This is because all TRPC functions rely on this.
