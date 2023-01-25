@@ -19,6 +19,7 @@ export const serverSchema = z.object({
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   MNEMONIC_API_KEY: z.string(),
+  GALLOP_API_KEY: z.string(),
   EMAIL_USER: z.string().email(),
   EMAIL_PASSWORD: z.string(),
   EMAIL_HOST: z.string(),

@@ -1,4 +1,5 @@
 import { Collection, DataPoint, Prisma, PrismaClient, RankTableEntry } from "@prisma/client";
+import { refreshFloor } from "../gallop/gallop";
 
 import * as MnemonicQuery from "./mnemonic";
 
@@ -424,7 +425,7 @@ const refreshFloorPrice = async () => {
         id: clc.id
       }, 
       data: {
-        floor: data.price.totalNative?? 0
+        floor: data.price?.totalNative?? 0
       }
     });
     jobs.push(job);
@@ -447,5 +448,5 @@ export const dailyJob = async () => {
   }
 
   await updateRankings(); 
-  await refreshFloorPrice();
+  await refreshFloor();
 }
