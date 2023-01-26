@@ -91,9 +91,7 @@ export type MnemonicResponse__CollectionMeta = {
  */
 export enum MnemonicQuery__RankType {
   avgPrice = "avg_price",
-  maxPrice = "max_price",
-  salesCount = "sales_count",
-  salesVolume = "sales_volume"
+  maxPrice = "max_price"
 };
 
 /**

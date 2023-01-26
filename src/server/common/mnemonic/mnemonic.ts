@@ -39,9 +39,7 @@ const MNEMONIC_AUTH_HEADER = {
 
 export const RankMapping = {
   "avg_price": CollectionsRank.avgPrice,
-  "max_price": CollectionsRank.maxPrice,
-  "sales_count": CollectionsRank.salesCount,
-  "sales_volume": CollectionsRank.salesVolume 
+  "max_price": CollectionsRank.maxPrice
 };
 
 export const TimeRanking = {
