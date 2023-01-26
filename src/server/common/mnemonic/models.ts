@@ -356,14 +356,14 @@ async function rankTimeUpdate(rank: MnemonicQuery__RankType, time: MnemonicQuery
  */
 async function updateRankings() {
   // For `avg_price`, `max_price`
-  for (let rank of Object.values(MnemonicQuery__RankType)) {
-    for (let time of Object.values(MnemonicQuery__RecordsDuration)) {
-      let jobSucceeded = false;
-      while (!jobSucceeded) {
-        jobSucceeded = await rankTimeUpdate(rank, time);
-      }
-    }
-  }
+  // for (let rank of Object.values(MnemonicQuery__RankType)) {
+  //   for (let time of Object.values(MnemonicQuery__RecordsDuration)) {
+  //     let jobSucceeded = false;
+  //     while (!jobSucceeded) {
+  //       jobSucceeded = await rankTimeUpdate(rank, time);
+  //     }
+  //   }
+  // }
   
   await updateGallopRankings();
 
@@ -447,10 +447,10 @@ const refreshFloorPrice = async () => {
 export const dailyJob = async () => {
   const collections = await prisma.collection.count();
 
-  if (collections > 0) {
-    await refreshTimeSeries();
-  }
+  // if (collections > 0) {
+  //   await refreshTimeSeries();
+  // }
 
   await updateRankings(); 
-  await refreshFloor();
+  // await refreshFloor();
 }

@@ -7,9 +7,9 @@ import { GallopRankingPeriod, GallopRankMetric } from "./types";
 
 import { findOrCreateCollection } from "../mnemonic/models";
 
-async function upsertCollection(address: string, name: string = "") {
+async function upsertCollection(address: string, name: string) {
   const collection = await findOrCreateCollection(address);
-  if (name.length > 0 && collection) {
+  if (collection && name) {
     const updated = await prisma.collection.update({
       where: {
         address: collection?.address
@@ -90,6 +90,7 @@ async function rankTimeUpdate(rank: GallopRankMetric, time: GallopRankingPeriod)
     console.log("Successful! :)");
     return true;
   } catch (err) {
+    console.error(err);
     return false;
   }
 }
