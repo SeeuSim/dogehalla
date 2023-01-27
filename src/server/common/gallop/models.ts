@@ -96,7 +96,7 @@ async function rankTimeUpdate(rank: GallopRankMetric, time: GallopRankingPeriod)
 }
 
 export async function updateGallopRankings() {
-  console.log("Gallop Rankings");
+  console.log("========Gallop Rankings==========");
   
   for (let rank of Object.values(GallopRankMetric)) {
     for (let time of Object.values(GallopRankingPeriod)) {
