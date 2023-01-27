@@ -1,31 +1,21 @@
 import { env } from "env/server.mjs";
 import { prisma } from "server/db/client";
-import type { Prisma, Collection } from "@prisma/client";
+import { Prisma, Collection, CollectionsRank, RankPeriod } from "@prisma/client";
 
-type GallopFloorResponse = {
-  status: number,
-  response: GallopFloorResponseData 
+import { type GallopFloorResponse, type GallopFloorCollections, GallopRankMetric, GallopRankingPeriod, type GallopRankResponse } from "./types";
+
+export const RankMapping = {
+  "sales_count": CollectionsRank.salesCount,
+  "eth_volume": CollectionsRank.salesVolume
 };
 
-type GallopFloorResponseData = {
-  total_items: number,
-  total_pages: number,
-  page: number,
-  collections: Array<GallopFloorCollections>
-};
-
-type GallopFloorCollections = {
-  collection_address: string,
-  marketplaces: Array<GallopFloorCollections__MarketPlaceSlug>
+export const TimeRanking = {
+  'one_day': RankPeriod.oneDay,
+  'seven_days': RankPeriod.sevenDays,
+  'thirty_days': RankPeriod.thirtyDays,
+  'ninety_days': RankPeriod.ninetyDays,
+  'all_time': RankPeriod.allTime
 }
-
-type GallopFloorCollections__MarketPlaceSlug = {
-  updated_at: string,
-  floor_price: number,
-  marketplace: string,
-  collection_id: string,
-  sub_collection_tag: string
-};
 
 export async function floorPrice(contractAddresses: Array<string>, page: number = 1) {
   const url = "https://api.prod.gallop.run/v1/data/eth/getMarketplaceFloorPrice"
@@ -99,4 +89,31 @@ export async function refreshFloor() {
   console.log("Pushing to database...");
   await prisma.$transaction(jobs);
   console.log("Floor price refreshed :)");
+}
+
+export async function TopCollection(rank: GallopRankMetric, time: GallopRankingPeriod) {
+  const url = "https://api.prod.gallop.run/v1/analytics/eth/getLeaderBoard";
+  const params = {
+    interval: time as string,
+    ranking_metric: rank as string,
+    page_size: 100
+  };
+
+  return await fetch(url, {
+    method: "POST",
+    headers: {
+      'accept': 'application/json',
+      'content-type': 'application/json',
+      'x-api-key': env.GALLOP_API_KEY
+    },
+    body: JSON.stringify(params)
+  })
+  .then(
+    (response) => {
+      if (response.status != 200) {
+        console.log(response.status);
+      }
+      return response.json() as Promise<GallopRankResponse>
+    }
+  );
 }

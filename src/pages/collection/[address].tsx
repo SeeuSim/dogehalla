@@ -31,7 +31,7 @@
  * --------------------
  */
 import { GetServerSidePropsContext, NextPage } from "next";
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 
 import Head from "next/head";
 

@@ -45,12 +45,28 @@ export default function CollectionsDash() {
     "salesVolume": "Sales Volume"
   };
 
-  const displayTime = {
+  const mnemonicTime = {
     "oneDay": "24h",
     "sevenDays": "7d",
     "thirtyDays": "30d",
     "oneYear": "1y"
   };
+
+  const mnemonicTimeOptions = [
+    RankPeriod.oneDay, RankPeriod.sevenDays, RankPeriod.thirtyDays, RankPeriod.oneYear
+  ];
+
+  const gallopTime = {
+    "oneDay": "24h",
+    "sevenDays": "7d",
+    "thirtyDays": "30d",
+    "ninetyDays": "90d",
+    "allTime": "All Time"
+  };
+
+  const gallopTimeOptions = [
+    RankPeriod.oneDay, RankPeriod.sevenDays, RankPeriod.thirtyDays, RankPeriod.ninetyDays, RankPeriod.allTime
+  ];
 
   const PageSelector: React.FC = () => {
     const buttonCallback = (fn: () => void) => {
@@ -201,11 +217,23 @@ export default function CollectionsDash() {
               value={timePeriod} 
               onChange={handleTimeChange}
               >
-              {timeOptions.map(v => 
-                <option 
-                  className="p-1 bg-white"
-                  key={v} 
-                  value={v}>{displayTime[v]}</option>)}
+              {
+                ranking == "avgPrice" || ranking == "maxPrice"
+                ? mnemonicTimeOptions
+                  .map(v => 
+                    <option className="p-1 bg-white"
+                    key={v}
+                    value={v}>{mnemonicTime[v]}</option>
+                  )
+                : gallopTimeOptions
+                  .map(v => 
+                    <option
+                      className="p-1 bg-white"
+                      key={v}
+                      value={v}>{gallopTime[v]}</option>
+                  )
+              }
+              
             </select>
           </div>
           <div className="flex justify-end pb-4">

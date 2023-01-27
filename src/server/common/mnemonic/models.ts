@@ -1,5 +1,6 @@
 import { Collection, DataPoint, Prisma, PrismaClient, RankTableEntry } from "@prisma/client";
 import { refreshFloor } from "../gallop/gallop";
+import { updateGallopRankings } from "../gallop/models";
 
 import * as MnemonicQuery from "./mnemonic";
 
@@ -22,7 +23,7 @@ const maxInt = Math.pow(2, 62);
  * @param contractAddress The desired Ethereum contract address.
  * @returns The collection from the database.
  */
-async function findOrCreateCollection(contractAddress: string) {
+export async function findOrCreateCollection(contractAddress: string) {
   //As this function also queries datapoints only on creation, 
   //`upsert` cannot be used.
   
@@ -354,6 +355,7 @@ async function rankTimeUpdate(rank: MnemonicQuery__RankType, time: MnemonicQuery
  * To be run daily to refresh collection rankings, or seed an empty database.
  */
 async function updateRankings() {
+  // For `avg_price`, `max_price`
   for (let rank of Object.values(MnemonicQuery__RankType)) {
     for (let time of Object.values(MnemonicQuery__RecordsDuration)) {
       let jobSucceeded = false;
@@ -363,6 +365,8 @@ async function updateRankings() {
     }
   }
   
+  await updateGallopRankings();
+
   console.log("==========>> Rankings Refreshed!")
 }
 
@@ -447,6 +451,6 @@ export const dailyJob = async () => {
     await refreshTimeSeries();
   }
 
-  await updateRankings(); 
+  await updateRankings();
   await refreshFloor();
 }
