@@ -186,7 +186,7 @@ async function populateDataPoints(
     async (sls, index) => {
       const data = {
         salesVolume: Boolean(sls?.volume)? sls?.volume : 0,
-        salesCount: Math.min(new Number(sls?.count?? 0).valueOf(), maxInt),
+        salesCount: Math.min(new Number(sls?.quantity?? 0).valueOf(), maxInt),
       };
       const job = prisma.dataPoint.upsert({
         where: {
@@ -323,19 +323,19 @@ async function rankTimeUpdate(rank: MnemonicQuery__RankType, time: MnemonicQuery
 
     //Query data
     const collections = await MnemonicQuery.getTopCollections(rank, time);
-
+   
     console.log("================================================================================");
     console.log(`== Refreshing ${rank} ${time} Rankings for ${collections.collections.length} collections ==`);
     console.log("================================================================================");
     let ct = 1;
 
     for (let clctn of collections.collections) {
-      const collection = await findOrCreateCollection(clctn.contractAddress);
+      const collection = await findOrCreateCollection(clctn.collection.contractAddress);
 
       if (collection) {
         //Create the ranking.
         console.log(`${ct}. ${collection.name || collection.address}`)
-        const job = updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
+        const job = updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.metricValue);
         rankingJobs.push(job);
         ct += 1;
       }
@@ -343,7 +343,7 @@ async function rankTimeUpdate(rank: MnemonicQuery__RankType, time: MnemonicQuery
     console.log("Pushing to database...")
     await prisma.$transaction(rankingJobs);
     console.log("Successful!");
-    return true;
+    return true; 
   } catch (err) {
     return false;
   }
@@ -354,7 +354,7 @@ async function rankTimeUpdate(rank: MnemonicQuery__RankType, time: MnemonicQuery
  * 
  * To be run daily to refresh collection rankings, or seed an empty database.
  */
-async function updateRankings() {
+async function updateRankings() { 
   // For `avg_price`, `max_price`
   for (let rank of Object.values(MnemonicQuery__RankType)) {
     for (let time of Object.values(MnemonicQuery__RecordsDuration)) {
@@ -445,12 +445,11 @@ const refreshFloorPrice = async () => {
  * respect to the API and market conditions.
  */
 export const dailyJob = async () => {
-  const collections = await prisma.collection.count();
+  await updateRankings();
+  await refreshFloor();
 
+  const collections = await prisma.collection.count();
   if (collections > 0) {
     await refreshTimeSeries();
   }
-
-  await updateRankings();
-  await refreshFloor();
 }

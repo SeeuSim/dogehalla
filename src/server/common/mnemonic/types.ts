@@ -100,7 +100,7 @@ export enum MnemonicQuery__RankType {
  * 
  * @CollectionsRank
  */
-type MnemonicResponse__Rank__Response = { avgPrice: string } & { maxPrice: string } & { salesCount: string } & { salesVolume: string };
+type MnemonicResponse__Rank__Response = { metricValue: string };
 
 /**
  * The response type Mnemonic provides for its `Top Collections by` endpoint.
@@ -109,8 +109,10 @@ type MnemonicResponse__Rank__Response = { avgPrice: string } & { maxPrice: strin
  */
 export type MnemonicResponse__Rank = {
   collections: Array<{
-    contractAddress: string,
-    contractName: string
+    collection: {
+      contractAddress: string,
+      name: string
+    }
   } & MnemonicResponse__Rank__Response>
 }
 
@@ -126,7 +128,7 @@ export type MnemonicResponse__PriceHistory = {
 export type MnemonicResponse__SalesVolume = {
   dataPoints: Array<{
     timestamp: string,
-    count: string,
+    quantity: string,
     volume: string
   }>
 }
@@ -153,8 +155,8 @@ export type MnemonicResponse__FloorPrice = {
   price: {
     totalNative: string,
     totalUsd: string,
-    erc20Address: string | null,
-    erc20Value: string | null
+    fungibleAddress: string | null,
+    fungibleValue: string | null
   }
 }
 
