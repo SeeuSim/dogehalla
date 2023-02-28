@@ -11,7 +11,8 @@ import SearchDropDown from './searchDropdown';
 import { MoonIcon } from '@heroicons/react/24/solid';
 
 //TO BE CHANGED
-const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
+// const dogeLogo = "https://flowbite.com/docs/images/logo.svg";
+const dogeLogo = "/nfinsight_logo.png";
 
 const menuOptions = [
   { name: 'Home', href: '/' },
