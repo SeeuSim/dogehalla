@@ -44,20 +44,8 @@ export async function floorPrice(contractAddresses: Array<string>, page: number 
   );
 }
 
-export async function refreshFloor() {
-  const collections = await prisma.collection.findMany({
-    select: {
-      address: true
-    }
-  }).then(data => {
-    return data.map(clc => clc.address);
-  });
-  const resp = await floorPrice(collections);
-
-  console.log(`Awaiting ${resp.response.collections.length} Collections`);
-
-  const pages = resp.response.total_pages;
-  let ct = 1;
+async function batchRequest(addresses: string[], ct: number = 1) {
+  const resp = await floorPrice(addresses);
   let jobs: Prisma.Prisma__CollectionClient<Collection, never>[] = [];
   const updateJob = async (point: GallopFloorCollections) => {
     console.log(`${ct}. ${point.collection_address}`);
@@ -76,14 +64,23 @@ export async function refreshFloor() {
     }));
     ct += 1;
   };
-  
   resp.response.collections.forEach(updateJob);
+  return jobs;
+}
 
-  let pageNum = resp.response.page;
-  while (pageNum < pages) {
-    pageNum += 1;
-    const newResp = await floorPrice(collections, pageNum);
-    newResp.response.collections.forEach(updateJob);
+export async function refreshFloor() {
+  const collections = await prisma.collection.findMany({
+    select: {
+      address: true
+    }
+  }).then(data => {
+    return data.map(clc => clc.address);
+  });
+
+  console.log(`Awaiting ${collections.length} Collections`);
+  let jobs: Prisma.Prisma__CollectionClient<Collection, never>[] = [];
+  for (let i = 0; i < collections.length; i = i + 1000) {
+    jobs.concat(await batchRequest(collections.slice(i, i + 1000), i + 1));
   }
 
   console.log("Pushing to database...");

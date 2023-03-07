@@ -445,7 +445,7 @@ const refreshFloorPrice = async () => {
  * respect to the API and market conditions.
  */
 export const dailyJob = async () => {
-  await updateRankings();
+  // await updateRankings();
   await refreshFloor();
 
   const collections = await prisma.collection.count();
