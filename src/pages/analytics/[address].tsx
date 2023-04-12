@@ -36,11 +36,6 @@ import { Suspense, useEffect, useState } from 'react';
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
-
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
-
 //For getServerSideProps
 import type { Collection } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime";
