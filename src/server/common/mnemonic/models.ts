@@ -52,7 +52,7 @@ export async function findOrCreateCollection(contractAddress: string) {
   );
   
   //Highly likely to be a bogus collection if all three are missing, and there are few owners
-  if (!Boolean(meta.name) && !Boolean(desc) && !Boolean(exturl) && new Number(meta.ownersCount) <= 5) return null; 
+  if (!Boolean(meta.name) && !Boolean(desc) && !Boolean(exturl) && new Number(meta.ownersCount).valueOf() <= 5) return null; 
   
   if (collection != null) {
     const updated = await prisma.collection.update({
