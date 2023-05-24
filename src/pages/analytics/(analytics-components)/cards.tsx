@@ -1,8 +1,17 @@
 
-const Cards: React.FC<any> = () => {
+const Cards: React.FC<any> = (props) => {
+    //To be updated when the actual backend API for the data values is connected, 
+    //for now an optional arbitrary default value is used for each of the 4 card values. 
+    interface CardData {
+        sentiment?: number;
+        predictedPrice?: number;
+        percentageIncrease?: number;
+        recomendation: number;
+    }
+
     return(
       <div className="flex items-center justify-center">
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
           <div className="relative py-6 px-6 rounded-3xl w-64 my-4 shadow-xl  bg-green-100 dark:bg-green-100">
               <div className=" text-white flex items-center absolute rounded-full py-4 px-4 shadow-xl bg-blue-500 left-4 -top-6">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -10,9 +19,7 @@ const Cards: React.FC<any> = () => {
                   </svg>
               </div>
               <div className="mt-8">
-                  <p className="text-xl font-semibold my-2">Sentiment</p>
-                  <p className="text-xl font-bold my-2 center">69%</p>
-  
+                  <p className="text-xl font-semibold my-2">Sentiment</p>  
                   <div className="border-t-2"></div>
   
                   <div className="flex justify-between">
@@ -23,7 +30,7 @@ const Cards: React.FC<any> = () => {
                       <div className="my-2">
                           <p className="font-semibold text-base mb-2">Progress</p>
                           <div className="text-base text-gray-400 font-semibold">
-                              <p>34%</p>
+                              <p>{props.sentiment || "69%"}</p>
                           </div>
                       </div>
                   </div>
@@ -47,7 +54,7 @@ const Cards: React.FC<any> = () => {
                       <div className="my-2">
                           <p className="font-semibold text-base mb-2">Progress</p>
                           <div className="text-base text-gray-400 font-semibold">
-                              <p>76%</p>
+                              <p>{props.predictedPrice || "76%"}</p>
                           </div>
                       </div>
                   </div>
@@ -72,7 +79,7 @@ const Cards: React.FC<any> = () => {
                       <div className="my-2">
                           <p className="font-semibold text-base mb-2">Progress</p>
                           <div className="text-base text-gray-400 font-semibold">
-                              <p>4%</p>
+                              <p>{props.percentageIncrease || "12%"}</p>
                           </div>
                       </div>
                   </div>
@@ -98,13 +105,13 @@ const Cards: React.FC<any> = () => {
                       <div className="my-2">
                           <p className="font-semibold text-base mb-2">Progress</p>
                           <div className="text-base text-gray-400 font-semibold">
-                              <p>90%</p>
+                              <p>{props.recommendation || "78%"}</p>
                           </div>
                       </div>
                   </div>
               </div>
           </div>
-      </div>
+        </div>
       </div>
     )
   };
