@@ -22,7 +22,7 @@ export default function CollectionsDash() {
   const [ranking, setRanking] = useState<CollectionsRank>(CollectionsRank.avgPrice);
   const [timePeriod, setTimePeriod] = useState<RankPeriod>(RankPeriod.oneDay);
 
-  const { data: collectionsData, isFetching, isInitialLoading } = trpc.model.nft.getTopCollections.useQuery({
+  const { data: collectionsData } = trpc.model.nft.getTopCollections.useQuery({
     rank: ranking,
     time: timePeriod,
     cursor: pageIndex,
@@ -65,7 +65,7 @@ export default function CollectionsDash() {
   };
 
   const gallopTimeOptions = [
-    RankPeriod.oneDay, RankPeriod.sevenDays, RankPeriod.thirtyDays, RankPeriod.ninetyDays, RankPeriod.allTime
+    RankPeriod.oneDay, RankPeriod.sevenDays, RankPeriod.thirtyDays
   ];
 
   const PageSelector: React.FC = () => {
