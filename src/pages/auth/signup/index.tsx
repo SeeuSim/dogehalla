@@ -121,6 +121,16 @@ export default function SignUp() {
     console.log(rs); //<<Replace this with toasts.
   };
 
+  const handlePassword = (event: React.MouseEvent) => {
+    event.preventDefault();
+    setShowPassword(!showPassword);
+  };
+  
+  const handleConfirmPassword = (event: React.MouseEvent) => {
+    event.preventDefault();
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
     <div className="flex flex-col items-center mx-auto md:h-full lg:py-0 bg-inherit">
       <Head>
@@ -198,7 +208,7 @@ export default function SignUp() {
                     {...register("password")}/>
               <AlertInput>{errors?.password?.message}</AlertInput>
               <button className={`absolute -translate-y-8 right-2`}
-                      onClick={() => setShowPassword(!showPassword)}>
+                      onClick={handlePassword}>
                 {showPassword
                   ? <EyeSlashIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>
                   : <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>}
@@ -217,7 +227,7 @@ export default function SignUp() {
                     {...register("confirmPassword")}/>
               <AlertInput>{errors?.confirmPassword?.message}</AlertInput>
               <button className={`absolute -translate-y-8 right-2`}
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                      onClick={handleConfirmPassword}>
                 {showConfirmPassword
                   ? <EyeSlashIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>
                   : <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-200 hover:text-gray-800 hover:dark:text-gray-300"/>}

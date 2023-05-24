@@ -124,7 +124,9 @@ enum RankPeriod {
   oneDay      @map("1_DAY")
   sevenDays   @map("7_DAYS")
   thirtyDays  @map("30_DAYS")
+  ninetyDays  @map("90_DAYS")
   oneYear     @map("365_DAYS")
+  allTime     @map("ALL_TIME")
 }
 
 model RankTable {

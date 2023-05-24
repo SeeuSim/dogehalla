@@ -39,9 +39,7 @@ const MNEMONIC_AUTH_HEADER = {
 
 export const RankMapping = {
   "avg_price": CollectionsRank.avgPrice,
-  "max_price": CollectionsRank.maxPrice,
-  "sales_count": CollectionsRank.salesCount,
-  "sales_volume": CollectionsRank.salesVolume 
+  "max_price": CollectionsRank.maxPrice
 };
 
 export const TimeRanking = {
@@ -62,7 +60,7 @@ export const TimeRanking = {
 export async function collectionMeta(contractAddress: string) {
   const __ = await delay();
   return await fetch(
-    `https://ethereum.rest.mnemonichq.com/contracts/v1beta1/nft/metadata/${contractAddress}`,
+    `https://ethereum-rest.api.mnemonichq.com/collections/v1beta2/${contractAddress}/metadata?includeStats=true`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER
@@ -98,13 +96,12 @@ export async function getTopCollections(
   
   const query = new URLSearchParams({
     limit: limit,
-    offset: offset,
-    duration: timePeriod.toString()
+    offset: offset
   }).toString();
 
   const __ = await delay();
   return await fetch(
-    `https://ethereum.rest.mnemonichq.com/collections/v1beta1/top/by_${rank}?${query}`,
+    `https://ethereum-rest.api.mnemonichq.com/collections/v1beta2/top/METRIC_${rank.toUpperCase()}/${timePeriod}?${query}`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER
@@ -115,7 +112,7 @@ export async function getTopCollections(
       throw new Error(response.statusText);
     }
     return response.json() as Promise<MnemonicResponse__Rank>;
-  });
+  }); 
 }
 
 /**
@@ -143,14 +140,12 @@ export async function collectionPriceHistory(
   timeStampLt: string = new Date(Date.now()).toJSON()
 ) {
   const query = new URLSearchParams({
-    duration: timePeriod.toString(),
-    timestampLt: timeStampLt,
-    groupByPeriod: groupBy.toString()
+    timestampLt: timeStampLt
   }).toString();
 
   const __ = await delay();
   return await fetch(
-      `https://ethereum.rest.mnemonichq.com/pricing/v1beta1/prices/by_contract/${contractAddress}?${query}`,
+      `https://ethereum-rest.api.mnemonichq.com/collections/v1beta2/${contractAddress}/prices/${timePeriod}/${groupBy}?${query}`,
       {
         method: 'GET',
         headers: MNEMONIC_AUTH_HEADER
@@ -190,14 +185,12 @@ export async function collectionSalesVolume(
   timeStampLt: string = new Date(Date.now()).toJSON()
 ) {
   const query = new URLSearchParams({
-    duration: timePeriod.toString(),
-    timestampLt: timeStampLt,
-    groupByPeriod: groupBy.toString()
+    timestampLt: timeStampLt
   }).toString();
 
   const __ = await delay();
   return await fetch(
-    `https://ethereum.rest.mnemonichq.com/pricing/v1beta1/volumes/by_contract/${contractAddress}?${query}`,
+    `https://ethereum-rest.api.mnemonichq.com/collections/v1beta2/${contractAddress}/sales_volume/${timePeriod}/${groupBy}?${query}`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER
@@ -236,14 +229,12 @@ export async function collectionTokensSupply(
   timeStampLt: string = new Date(Date.now()).toJSON()
 ) {
   const query = new URLSearchParams({
-    duration: timePeriod.toString(),
-    timestampLt: timeStampLt,
-    groupByPeriod: groupBy.toString()
+    timestampLt: timeStampLt
   }).toString();
 
   const __ = await delay();
   return await fetch(
-    `https://ethereum.rest.mnemonichq.com/collections/v1beta1/supply/${contractAddress}?${query}`,
+    `https://ethereum-rest.api.mnemonichq.com/collections/v1beta2/${contractAddress}/supply/${timePeriod}/${groupBy}?${query}`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER
@@ -288,7 +279,7 @@ export async function collectionOwnersCount(
   }).toString();
 
   const __ = await delay();
-  return await fetch(`https://ethereum.rest.mnemonichq.com/collections/v1beta1/owners_count/${contractAddress}?${query}`,
+  return await fetch(`https://ethereum-rest.api.mnemonichq.com/collections/v1beta2/${contractAddress}/owners_count/${timePeriod}/${groupBy}?${query}`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER
@@ -330,7 +321,7 @@ export async function floorPrice(contractAddress: string, tokenID?: string, mark
       ).toString();
     }
   }
-  return await fetch(`https://ethereum.rest.mnemonichq.com/ethereum/marketplaces/v1beta1/floors/${contractAddress}${params? `?${params}`:""}`,
+  return await fetch(`https://ethereum-rest.api.mnemonichq.com/marketplaces/v1beta2/floors/${contractAddress}${params? `?${params}`:""}`,
     {
       method: 'GET',
       headers: MNEMONIC_AUTH_HEADER

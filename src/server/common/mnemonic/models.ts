@@ -1,14 +1,10 @@
 import { Collection, DataPoint, Prisma, PrismaClient, RankTableEntry } from "@prisma/client";
-// import { prisma } from "server/db/client";
+import { refreshFloor } from "../gallop/gallop";
+import { updateGallopRankings } from "../gallop/models";
 
 import * as MnemonicQuery from "./mnemonic";
 
-import { 
-  MnemonicQuery__DataTimeGroup, 
-  MnemonicQuery__RankType, 
-  MnemonicQuery__RecordsDuration, 
-  MnemonicResponse__CollectionMeta__Metadata__Type 
-} from "./types";
+import { MnemonicQuery__DataTimeGroup, MnemonicQuery__RankType, MnemonicQuery__RecordsDuration, MnemonicResponse__CollectionMeta__Metadata__Type } from "./types";
 
 //ONLY FOR THIS FILE
 const prisma = new PrismaClient({
@@ -27,22 +23,18 @@ const maxInt = Math.pow(2, 62);
  * @param contractAddress The desired Ethereum contract address.
  * @returns The collection from the database.
  */
-async function findOrCreateCollection(contractAddress: string) {
-  //As this function also queries metadata and datapoints only on creation, 
+export async function findOrCreateCollection(contractAddress: string) {
+  //As this function also queries datapoints only on creation, 
   //`upsert` cannot be used.
+  
+  const meta = await MnemonicQuery.collectionMeta(contractAddress);
 
   const collection = await prisma.collection.findUnique({
     where: {
       address: contractAddress
     }
   });
-
-  if (collection != null) return collection;
-
-  //Only query metadata on creation
-  const meta = await MnemonicQuery.collectionMeta(contractAddress);
-
-
+  
   const bannerImg = meta.metadata.find(
     val => val.type === MnemonicResponse__CollectionMeta__Metadata__Type.bannerImage
   );
@@ -60,8 +52,21 @@ async function findOrCreateCollection(contractAddress: string) {
   );
   
   //Highly likely to be a bogus collection if all three are missing, and there are few owners
-  if (!Boolean(meta.name) && !Boolean(desc) && !Boolean(exturl) && new Number(meta.ownersCount) <= 5) return null; 
-
+  if (!Boolean(meta.name) && !Boolean(desc) && !Boolean(exturl) && new Number(meta.ownersCount).valueOf() <= 5) return null; 
+  
+  if (collection != null) {
+    const updated = await prisma.collection.update({
+      where: {
+        id: collection.id
+      },
+      data: {
+        tokens: new Number(meta.tokensCount?? 0).valueOf(),
+        owners: new Number(meta.ownersCount?? 0).valueOf(),
+        salesVolume: Boolean(meta.salesVolume)? meta.salesVolume : 0,
+      }
+    });
+    return updated;
+  }
   
   try {
     const newCollection = await prisma.collection.create({
@@ -153,18 +158,10 @@ async function populateDataPoints(
   
   prices.dataPoints.forEach(
     async (prc, index) => {
-      const [ownr, sls, tkn] = [owners.dataPoints[index], sales.dataPoints[index], tokens.dataPoints[index]];
       const data = {
         avgPrice: Boolean(prc.avg)? prc.avg : 0,
         maxPrice: Boolean(prc.max)? prc.max : 0,
         minPrice: Boolean(prc.min)? prc.min : 0,
-        salesVolume: Boolean(sls?.volume)? sls?.volume : 0,
-        tokensBurned: Boolean(tkn?.burned)? tkn?.burned : 0,
-        tokensMinted: Boolean(tkn?.minted)? tkn?.minted : 0,
-        totalBurned: Boolean(tkn?.totalBurned)? tkn?.totalBurned : 0,
-        totalMinted: Boolean(tkn?.totalMinted)? tkn?.totalMinted : 0,
-        ownersCount: Math.min(new Number(ownr?.count?? 0).valueOf(), maxInt),
-        salesCount: Math.min(new Number(sls?.count?? 0).valueOf(), maxInt),
       };
 
       const job = prisma.dataPoint.upsert({
@@ -184,6 +181,82 @@ async function populateDataPoints(
       jobs.push(job);
     }
   );
+  
+  sales.dataPoints.forEach(
+    async (sls, index) => {
+      const data = {
+        salesVolume: Boolean(sls?.volume)? sls?.volume : 0,
+        salesCount: Math.min(new Number(sls?.quantity?? 0).valueOf(), maxInt),
+      };
+      const job = prisma.dataPoint.upsert({
+        where: {
+          collectionId_timestamp: {
+            collectionId: collectionID,
+            timestamp: sls.timestamp
+          }
+        },
+        update: data,
+        create: {
+          collectionId: collectionID,
+          timestamp: sls.timestamp,
+          ...data
+        }
+      });
+      jobs.push(job);
+    }
+  )
+
+  owners.dataPoints.forEach(
+    async (ownr, index) => {
+      const data = {
+        ownersCount: Math.min(new Number(ownr?.count?? 0).valueOf(), maxInt),
+      };
+
+      const job = prisma.dataPoint.upsert({
+        where: {
+          collectionId_timestamp: {
+            collectionId: collectionID,
+            timestamp: ownr.timestamp
+          }
+        },
+        update: data,
+        create: {
+          collectionId: collectionID,
+          timestamp: ownr.timestamp,
+          ...data
+        }
+      });
+      jobs.push(job);
+    }
+  )
+
+  tokens.dataPoints.forEach(
+    async (tkn, index) => {
+      const data = {
+        tokensBurned: Boolean(tkn?.burned)? tkn?.burned : 0,
+        tokensMinted: Boolean(tkn?.minted)? tkn?.minted : 0,
+        totalBurned: Boolean(tkn?.totalBurned)? tkn?.totalBurned : 0,
+        totalMinted: Boolean(tkn?.totalMinted)? tkn?.totalMinted : 0,
+      };
+
+      const job = prisma.dataPoint.upsert({
+        where: {
+          collectionId_timestamp: {
+            collectionId: collectionID,
+            timestamp: tkn.timestamp
+          }
+        },
+        update: data,
+        create: {
+          collectionId: collectionID,
+          timestamp: tkn.timestamp,
+          ...data
+        }
+      });
+      jobs.push(job);
+    }
+  )
+
   await prisma.$transaction(jobs);
 }
 
@@ -238,53 +311,62 @@ async function findOrCreateRankTable(rank: MnemonicQuery__RankType, timePeriod: 
   return out;
 }
 
+async function rankTimeUpdate(rank: MnemonicQuery__RankType, time: MnemonicQuery__RecordsDuration) {
+  try {
+    let rankingJobs: Prisma.Prisma__RankTableEntryClient<RankTableEntry, never>[] = [];
+    const rankTable = await findOrCreateRankTable(rank, time);
+    const { count } = await prisma.rankTableEntry.deleteMany({
+      where: {
+        tableId: rankTable.id
+      }
+    });
+
+    //Query data
+    const collections = await MnemonicQuery.getTopCollections(rank, time);
+   
+    console.log("================================================================================");
+    console.log(`== Refreshing ${rank} ${time} Rankings for ${collections.collections.length} collections ==`);
+    console.log("================================================================================");
+    let ct = 1;
+
+    for (let clctn of collections.collections) {
+      const collection = await findOrCreateCollection(clctn.collection.contractAddress);
+
+      if (collection) {
+        //Create the ranking.
+        console.log(`${ct}. ${collection.name || collection.address}`)
+        const job = updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.metricValue);
+        rankingJobs.push(job);
+        ct += 1;
+      }
+    }
+    console.log("Pushing to database...")
+    await prisma.$transaction(rankingJobs);
+    console.log("Successful!");
+    return true; 
+  } catch (err) {
+    return false;
+  }
+}
+
 /**
  * A daily job.
  * 
  * To be run daily to refresh collection rankings, or seed an empty database.
  */
-async function updateRankings() {
-
-  //FOR TESTING
-  // const boredApe = await findOrCreateCollection("0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D");
-  // if (!boredApe) return;
-  // await populateDataPoints(boredApe.id, boredApe.address)
-  // const delay = (ms = 1000) => new Promise(r => setTimeout(r, ms));
-
-  let rankingJobs: Prisma.Prisma__RankTableEntryClient<RankTableEntry, never>[] = [];
-
+async function updateRankings() { 
+  // For `avg_price`, `max_price`
   for (let rank of Object.values(MnemonicQuery__RankType)) {
     for (let time of Object.values(MnemonicQuery__RecordsDuration)) {
-      const rankTable = await findOrCreateRankTable(rank, time);
-      const { count } = await prisma.rankTableEntry.deleteMany({
-        where: {
-          tableId: rankTable.id
-        }
-      });
-
-      //Query data
-      const collections = await MnemonicQuery.getTopCollections(rank, time);
-
-      console.log("=========================================================================================");
-      console.log(`==Refreshing ${rank} ${time} Rankings for ${collections.collections.length} collections==`);
-      console.log("=========================================================================================");
-      let ct = 1;
-
-      for (let clctn of collections.collections) {
-        const collection = await findOrCreateCollection(clctn.contractAddress);
-
-          if (collection) {
-            //Create the ranking.
-            console.log(`${ct}. ${collection.name || collection.address}`)
-            const job = updateOrCreateRankTableEntry(collection.id, rankTable.id, clctn.avgPrice || clctn.maxPrice || clctn.salesCount || clctn.salesVolume);
-            rankingJobs.push(job);
-            ct += 1;
-          }
+      let jobSucceeded = false;
+      while (!jobSucceeded) {
+        jobSucceeded = await rankTimeUpdate(rank, time);
       }
     }
   }
-  console.log("Pushing to database...")
-  await prisma.$transaction(rankingJobs);
+  
+  await updateGallopRankings();
+
   console.log("==========>> Rankings Refreshed!")
 }
 
@@ -295,13 +377,7 @@ async function updateRankings() {
  * database.
  */
 const refreshTimeSeries = async () => {
-  const collections = await prisma.collection.findMany({
-    select: {
-      name: true,
-      id: true,
-      address: true
-    }
-  });
+  const collections = await prisma.collection.findMany();
   
   let errors = [];
   console.log("////////////////////////////////////////////////")
@@ -315,7 +391,7 @@ const refreshTimeSeries = async () => {
     await populateDataPoints(
       clc.id,
       clc.address,
-      MnemonicQuery__RecordsDuration.oneYear, //Duration
+      MnemonicQuery__RecordsDuration.sevenDays, //Duration
       MnemonicQuery__DataTimeGroup.oneDay //Grouping - To experiment with 1 Hour, or 15 Mins if database allows
     )
     } catch(err) {
@@ -324,7 +400,7 @@ const refreshTimeSeries = async () => {
     ct += 1
   }
   console.log("=====>> TimeSeries Refreshed!! :)")
-  if (!errors) return;
+  if (!errors.length) return;
   console.log("ERRORS: ")
   errors.forEach(console.log);
 }
@@ -342,13 +418,18 @@ const refreshFloorPrice = async () => {
   let ct = 1;
   for (let clc of collection) {
     console.log(`${ct}. ${clc.name || clc.address}`)
-    const data = await MnemonicQuery.floorPrice(clc.address);
+    let data;
+    try {
+      data = await MnemonicQuery.floorPrice(clc.address);
+    } catch (err) {
+      data = await MnemonicQuery.floorPrice(clc.address);
+    }
     const job = prisma.collection.update({
       where: {
         id: clc.id
       }, 
       data: {
-        floor: data.price.totalNative?? 0
+        floor: data.price?.totalNative?? 0
       }
     });
     jobs.push(job);
@@ -364,13 +445,11 @@ const refreshFloorPrice = async () => {
  * respect to the API and market conditions.
  */
 export const dailyJob = async () => {
-  const collections = await prisma.collection.count();
+  await updateRankings();
+  await refreshFloor();
 
+  const collections = await prisma.collection.count();
   if (collections > 0) {
     await refreshTimeSeries();
   }
-
-  await updateRankings(); 
-  await refreshFloorPrice();
 }
-

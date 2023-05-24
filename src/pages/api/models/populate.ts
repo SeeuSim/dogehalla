@@ -28,8 +28,8 @@ handler.post(
 
     //Is admin, proceed to populate/refresh database
     await dailyJob();
+    res.status(200).json({ message: "ok" });
 
-    return res.status(200).json({ message: "ok" });
   }
 )
 

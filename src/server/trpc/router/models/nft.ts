@@ -89,7 +89,38 @@ export const NFTRouter = router({
           });
           return collections;
         } catch (err) {
+          console.error(err);
           return []
         }
-    })
+    }),
+  collectionsPage: publicProcedure
+    .input(z.object({
+      address: z.string()
+    }))
+    .query(
+      async ({ input }) => {
+        const address = input.address;
+        const current = new Date(Date.now());
+        current.setDate(current.getDate() - 365);
+
+        const collection = await prisma.collection.findUnique({
+          where: {
+            address: address
+          },
+          include: {
+            data: {
+              where: {
+                timestamp: {
+                  gte: current
+                }
+              },
+              orderBy: {
+                timestamp: "asc"
+              }
+            }
+          }
+        });
+        return collection;
+      }
+    ),
 });

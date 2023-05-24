@@ -42,7 +42,6 @@ const AdminPage: NextPage<{
         }),
       }
     );
-    console.log(res);
     dsetLoading(false);
   }
 

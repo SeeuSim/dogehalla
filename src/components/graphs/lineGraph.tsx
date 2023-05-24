@@ -36,7 +36,7 @@ const LineGraph: React.FC<{
       legend: {
         labels: {
           font: {
-            size: 14,
+            size: 18,
             family: "system-ui"
           },
           color: "#64748b"
@@ -46,7 +46,7 @@ const LineGraph: React.FC<{
     },
     elements: {
       line: {
-        tension: 0,
+        tension: 0.25,
         borderWidth: 2,
         borderColor: "rgba(47, 97, 68, 1)",
         fill: "start",
