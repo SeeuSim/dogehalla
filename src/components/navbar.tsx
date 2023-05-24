@@ -16,7 +16,7 @@ const dogeLogo = "/nfinsight_logo.png";
 
 const menuOptions = [
   { name: 'Home', href: '/' },
-  { name: 'Analytics', href: '/#' },
+  { name: 'Analytics', href: '/analytics' },
   { name: 'Account', href: '/account' },
 ]
 
