@@ -10,9 +10,10 @@ import { formatFloor, formatVal } from "utils/ethereum/price";
 import { trpc } from "utils/trpc";
 
 import ImageWithFallback from "components/images/imageWithFallback";
+import AnalyticsPage from "./[address]";
 
-export default function CollectionsDash() {
-  const RECORDS_PER_PAGE = 10;
+export default function AnalyticsDash() {
+  const RECORDS_PER_PAGE = 5;
 
   const rankOptions = [...Object.values(CollectionsRank)];
   const timeOptions = [...Object.values(RankPeriod)];
@@ -22,7 +23,7 @@ export default function CollectionsDash() {
   const [ranking, setRanking] = useState<CollectionsRank>(CollectionsRank.avgPrice);
   const [timePeriod, setTimePeriod] = useState<RankPeriod>(RankPeriod.oneDay);
 
-  const { data: collectionsData } = trpc.model.nft.getTopCollections.useQuery({
+  const { data: collectionsData, isFetching, isInitialLoading } = trpc.model.nft.getTopCollections.useQuery({
     rank: ranking,
     time: timePeriod,
     cursor: pageIndex,
@@ -45,28 +46,12 @@ export default function CollectionsDash() {
     "salesVolume": "Sales Volume"
   };
 
-  const mnemonicTime = {
+  const displayTime = {
     "oneDay": "24h",
     "sevenDays": "7d",
     "thirtyDays": "30d",
     "oneYear": "1y"
   };
-
-  const mnemonicTimeOptions = [
-    RankPeriod.oneDay, RankPeriod.sevenDays, RankPeriod.thirtyDays, RankPeriod.oneYear
-  ];
-
-  const gallopTime = {
-    "oneDay": "24h",
-    "sevenDays": "7d",
-    "thirtyDays": "30d",
-    "ninetyDays": "90d",
-    "allTime": "All Time"
-  };
-
-  const gallopTimeOptions = [
-    RankPeriod.oneDay, RankPeriod.sevenDays, RankPeriod.thirtyDays
-  ];
 
   const PageSelector: React.FC = () => {
     const buttonCallback = (fn: () => void) => {
@@ -217,23 +202,11 @@ export default function CollectionsDash() {
               value={timePeriod} 
               onChange={handleTimeChange}
               >
-              {
-                ranking == "avgPrice" || ranking == "maxPrice"
-                ? mnemonicTimeOptions
-                  .map(v => 
-                    <option className="p-1 bg-white"
-                    key={v}
-                    value={v}>{mnemonicTime[v]}</option>
-                  )
-                : gallopTimeOptions
-                  .map(v => 
-                    <option
-                      className="p-1 bg-white"
-                      key={v}
-                      value={v}>{gallopTime[v]}</option>
-                  )
-              }
-              
+              {timeOptions.map(v => 
+                <option 
+                  className="p-1 bg-white"
+                  key={v} 
+                  value={v}>{displayTime[v]}</option>)}
             </select>
           </div>
           <div className="flex justify-end pb-4">
@@ -291,7 +264,7 @@ export default function CollectionsDash() {
         className="bg-gray-50 dark:bg-gray-700"
         key={index}>
         <td>
-        <Link href={`/collection/${address}`}>
+        <Link href={`/analytics/${address}`}>
           <div className="px-4 py-2 sm:px-6 w-full inline-flex items-center justify-between space-x-2 hover:bg-slate-100 dark:hover:bg-slate-600">
             <div className="inline-flex items-center">
               <div className="inline-flex items-center">
