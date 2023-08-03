@@ -33,7 +33,7 @@
     "next-connect": "^0.13.0",
     "next-session": "^4.0.5",
     "nodemailer-react": "^1.0.2",
-    "passport": "^0.5.3",
+    "passport": "^0.6.0",
     "passport-coinbase": "^0.1.4",
     "passport-google-oauth2": "^0.2.0",
     "passport-local": "^1.0.0",
